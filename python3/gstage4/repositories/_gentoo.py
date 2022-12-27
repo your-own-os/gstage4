@@ -22,6 +22,7 @@
 
 
 import os
+import mrget
 import tarfile
 import urllib.request
 from .. import ManualSyncRepository
@@ -40,7 +41,7 @@ class CloudGentoo(EmergeSyncRepository):
         return _DATADIR_PATH
 
     def get_repos_conf_file_content(self):
-        url = "rsync://mirrors.tuna.tsinghua.edu.cn/gentoo-portage"
+        url = mrget.target_urls("mirror://gentoo-portage", filter_key=lambda x: x["protocol"] == "rsync")[0]
 
         # from Gentoo AMD64 Handbook
         # the commented part is not needed, I have tested it
@@ -80,7 +81,7 @@ class CloudGentooSnapshot(ManualSyncRepository):
         return _DATADIR_PATH
 
     def sync(self, datadir_hostpath):
-        url = "rsync://mirrors.tuna.tsinghua.edu.cn/gentoo-portage"
+        url = mrget.target_urls("mirror://gentoo", filter_key=lambda x: x["protocol"] in ["http", "https", "ftp"])[0]
         url = os.path.join(url, "snapshots", "gentoo-%s.tar.xz" % (self._date))
         with urllib.request.urlopen(url) as resp:
             with tarfile.open(fileobj=resp, mode="r:xz") as tf:

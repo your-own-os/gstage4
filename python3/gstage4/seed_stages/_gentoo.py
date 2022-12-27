@@ -23,6 +23,7 @@
 
 import os
 import re
+import mrget
 import tarfile
 import pathlib
 import urllib.request
@@ -104,7 +105,7 @@ class CloudGentooStage3Archive(SeedStage):
         else:
             assert False
 
-        baseUrl = "https://mirrors.tuna.tsinghua.edu.cn/gentoo"
+        baseUrl = mrget.target_urls("mirror://gentoo", filter_key=lambda x: x["protocol"] in ["http", "https", "ftp"])[0]
         autoBuildsUrl = os.path.join(baseUrl, "releases", self._arch, "autobuilds")
 
         self._stage3FileUrl = None

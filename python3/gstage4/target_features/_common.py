@@ -150,6 +150,7 @@ if True:
     os.symlink("bin", "/usr/sbin")
 """
 
+
 class PreferGnuAndGpl:
 
     def update_target_settings(self, target_settings):
