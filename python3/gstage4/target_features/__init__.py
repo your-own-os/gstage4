@@ -23,6 +23,8 @@
 
 from ._common import UsePortage
 from ._common import UseGenkernel
+from ._common import UseGentooKernelBin
+from ._common import UseFakeKernel
 from ._common import UseOpenrc
 from ._common import UseSystemd
 

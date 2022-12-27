@@ -54,6 +54,12 @@ class UseGentooKernelBin:
         world_set.add("sys-kernel/gentoo-kernel-bin")
 
 
+class UseFakeKernel:
+
+    def update_target_settings(self, target_settings):
+        target_settings.kernel_manager = "fake"
+
+
 class UseOpenrc:
 
     def update_target_settings(self, target_settings):
