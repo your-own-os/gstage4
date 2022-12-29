@@ -31,6 +31,7 @@ from ._common import UseSystemd
 from ._common import DoNotUseDeprecatedPackagesAndFunctions
 from ._common import UsrMerge
 from ._common import PreferGnuAndGpl
+from ._common import PreferBinaryPackage
 
 from ._common import SshServer
 from ._common import ChronyDaemon

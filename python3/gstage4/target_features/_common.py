@@ -184,8 +184,19 @@ class PreferGnuAndGpl:
 """
 
     _maskFileContent = """
-# no, we prefer sys-libs/readline
-dev-libs/libedit
+"""
+
+
+class PreferBinaryPackage:
+
+    def update_target_settings(self, target_settings):
+        assert "10-prefer-binary-package" not in target_settings.pkg_mask_files
+
+        target_settings.pkg_mask_files["10-prefer-gnu-and-gpl"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+# we prefer dev-lang/rust-bin
+dev-lang/rust
 """
 
 
