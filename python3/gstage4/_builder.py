@@ -54,17 +54,16 @@ def Action(*progressStepTuple):
     return decorator
 
 
-class BuildStep(enum.IntEnum):
-    INIT = enum.auto()
-    UNPACKED = enum.auto()
-    GENTOO_REPOSITORY_CREATED = enum.auto()
-    CONFDIR_INITIALIZED = enum.auto()
-    OVERLAYS_CREATED = enum.auto()
-    WORLD_UPDATED = enum.auto()
-    KERNEL_INSTALLED = enum.auto()
-    SERVICES_ENABLED = enum.auto()
-    SYSTEM_CUSTOMIZED = enum.auto()
-    CLEANED_UP = enum.auto()
+class BuildStep:
+    INIT = "init"
+    UNPACKED = "unpacked"
+    GENTOO_REPOSITORY_CREATED = "gentoo_repository_created"
+    CONFDIR_INITIALIZED = "config_directory_initialized"
+    OVERLAYS_CREATED = "overlays_created"
+    WORLD_UPDATED = "world_updated"
+    KERNEL_INSTALLED = "kernel_installed"
+    SERVICES_ENABLED = "service_enabled"
+    CLEANED_UP = "cleaned_up"
 
 
 class Builder:
@@ -88,14 +87,15 @@ class Builder:
 
         self._workDirObj = work_dir
 
+        self._actionList = []
         self._progress = BuildStep.INIT
+
         self._workDirObj.open_chroot_dir()
         self._workDirObj.close_chroot_dir(to_dir_name=self._getChrootDirName())
 
-    def get_progress(self):
-        return self._progress
-
-    @Action(BuildStep.INIT)
+    @PreCondition(BuildStep.INIT)
+    @ChangeStateTo(BuildStep.UNPACKED)
+    @Action
     def action_unpack(self, seed_stage):
         assert isinstance(seed_stage, SeedStage)
         assert seed_stage.get_arch() == self._ts.arch
@@ -111,7 +111,9 @@ class Builder:
         with open(t.world_file_hostpath, "w") as f:
             f.write("")
 
-    @Action(BuildStep.UNPACKED)
+    @PreCondition(BuildStep.UNPACKED)
+    @ChangeStateTo(BuildStep.GENTOO_REPOSITORY_CREATED)
+    @Action
     def action_create_gentoo_repository(self, repo):
         assert repo.get_name() == "gentoo"
 
@@ -128,7 +130,9 @@ class Builder:
         else:
             assert False
 
-    @Action(BuildStep.GENTOO_REPOSITORY_CREATED)
+    @PreCondition(BuildStep.GENTOO_REPOSITORY_CREATED)
+    @ChangeStateTo(BuildStep.CONFDIR_INITIALIZED)
+    @Action
     def action_init_confdir(self):
         if self._ts.profile is not None:
             with _MyChrooter(self) as m:
@@ -143,7 +147,9 @@ class Builder:
         t.write_package_license()
         t.write_use_mask()
 
-    @Action(BuildStep.CONFDIR_INITIALIZED)
+    @PreCondition(BuildStep.CONFDIR_INITIALIZED)
+    @ChangeStateTo(BuildStep.OVERLAYS_CREATED)
+    @Action
     def action_create_overlays(self, preprocess_script_list=[], overlay_list=[]):
         assert overlay_list is not None
         assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository, MountRepository) for x in overlay_list])
@@ -189,7 +195,9 @@ class Builder:
 
         self._workDirObj.save_record("overlays", json.dumps(overlayRecord))
 
-    @Action(BuildStep.OVERLAYS_CREATED)
+    @PreCondition(BuildStep.CONFDIR_INITIALIZED, BuildStep.OVERLAYS_CREATED)
+    @ChangeStateTo(BuildStep.WORLD_UPDATED)
+    @Action
     def action_update_world(self, preprocess_script_list=[], install_list=[], world_set=set()):
         assert len(world_set & set(install_list)) == 0
         assert all([isinstance(s, ScriptInChroot) for s in preprocess_script_list])
@@ -261,7 +269,9 @@ class Builder:
 
             m.script_exec(ScriptUpdateWorld(self._s.verbose_level), quiet=self._getQuiet())
 
-    @Action(BuildStep.WORLD_UPDATED)
+    @PreCondition(BuildStep.CONFDIR_INITIALIZED, BuildStep.WORLD_UPDATED)
+    @ChangeStateTo(BuildStep.KERNEL_INSTALLED)
+    @Action
     def action_install_kernel(self, preprocess_script_list=[]):
         assert all([isinstance(s, ScriptInChroot) for s in preprocess_script_list])
 
@@ -302,7 +312,9 @@ class Builder:
 
         assert False
 
-    @Action(BuildStep.WORLD_UPDATED, BuildStep.KERNEL_INSTALLED)
+    @PreCondition(BuildStep.CONFDIR_INITIALIZED, BuildStep.WORLD_UPDATED, BuildStep.KERNEL_INSTALLED)
+    @ChangeStateTo(BuildStep.SERVICES_ENABLED)
+    @Action
     def action_enable_services(self, preprocess_script_list=[], service_list=[]):
         assert all([isinstance(s, ScriptInChroot) for s in preprocess_script_list])
         if len(service_list) == 0:
@@ -325,34 +337,35 @@ class Builder:
                     else:
                         assert False
 
-    @Action(BuildStep.WORLD_UPDATED, BuildStep.KERNEL_INSTALLED, BuildStep.SERVICES_ENABLED)
-    def action_customize_system(self, custom_script_list=[]):
-        assert all([isinstance(s, ScriptInChroot) for s in custom_script_list])
+    # @Action(BuildStep.WORLD_UPDATED, BuildStep.KERNEL_INSTALLED, BuildStep.SERVICES_ENABLED)
+    # def action_customize_system(self, custom_script_list=[]):
+    #     assert all([isinstance(s, ScriptInChroot) for s in custom_script_list])
+    #
+    #     if len(custom_script_list) > 0:
+    #         with _MyChrooter(self) as m:
+    #             for s in custom_script_list:
+    #                 m.script_exec(s, quiet=self._getQuiet())
 
-        if len(custom_script_list) > 0:
-            with _MyChrooter(self) as m:
-                for s in custom_script_list:
-                    m.script_exec(s, quiet=self._getQuiet())
-
-    @Action(BuildStep.CONFDIR_INITIALIZED, BuildStep.OVERLAYS_CREATED, BuildStep.WORLD_UPDATED, BuildStep.KERNEL_INSTALLED, BuildStep.SERVICES_ENABLED, BuildStep.SYSTEM_CUSTOMIZED)
+    @PreCondition(BuildStep.CONFDIR_INITIALIZED, BuildStep.WORLD_UPDATED, BuildStep.KERNEL_INSTALLED, BuildStep.SERVICES_ENABLED)
+    @ChangeStateTo(BuildStep.CLEANED_UP)
+    @Action
     def action_cleanup(self):
         with _MyChrooter(self) as m:
-            if not self._ts.degentoo:
-                m.shell_call("", "eselect news read all")
-                m.script_exec(ScriptDepClean(self._s.verbose_level), quiet=self._getQuiet())
-            else:
+            m.shell_call("", "eselect news read all")
+            m.script_exec(ScriptDepClean(self._s.verbose_level), quiet=self._getQuiet())
+
+            if self._ts.degentoo:
                 # FIXME
-                m.script_exec(ScriptDepClean(self._s.verbose_level), quiet=self._getQuiet())
                 # m.shell_exec("", "%s/run-merge.sh -C sys-devel/gcc" % (scriptDirPath))
                 # m.shell_exec("", "%s/run-merge.sh -C sys-apps/portage" % (scriptDirPath))
+                pass
 
-        if not self._ts.degentoo:
-            t = TargetConfDirCleaner(self._workDirObj.chroot_dir_path)
-            t.cleanup_repos_conf_dir()
-            t.cleanup_make_conf()
-        else:
+        t = TargetConfDirCleaner(self._workDirObj.chroot_dir_path)
+        t.cleanup_repos_conf_dir()
+        t.cleanup_make_conf()
+
+        if self._ts.degentoo:
             # FIXME
-            t = TargetFilesAndDirs(self._workDirObj.chroot_dir_path)
             robust_layer.simple_fops.rm(t.confdir_hostpath)
             robust_layer.simple_fops.rm(t.statedir_hostpath)
             robust_layer.simple_fops.rm(t.pkgdbdir_hostpath)
@@ -360,6 +373,18 @@ class Builder:
             robust_layer.simple_fops.rm(t.logdir_hostpath)
             robust_layer.simple_fops.rm(t.distdir_hostpath)
             robust_layer.simple_fops.rm(t.binpkgdir_hostpath)
+
+    def finish(self):
+        assert self._progress == BuildStep.CLEANED_UP
+
+    def get_progress(self):
+        return self._progress
+
+    def add_custom_action(self, action_name, custom_scripts, pre_condition, change_state_to, before=None):
+        assert False
+
+    def remove_action(self, action_name):
+        assert False
 
     def _getChrootDirName(self):
         return "%02d-%s" % (self._progress.value, self._progress.name)
