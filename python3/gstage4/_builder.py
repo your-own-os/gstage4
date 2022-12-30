@@ -393,7 +393,8 @@ class Builder:
 
     def remove_action(self, action_name):
         o = getattr(self, "action_" + action_name)
-        assert o 
+        assert o.has_decorator(XXXX)
+        del o?
 
     def _getChrootDirName(self):
         return "%02d-%s" % (self._progress.value, self._progress.name)
