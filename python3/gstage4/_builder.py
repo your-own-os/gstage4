@@ -85,11 +85,9 @@ class Builder:
         if self._ts.build_opts.ccache and self._s.host_ccache_dir is None:
             raise SettingsError("ccache is enabled but host ccache directory is not specified")
 
-        self._workDirObj = work_dir
-
-        self._actionList = []
         self._progress = BuildStep.INIT
 
+        self._workDirObj = work_dir
         self._workDirObj.open_chroot_dir()
         self._workDirObj.close_chroot_dir(to_dir_name=self._getChrootDirName())
 
@@ -380,11 +378,22 @@ class Builder:
     def get_progress(self):
         return self._progress
 
-    def add_custom_action(self, action_name, custom_scripts, pre_condition, change_state_to, before=None):
-        assert False
+    def add_custom_action(self, action_name, custom_scripts, pre_condition, change_state_to):
+        assert re.fullmatch("[a-z_]+", action_name) and action_name not in dir(self)
+        assert len(custom_scripts) > 0 and all([isinstance(s, ScriptInChroot) for s in custom_script_list])
+
+        @PreCondition(*pre_condition)
+        @ChangeStateTo(change_state_to)
+        @CustomAction
+        def x(self):
+            with _MyChrooter(self) as m:
+                for s in custom_scripts:
+                    m.script_exec(s, quiet=self._getQuiet())
+        eval("self.action_%s = x" % (action_name))
 
     def remove_action(self, action_name):
-        assert False
+        o = getattr(self, "action_" + action_name)
+        assert o 
 
     def _getChrootDirName(self):
         return "%02d-%s" % (self._progress.value, self._progress.name)
