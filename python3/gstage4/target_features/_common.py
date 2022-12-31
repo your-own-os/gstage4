@@ -133,8 +133,7 @@ class UsrMerge:
             target_settings.use_mask.append("split-usr")
 
     def get_custom_action(self):
-        return BuilderCustomAction("usr-merge",
-                                   [ScriptFromBuffer("Merge /bin, /sbin, /lib, /lib64 and their /usr counterparts", self._scriptFileContent)],
+        return BuilderCustomAction(ScriptFromBuffer("Merge /bin, /sbin, /lib, /lib64 and their /usr counterparts", self._scriptFileContent),
                                    after=["init_confdir", "create_overlays"],
                                    before=["install_packages"])
 

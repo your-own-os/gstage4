@@ -335,10 +335,11 @@ class Builder:
         assert self._lastAction == self.action_cleanup
         self._finished = True
 
-    def add_custom_action(self, custom_action, insert_after=None, insert_before=None):
+    def add_custom_action(self, action_name, action, insert_after=None, insert_before=None):
         assert self._lastAction is None
-        assert BuilderCustomAction.check_object(custom_action, raise_exception=False)
-        assert "action_" + custom_action.action_name in dir(self)
+        assert re.fullmatch("[0-9a-z_]+", action_name)
+        assert BuilderCustomAction.check_object(action, raise_exception=False)
+        assert "action_" + action.action_name in dir(self)
 
         if insert_before is not None and insert_after is None:
             insert_before = self._actionList.index(insert_before)
@@ -352,12 +353,12 @@ class Builder:
             assert False
 
         # create new action
-        @Action(after=[getattr(self, "action_" + x) for x in custom_action.after], before=[getattr(self, "action_" + x) for x in custom_action.before])
+        @Action(after=[getattr(self, "action_" + x) for x in action.after], before=[getattr(self, "action_" + x) for x in action.before])
         def x(self):
             with _MyChrooter(self) as m:
-                for s in custom_action.custom_scripts:
+                for s in action.custom_scripts:
                     m.script_exec(s, quiet=self._getQuiet())
-        exec("self.action_%s = x" % (custom_action.action_name))
+        exec("self.action_%s = x" % action_name)
 
         # add new action to self._actionList
         self._actionList.insert(insert_before, x)
@@ -397,8 +398,7 @@ class Builder:
 
 class BuilderCustomAction:
 
-    def __init__(self, action_name, custom_scripts, after=[], before=[]):
-        self.action_name = action_name
+    def __init__(self, *custom_scripts, after=[], before=[]):
         self.custom_scripts = custom_scripts
         self.after = after
         self.before = before
@@ -410,12 +410,6 @@ class BuilderCustomAction:
         if not isinstance(obj, cls):
             if raise_exception:
                 raise BuilderCustomActionError("invalid object type")
-            else:
-                return False
-
-        if not re.fullmatch("[0-9a-z_]+", obj.action_name):
-            if raise_exception:
-                raise BuilderCustomActionError("invalid value for key \"action_name\"")
             else:
                 return False
 
