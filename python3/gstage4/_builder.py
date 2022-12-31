@@ -42,15 +42,17 @@ from .scripts import ScriptFromBuffer
 def Action(*preConditionTuple):
     def decorator(func):
         def wrapper(self, *kargs, **kwargs):
-            assert func in self._actionList
-            if len(preConditionTuple) > 0:                # check pre-conditions
+            if self._lastAction is not None:
+                assert self._actionList.index(self._lastAction) < self._actionList.index(func)
+            assert not self._finished
+            if len(preConditionTuple) > 0:                                                              # check pre-conditions
                 bFound = False
                 for p in preConditionTuple:
                     if p in self._actionList:
-                        assert self._actionList.index(self._lastAction) >= self._actionList.index(p)
+                        assert self._actionList.index(p) < self._actionList.index(func)
                         bFound = True
                 assert bFound
-            if True:                                      # do work
+            if True:                                                                                    # do work
                 self._curAction = func
                 self._workDirObj.open_chroot_dir(from_dir_name=self._getChrootDirName())
                 func(self, *kargs, **kwargs)
@@ -87,12 +89,14 @@ class Builder:
             self.action_create_gentoo_repository,
             self.action_init_confdir,
             self.action_create_overlays,
+            self.action_install_packages,
             self.action_update_world,
             self.action_install_kernel,
             self.action_enable_services,
             self.action_cleanup,
         ]
         self._lastAction = None
+        self._finished = False
 
     @Action
     def action_unpack(self, seed_stage):
@@ -143,13 +147,11 @@ class Builder:
         t.write_use_mask()
 
     @Action(action_init_confdir)
-    def action_create_overlays(self, preprocess_script_list=[], overlay_list=[]):
-        assert overlay_list is not None
+    def action_create_overlays(self, overlay_list):
+        assert len(overlay_list) > 0
         assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository, MountRepository) for x in overlay_list])
         assert not any([x.get_name() == "gentoo" for x in overlay_list])
         assert len([x.get_name() for x in overlay_list]) == len(set([x.get_name() for x in overlay_list]))        # no duplication
-        if len(overlay_list) == 0:
-            assert len(preprocess_script_list) == 0
 
         overlayRecord = dict()
         pkgSet = set()
@@ -171,11 +173,8 @@ class Builder:
             else:
                 assert False
 
-        if len(preprocess_script_list) > 0 or any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
+        if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
             with _MyChrooter(self) as m:
-                for s in preprocess_script_list:
-                    m.script_exec(s, quiet=self._getQuiet())
-
                 installList = [x for x in pkgSet if not Util.portageIsPkgInstalled(self._workDirObj.chroot_dir_path, x)]
                 m.script_exec(ScriptInstallPackages(installList, self._s.verbose_level), quiet=self._getQuiet())
 
@@ -189,9 +188,9 @@ class Builder:
         self._workDirObj.save_record("overlays", json.dumps(overlayRecord))
 
     @Action(action_init_confdir, action_create_overlays)
-    def action_update_world(self, preprocess_script_list=[], install_list=[], world_set=set()):
+    def action_install_packages(self, install_list=[], world_set=set()):
+        assert len(install_list) > 0 or len(world_set) > 0
         assert len(world_set & set(install_list)) == 0
-        assert all([isinstance(s, ScriptInChroot) for s in preprocess_script_list])
 
         def __pkgNeeded(pkg):
             if pkg not in install_list and pkg not in world_set:
@@ -250,33 +249,24 @@ class Builder:
             for pkg in world_set:
                 f.write("%s\n" % (pkg))
 
-        # preprocess, install packages, update @world
+        # install packages, update @world
         with _MyChrooter(self) as m:
-            for s in preprocess_script_list:
-                m.script_exec(s, quiet=self._getQuiet())
-
             installList = [x for x in installList if not Util.portageIsPkgInstalled(self._workDirObj.chroot_dir_path, x)]
             m.script_exec(ScriptInstallPackages(installList, self._s.verbose_level), quiet=self._getQuiet())
 
+    @Action(action_init_confdir, action_create_overlays, action_install_packages)
+    def action_update_world(self):
+        with _MyChrooter(self) as m:
             m.script_exec(ScriptUpdateWorld(self._s.verbose_level), quiet=self._getQuiet())
 
-    @Action(action_init_confdir, action_update_world)
-    def action_install_kernel(self, preprocess_script_list=[]):
-        assert all([isinstance(s, ScriptInChroot) for s in preprocess_script_list])
-
-        if self._ts.kernel_manager == "none":
-            assert len(preprocess_script_list) == 0
-            return
-
+    @Action(action_init_confdir, action_install_packages, action_update_world)
+    def action_install_kernel(self):
         if self._ts.kernel_manager == "genkernel":
             t = TargetConfDirParser(self._workDirObj.chroot_dir_path)
             tj = t.get_make_conf_make_opts_jobs()
             tl = t.get_make_conf_load_average()
 
             with _MyChrooter(self) as m:
-                for s in preprocess_script_list:
-                    m.script_exec(s, quiet=self._getQuiet())
-
                 m.shell_call("", "eselect kernel set 1")
 
                 dotConfigFile = "/usr/src/dot-config"
@@ -287,7 +277,6 @@ class Builder:
             return
 
         if self._ts.kernel_manager == "binary-kernel":
-            assert len(preprocess_script_list) == 0
             return
 
         if self._ts.kernel_manager == "fake":
@@ -301,30 +290,20 @@ class Builder:
 
         assert False
 
-    @Action(action_init_confdir, action_update_world, action_install_kernel)
-    def action_enable_services(self, preprocess_script_list=[], service_list=[]):
-        assert all([isinstance(s, ScriptInChroot) for s in preprocess_script_list])
-        if len(service_list) == 0:
-            assert len(preprocess_script_list) == 0
-
-        if self._ts.service_manager == "none":
-            assert len(preprocess_script_list) == 0
-            assert len(service_list) == 0
-            return
-
-        if len(service_list) > 0:
+    @Action(action_init_confdir, action_install_packages, action_update_world, action_install_kernel)
+    def action_enable_services(self, service_list):
+        if self._ts.service_manager == "openrc":
             with _MyChrooter(self) as m:
-                for s in preprocess_script_list:
-                    m.script_exec(s, quiet=self._getQuiet())
                 for s in service_list:
-                    if self._ts.service_manager == "openrc":
-                        m.shell_exec("", "rc-update add %s default > /dev/null" % (s))
-                    elif self._ts.service_manager == "systemd":
-                        m.shell_exec("", "systemctl enable %s -q" % (s))
-                    else:
-                        assert False
+                    m.shell_exec("", "rc-update add %s default > /dev/null" % (s))
+        elif self._ts.service_manager == "systemd":
+            with _MyChrooter(self) as m:
+                for s in service_list:
+                    m.shell_exec("", "systemctl enable %s -q" % (s))
+        else:
+            assert False
 
-    @Action(action_init_confdir, action_update_world, action_install_kernel, action_enable_services)
+    @Action(action_init_confdir, action_install_packages, action_update_world, action_install_kernel, action_enable_services)
     def action_cleanup(self):
         with _MyChrooter(self) as m:
             m.shell_call("", "eselect news read all")
@@ -351,9 +330,12 @@ class Builder:
             robust_layer.simple_fops.rm(t.binpkgdir_hostpath)
 
     def finish(self):
+        assert not self._finished
         assert self._lastAction == self.action_cleanup
+        self._finished = True
 
     def add_custom_action(self, action_name, custom_scripts, pre_condition=None, before=None, after=None):
+        assert self._lastAction is None
         assert re.fullmatch("[a-z_]+", action_name) and action_name not in dir(self)
         assert len(custom_scripts) > 0 and all([isinstance(s, ScriptInChroot) for s in custom_scripts])
 
@@ -380,6 +362,8 @@ class Builder:
         self._actionList.insert(before, x)
 
     def remove_action(self, action_name):
+        assert self._lastAction is None
+
         o = eval("self.action_%s" % (action_name))
         self._actionList.remove(o)
 
