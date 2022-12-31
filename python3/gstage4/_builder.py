@@ -384,6 +384,9 @@ class Builder:
             return (self._actionList.index(self._lastAction) + 1) * 100 // len(self._actionList)
 
     def _checkAction(self, action, actionIndex):
+        print(action._myAfter.__name__)
+        print(action._myBefore.__name__)
+
         if len(action._myAfter) > 0:
             bFound = False
             for p in action._myAfter:
