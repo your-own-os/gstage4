@@ -93,8 +93,8 @@ class Builder:
             self.action_enable_services,
             self.action_cleanup,
         ]
-        for p in self._actionList:
-            self._checkAction(p)
+        for i in range(0, len(self._actionList)):
+            self._checkAction(self._actionList[i], i)
 
         self._lastAction = None
         self._finished = False
@@ -336,7 +336,6 @@ class Builder:
         self._finished = True
 
     def add_custom_action(self, action_name, action, insert_after=None, insert_before=None):
-        assert self._lastAction is None
         assert re.fullmatch("[0-9a-z_]+", action_name)
         assert BuilderCustomAction.check_object(action, raise_exception=False)
         assert "action_" + action.action_name in dir(self)
@@ -351,6 +350,8 @@ class Builder:
             insert_before = len(self._actionList) - 1              # action_cleanup must be the last action
         else:
             assert False
+        if self._lastAction is not None:
+            assert self._actionList.index(self._lastAction) < insert_before
 
         # create new action
         @Action(after=[getattr(self, "action_" + x) for x in action.after], before=[getattr(self, "action_" + x) for x in action.before])
@@ -362,13 +363,18 @@ class Builder:
 
         # add new action to self._actionList
         self._actionList.insert(insert_before, x)
-        self._checkAction(x)
+        self._checkAction(x, insert_before)
 
     def remove_action(self, action_name):
-        assert self._lastAction is None
-
         o = eval("self.action_%s" % (action_name))
-        self._actionList.remove(o)
+        idx = self._actionList.index(o)
+
+        if self._lastAction is not None:
+            assert self._actionList.index(self._lastAction) < idx
+
+        self._actionList.pop(idx)
+        for i in range(idx, len(self._actionList)):
+            self._checkAction(self._actionList[i], i)
 
     def get_progress(self):
         if self._lastAction is None:
@@ -376,18 +382,18 @@ class Builder:
         else:
             return (self._actionList.index(self._lastAction) + 1) * 100 // len(self._actionList)
 
-    def _checkAction(self, action):
+    def _checkAction(self, action, actionIndex):
         if len(action._after) > 0:
             bFound = False
             for p in action._after:
                 if p in self._actionList:
-                    assert self._actionList.index(p) < self._actionList.index(action)
+                    assert self._actionList.index(p) < actionIndex
                     bFound = True
             assert bFound
 
         for p in action._before:
             if p in self._actionList:
-                assert self._actionList.index(action) < self._actionList.index(p)
+                assert actionIndex < self._actionList.index(p)
 
     def _getChrootDirName(self):
         return "%02d-%s" % (self._actionList.index(self._curAction), self._curAction.name)
