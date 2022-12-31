@@ -43,9 +43,6 @@ from .scripts import ScriptFromBuffer
 def Action(after=[], before=[]):
 
     def decorator(func):
-        func._after = after
-        func._before = before
-
         def wrapper(self, *kargs, **kwargs):
             assert self._actionList.index(self._lastAction) < self._actionList.index(func) if self._lastAction is not None else True
             assert not self._finished
@@ -55,9 +52,9 @@ def Action(after=[], before=[]):
             self._workDirObj.close_chroot_dir(to_dir_name=self._getChrootDirName())
             del self._curAction
             self._lastAction = func
-
+        wrapper._after = after
+        wrapper._before = before
         return wrapper
-
     return decorator
 
 
