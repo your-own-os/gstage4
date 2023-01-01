@@ -88,7 +88,7 @@ class Builder:
         ]
         for i in range(0, len(self._actionList)):
             print(self._actionList[i], self._actionList[i].__name__)
-            self._checkAction(self._actionList[i], i)
+            # self._checkAction(self._actionList[i], i)
 
         self._actionStorage = dict()
 
