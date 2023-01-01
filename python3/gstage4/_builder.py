@@ -42,22 +42,15 @@ from .scripts import ScriptFromBuffer
 def Action(after=[], before=[]):
     def decorator(func):
         def wrapper(self, *kargs, **kwargs):
-            if self._lastAction is not None:
-                for p in self._actionList:
-                    print(p)
-
-                print(self._lastAction._func in self._actionList)
-                print(wrapper._func in self._actionList)
-
-                print(self._lastAction._func, func)
-
-                print(self._lastAction in self._actionList)
-                print(wrapper in self._actionList)
-
-            assert self._actionList.index(self._lastAction) < self._actionList.index(wrapper) if self._lastAction is not None else True
+            curMethod = None
+            for p in self._actionList:
+                if p.__func__ == wrapper:
+                    curMethod = p
+                    break
+            assert self._actionList.index(self._lastAction) < self._actionList.index(curMethod) if self._lastAction is not None else True
             assert not self._finished
             func(self, *kargs, **kwargs)
-            self._lastAction = wrapper
+            self._lastAction = curMethod
         wrapper._func = func
         wrapper._after = after
         wrapper._before = before
