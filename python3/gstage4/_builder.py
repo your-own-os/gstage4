@@ -43,9 +43,17 @@ def Action(after=[], before=[]):
     def decorator(func):
         def wrapper(self, *kargs, **kwargs):
             if self._lastAction is not None:
+                for p in self._actionList:
+                    print(p)
+
+                print(self._lastAction._func in self._actionList)
+                print(wrapper._func in self._actionList)
+
                 print(self._lastAction._func, func)
-                print(self._lastAction in self._actionList, any([self._lastAction == x for x in self._actionList]))
-                print(wrapper in self._actionList, any([wrapper == x for x in self._actionList]))
+
+                print(self._lastAction in self._actionList)
+                print(wrapper in self._actionList)
+
             assert self._actionList.index(self._lastAction) < self._actionList.index(wrapper) if self._lastAction is not None else True
             assert not self._finished
             func(self, *kargs, **kwargs)
