@@ -95,7 +95,7 @@ class Builder:
         self._lastAction = None
         self._finished = False
 
-    @Action
+    @Action()
     def action_unpack(self, seed_stage):
         assert isinstance(seed_stage, SeedStage)
         assert seed_stage.get_arch() == self._ts.arch
