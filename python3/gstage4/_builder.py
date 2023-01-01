@@ -61,12 +61,9 @@ class Builder:
     It is the driver class for pretty much everything that gstage4 does.
     """
 
-    def __init__(self, work_dir, settings, target_settings):
+    def __init__(self, settings, target_settings, work_dir):
         assert Settings.check_object(settings, raise_exception=False)
         assert TargetSettings.check_object(target_settings, raise_exception=False)
-
-        self._workDirObj = work_dir
-        self._workDirObj.initialize()
 
         self._s = settings
         if self._s.log_dir is not None:
@@ -75,6 +72,8 @@ class Builder:
         self._ts = target_settings
         if self._ts.build_opts.ccache and self._s.host_ccache_dir is None:
             raise SettingsError("ccache is enabled but host ccache directory is not specified")
+
+        self._workDirObj = work_dir
 
         self._actionList = [
             self.action_unpack,
