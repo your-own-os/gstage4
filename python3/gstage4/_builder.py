@@ -45,12 +45,13 @@ def Action(after=[], before=[]):
         def wrapper(self, *kargs, **kwargs):
             assert self._actionList.index(self._lastAction) < self._actionList.index(func) if self._lastAction is not None else True
             assert not self._finished
-            self._curAction = func
+            self._curAction = func._wrapper
             self._workDirObj.open_chroot_dir(from_dir_name=self._getChrootDirName())
             func(self, *kargs, **kwargs)
             self._workDirObj.close_chroot_dir(to_dir_name=self._getChrootDirName())
             del self._curAction
-            self._lastAction = func
+            self._lastAction = func._wrapper
+        func._wrapper = wrapper
         wrapper._myAfter = after
         wrapper._myBefore = before
         return wrapper
@@ -359,7 +360,7 @@ class Builder:
 
         # add new action to self._actionList
         self._actionList.insert(insert_before, x)
-        self._checkAction(x, insert_before)
+        self._checkAction(x, insert_before)93
 
     def add_and_run_custom_action(self, action_name, action):
         assert self._lastAction is not None
@@ -384,18 +385,18 @@ class Builder:
             return (self._actionList.index(self._lastAction) + 1) * 100 // len(self._actionList)
 
     def _checkAction(self, action, actionIndex):
-        print(action._myAfter.__name__)
-        print(action._myBefore)
+        print(action._realFunc._myAfter.__name__)
+        print(action._realFunc._myBefore)
 
-        if len(action._myAfter) > 0:
+        if len(action._realFunc._myAfter) > 0:
             bFound = False
-            for p in action._myAfter:
+            for p in action._realFunc._myAfter:
                 if p in self._actionList:
                     assert self._actionList.index(p) < actionIndex
                     bFound = True
             assert bFound
 
-        for p in action._myBefore:
+        for p in action._realFunc._myBefore:
             if p in self._actionList:
                 assert actionIndex < self._actionList.index(p)
 
