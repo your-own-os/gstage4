@@ -51,9 +51,9 @@ def Action(after=[], before=[]):
             self._workDirObj.close_chroot_dir(to_dir_name=self._getChrootDirName())
             del self._curAction
             self._lastAction = func
+        wrapper._myAfter = after
+        wrapper._myBefore = before
         return wrapper
-    decorator._myAfter = after
-    decorator._myBefore = before
     return decorator
 
 
