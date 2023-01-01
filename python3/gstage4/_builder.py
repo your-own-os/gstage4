@@ -49,6 +49,7 @@ def Action(after=[], before=[]):
             del self._curAction
             self._lastAction = func._wrapper
         func._wrapper = wrapper
+        wrapper._func = func
         wrapper._after = after
         wrapper._before = before
         return wrapper
@@ -385,9 +386,9 @@ class Builder:
         if len(action._after) > 0:
             bFound = False
             for p in action._after:
-                print(p, p.__name__)
+                print(p, p.__name__, p._func.__name__)
                 for x in self._actionList:
-                    print("    ", x, x.__name__)
+                    print("    ", x, x.__name__, x._func.__name__)
                 if p in self._actionList:
                     assert self._actionList.index(p) < actionIndex
                     bFound = True
