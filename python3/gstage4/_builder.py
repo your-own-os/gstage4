@@ -443,6 +443,8 @@ class CustomAction:
             else:
                 return False
 
+        return True
+
 
 class _MyRepoUtil:
 
