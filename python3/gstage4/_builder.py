@@ -332,9 +332,8 @@ class Builder:
         self._finished = True
 
     def add_custom_action(self, action_name, action, insert_after=None, insert_before=None):
-        assert re.fullmatch("[0-9a-z_]+", action_name)
+        assert re.fullmatch("[0-9a-z_]+", action_name) and "action_" + action.action_name not in dir(self)
         assert CustomAction.check_object(action, raise_exception=False)
-        assert "action_" + action.action_name in dir(self)
 
         if insert_before is not None and insert_after is None:
             insert_before = self._actionList.index(insert_before)
@@ -398,9 +397,6 @@ class Builder:
         for p in action._myBefore:
             if p in self._actionList:
                 assert actionIndex < self._actionList.index(p)
-
-    def _getChrootDirName(self):
-        return "%02d-%s" % (self._actionList.index(self._curAction), self._curAction.__name__)
 
     def _getQuiet(self):
         return (self._s.verbose_level == 0)
