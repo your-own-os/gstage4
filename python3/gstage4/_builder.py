@@ -334,7 +334,7 @@ class Builder:
         self._finished = True
 
     def add_custom_action(self, action_name, action, insert_after=None, insert_before=None):
-        assert re.fullmatch("[0-9a-z_]+", action_name) and "action_" + action.action_name not in dir(self)
+        assert re.fullmatch("[0-9a-z_]+", action_name) and "action_" + action_name not in dir(self)
         assert CustomAction.check_object(action, raise_exception=False)
 
         if insert_before is not None and insert_after is None:
@@ -356,7 +356,7 @@ class Builder:
             with _MyChrooter(self) as m:
                 for s in action.custom_scripts:
                     m.script_exec(s, quiet=self._getQuiet())
-        exec("self.action_%s = x" % action_name)
+        exec("self.action_%s = x" % (action_name))
 
         # add new action to self._actionList
         self._actionList.insert(insert_before, x)
