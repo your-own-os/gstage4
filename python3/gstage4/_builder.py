@@ -42,6 +42,7 @@ from .scripts import ScriptFromBuffer
 def Action(after=[], before=[]):
     def decorator(func):
         def wrapper(self, *kargs, **kwargs):
+            print(self._lastAction._func, func)
             assert self._actionList.index(self._lastAction) < self._actionList.index(func._wrapper) if self._lastAction is not None else True
             assert not self._finished
             self._curAction = func._wrapper
