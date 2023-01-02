@@ -107,6 +107,7 @@ class WorkDir:
             else:
                 return False
         if s.st_mode != self._MODE:
+            print("%o" % (s.st_mode))
             if raiseException:
                 raise WorkDirError("invalid mode for \"%s\"" % (self._path))
             else:
