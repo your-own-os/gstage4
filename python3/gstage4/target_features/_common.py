@@ -39,10 +39,14 @@ class UsePortage:
 
 class UseGenkernel:
 
+    def __init__(self, kernel):
+        self._kernel = kernel
+
     def update_target_settings(self, target_settings):
         target_settings.kernel_manager = "genkernel"
 
     def update_world_set(self, world_set):
+        world_set.add("sys-kernel/%s" % (self._kernel))
         world_set.add("sys-kernel/genkernel")
         world_set.add("sys-devel/bc")           # kernel build script needs it
 
