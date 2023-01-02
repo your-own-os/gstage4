@@ -22,7 +22,7 @@
 
 
 import crypt
-from .. import CustomAction
+from ..custom_actions import SimpleCustomAction
 from ..scripts import OneLinerScript
 from ..scripts import ScriptFromBuffer
 from ..scripts import PlacingFilesScript
@@ -138,10 +138,10 @@ class UsrMerge:
             target_settings.use_mask.append("split-usr")
 
     def get_custom_action(self):
-        return CustomAction("Merge /bin, /sbin, /lib, /lib64 and their /usr counterparts",
-                            ScriptFromBuffer(self._scriptFileContent),
-                            after=["init_confdir", "create_overlays"],
-                            before=["install_packages"])
+        return SimpleCustomAction("Merge /bin, /sbin, /lib, /lib64 and their /usr counterparts",
+                                  ScriptFromBuffer(self._scriptFileContent),
+                                  after=["init_confdir", "create_overlays"],
+                                  before=["install_packages"])
 
         # UNINSTALL_IGNORE="/bin /lib /lib64 /sbin /usr/sbin"
 
@@ -249,9 +249,9 @@ class GettyAutoLogin:
         s.append_dir("/etc/systemd/system/getty@.service.d")
         s.append_file("/etc/systemd/system/getty@.service.d/getty-autologin.conf",
                       self._fileContent.strip("\n") + "\n")  # remove all redundant carrage returns)
-        return CustomAction("Place auto login file",
-                            s,
-                            after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
+        return SimpleCustomAction("Place auto login file",
+                                  s,
+                                  after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
 
     _fileContent = """
 [Service]
@@ -267,9 +267,9 @@ class SetPasswordForUserRoot:
 
     def get_custom_action(self):
         # modify /etc/shadow directly so that password complexity check won't be in our way
-        return CustomAction("Set root's password",
-                            OneLinerScript("sed -i 's#^root:[^:]*:#root:%s:#' /etc/shadow" % (self._hash)),
-                            after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
+        return SimpleCustomAction("Set root's password",
+                                  OneLinerScript("sed -i 's#^root:[^:]*:#root:%s:#' /etc/shadow" % (self._hash)),
+                                  after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
 
 
 class AddUser:

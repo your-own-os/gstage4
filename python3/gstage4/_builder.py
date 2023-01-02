@@ -23,6 +23,7 @@
 
 import os
 import re
+import abc
 import pathlib
 import robust_layer.simple_fops
 from ._util import Util
@@ -411,13 +412,27 @@ class Builder:
         return (self._s.verbose_level == 0)
 
 
-class CustomAction:
+class CustomAction(abc.ABC):
 
-    def __init__(self, description, *custom_scripts, after=[], before=[]):
-        self.description = description
-        self.custom_scripts = custom_scripts
-        self.after = after
-        self.before = before
+    @abc.abstractmethod
+    @property
+    def description(self):
+        pass
+
+    @abc.abstractmethod
+    @property
+    def custom_scripts(self):
+        pass
+
+    @abc.abstractmethod
+    @property
+    def after(self):
+        pass
+
+    @abc.abstractmethod
+    @property
+    def before(self):
+        pass
 
     @classmethod
     def check_object(cls, obj, raise_exception=None):
