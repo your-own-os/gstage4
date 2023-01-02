@@ -147,7 +147,6 @@ class Builder:
 
     @Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
-        assert len(overlay_list) > 0
         assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository, MountRepository) for x in overlay_list])
         assert not any([x.get_name() == "gentoo" for x in overlay_list])
         assert len([x.get_name() for x in overlay_list]) == len(set([x.get_name() for x in overlay_list]))        # no duplication
@@ -187,8 +186,7 @@ class Builder:
         self._actionStorage["overlays"] = overlayRecord
 
     @Action(after=["init_confdir", "create_overlays"])
-    def action_install_packages(self, install_list=[], world_set=set()):
-        assert len(install_list) > 0 or len(world_set) > 0
+    def action_install_packages(self, install_list, world_set):
         assert len(world_set & set(install_list)) == 0
 
         def __pkgNeeded(pkg):
@@ -249,9 +247,10 @@ class Builder:
                 f.write("%s\n" % (pkg))
 
         # install packages, update @world
-        with _MyChrooter(self) as m:
-            installList = [x for x in installList if not Util.portageIsPkgInstalled(self._workDirObj.path, x)]
-            m.script_exec(ScriptInstallPackages(installList, self._s.verbose_level), quiet=self._getQuiet())
+        installList = [x for x in installList if not Util.portageIsPkgInstalled(self._workDirObj.path, x)]
+        if len(installList) > 0:
+            with _MyChrooter(self) as m:
+                m.script_exec(ScriptInstallPackages(installList, self._s.verbose_level), quiet=self._getQuiet())
 
     @Action(after=["init_confdir", "create_overlays", "install_packages"])
     def action_update_world(self):
@@ -291,6 +290,9 @@ class Builder:
 
     @Action(after=["init_confdir", "install_packages", "update_world", "install_kernel"])
     def action_enable_services(self, service_list):
+        if len(service_list) == 0:
+            return
+
         if self._ts.service_manager == "openrc":
             with _MyChrooter(self) as m:
                 for s in service_list:
