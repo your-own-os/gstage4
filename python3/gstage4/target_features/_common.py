@@ -23,6 +23,7 @@
 
 import crypt
 from .. import CustomAction
+from ..scripts import OneLinerScript
 from ..scripts import ScriptFromBuffer
 from ..scripts import PlacingFilesScript
 
@@ -261,12 +262,9 @@ class SetPasswordForUserRoot:
         self._hash = crypt.crypt(password)
 
     def get_custom_action(self):
-        buf = ""
-        buf += "#!/bin/sh\n"
-        buf += "sed -i 's#^root:[^:]*:#root:%s:#' /etc/shadow\n" % (self._hash)      # modify /etc/shadow directly so that password complexity check won't be in our way
-
+        # modify /etc/shadow directly so that password complexity check won't be in our way
         return CustomAction("Set root's password",
-                            ScriptFromBuffer(buf),
+                            OneLinerScript("sed -i 's#^root:[^:]*:#root:%s:#' /etc/shadow" % (self._hash)),
                             after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
 
 
