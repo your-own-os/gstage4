@@ -42,8 +42,7 @@ class Runner:
     def __exit__(self, type, value, traceback):
         self.unbind()
 
-    @property
-    def binded(self):
+    def is_binded(self):
         return len(self._mountList) > 0
 
     def bind(self):

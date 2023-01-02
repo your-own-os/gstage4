@@ -413,18 +413,18 @@ class Builder:
 
 class CustomAction(abc.ABC):
 
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def custom_scripts(self):
         pass
 
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def after(self):
         pass
 
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def before(self):
         pass
 
