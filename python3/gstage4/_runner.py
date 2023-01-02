@@ -136,8 +136,6 @@ class Runner:
         os.makedirs(hostPath, mode=0o755)
         self._scriptDirList.append(hostPath)
 
-        if not quiet:
-            print(scriptObj.get_description())
         scriptObj.fill_script_dir(hostPath)
         self.shell_exec("", "sh -c \"cd %s ; ./%s\"" % (path, scriptObj.get_script()), quiet)
 

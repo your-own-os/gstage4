@@ -89,19 +89,5 @@ class ScriptInChroot(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_description(self):
-        pass
-
-    @abc.abstractmethod
     def get_script(self):
         pass
-
-    def __eq__(self, other):
-        if not isinstance(other, ScriptInChroot):
-            return False
-        if self.get_description() != other.get_description():
-            return False
-        return True
-
-    def __ne__(self, other):
-        return (not self.__eq__(other))

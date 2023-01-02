@@ -411,7 +411,8 @@ class Builder:
 
 class CustomAction:
 
-    def __init__(self, *custom_scripts, after=[], before=[]):
+    def __init__(self, description, *custom_scripts, after=[], before=[]):
+        self.description = description
         self.custom_scripts = custom_scripts
         self.after = after
         self.before = before
@@ -423,6 +424,12 @@ class CustomAction:
         if not isinstance(obj, cls):
             if raise_exception:
                 raise CustomActionError("invalid object type")
+            else:
+                return False
+
+        if not isinstance(obj.description, str):
+            if raise_exception:
+                raise CustomActionError("invalid value for key \"description\"")
             else:
                 return False
 
