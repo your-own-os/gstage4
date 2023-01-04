@@ -201,6 +201,9 @@ class PreferBinaryPackage:
     _maskFileContent = """
 # we prefer dev-lang/rust-bin
 dev-lang/rust
+
+# we prefer sys-firmware/edk2-ovmf-bin
+sys-firmware/edk2-ovmf
 """
 
 
