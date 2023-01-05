@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 
+import lxml.etree
 from .. import MountRepository
 from .. import EmergeSyncRepository
 
@@ -61,14 +62,10 @@ class RegisteredOverlay(EmergeSyncRepository):
     """Overlay in Gentoo Overlay Database (https://api.gentoo.org/overlays/repositories.xml)"""
 
     def __init__(self, overlay_name):
+        ret = self._parse()
         self._name = overlay_name
-
-        # FIXME:
-        # 1. retrieve repositories.xml
-        # 2. get info by overlay_name
-        self._syncType = None
-        self._syncUrl = None
-        assert False
+        self._syncType = ret[overlay_name][0]
+        self._syncUrl = ret[overlay_name][1]
 
     def get_name(self):
         return self._name
@@ -84,6 +81,55 @@ class RegisteredOverlay(EmergeSyncRepository):
         buf += "sync-type = %s\n" % (self._syncType)
         buf += "sync-uri = %s\n" % (self._syncUrl)
         return buf
+
+    def _parse(self, fullfn):
+        cList = [
+            ("git", "https", "github.com"),
+            ("git", "https", "gitlab.com"),
+            ("git", "https", None),
+            ("git", "http", None),
+            ("git", "git", None),
+            ("svn", "https", None),
+            ("svn", "http", None),
+            ("mercurial", "https", None),
+            ("mercurial", "http", None),
+            ("rsync", "rsync", None),
+        ]
+
+        ret = dict()
+        rootElem = lxml.etree.parse("https://api.gentoo.org/overlays/repositories.xml").getroot()
+        for nameTag in rootElem.xpath(".//repo/name"):
+            overlayName = nameTag.text
+            if overlayName in ret:
+                raise Exception("duplicate overlay \"%s\"" % (overlayName))
+
+            for vcsType, urlProto, urlDomain in cList:
+                for sourceTag in nameTag.xpath("../source"):
+                    tVcsType = sourceTag.get("type")
+                    tUrl = sourceTag.text
+                    if tUrl.startswith("git://github.com/"):                            # FIXME: github does not support git:// anymore
+                        tUrl = tUrl.replace("git://", "https://")
+                    if tVcsType == vcsType:
+                        if urlDomain is not None:
+                            if tUrl.startswith(urlProto + "://" + urlDomain + "/"):
+                                ret[overlayName] = (tVcsType, tUrl)
+                                break
+                        else:
+                            if tUrl.startswith(urlProto + "://"):
+                                ret[overlayName] = (tVcsType, tUrl)
+                                break
+                if overlayName in ret:
+                    if ret[overlayName][1].startswith("https://github.com/"):
+                        # for github mirror
+                        url = ret[overlayName][1]
+                        url = url.replace("https://github.com/", "mirror://github/")
+                        ret[overlayName] = (ret[overlayName][0], url)
+                    break
+
+            if overlayName not in ret:
+                raise Exception("no appropriate source for overlay \"%s\"" % (overlayName))
+
+        return ret
 
 
 class UserDefinedOverlay(EmergeSyncRepository):

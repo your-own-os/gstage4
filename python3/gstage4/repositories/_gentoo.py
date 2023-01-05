@@ -44,7 +44,7 @@ class CloudGentoo(EmergeSyncRepository):
         url = mrget.target_urls("mirror://gentoo-portage", filter_key=lambda x: x["protocol"] == "rsync")[0]
 
         # from Gentoo AMD64 Handbook
-        # the commented part is not needed, I have tested it
+        # the commented part is not needed
         buf = ""
         # buf += "[DEFAULT]\n"
         # buf += "main-repo = gentoo\n"
