@@ -109,7 +109,7 @@ class TargetSettings:
 
         self.profile = None
 
-        self.package_manager = "portage"
+        self.package_manager = "portage"         # "portage"
         self.kernel_manager = "none"             # "none", "genkernel", "fake". kernel source and kernel config is select by emerge/pre-command
         self.service_manager = "none"            # "none", "systemd"
 
