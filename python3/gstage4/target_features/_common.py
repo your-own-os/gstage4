@@ -114,7 +114,14 @@ net-misc/networkmanager    iwd gnutls -nss -wext
     _maskFileContent = """
 # deprecated gnome libs
 gnome-base/gconf
-gnome-base/gnome-vfs
+
+# app-cdr/mirage2iso deprecates the following packages
+app-cdr/bchunk
+app-cdr/ccd2iso
+app-cdr/nrg2iso
+
+# not active developed and "equery hasuse -p" can do its job
+app-portage/euses
 
 # these packages depends on dev-lang/lua[deprecated]
 media-libs/libquvi
@@ -128,6 +135,12 @@ net-wireless/wpa_supplicant
 
 # libstdc++ is integrated in gcc
 sys-libs/libstdc++-v3
+
+# too old
+sys-apps/sysvinit
+
+# deprecated by dev-libs/rocm-opencl-runtime
+dev-libs/amdgpu-pro-opencl
 """
 
 
