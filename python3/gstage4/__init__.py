@@ -30,7 +30,7 @@ __version__ = '0.0.1'
 __author__ = 'Fpemud <fpemud@sina.com>'
 
 
-from ._settings import HostInfo
+from ._host import HostInfo
 
 from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
