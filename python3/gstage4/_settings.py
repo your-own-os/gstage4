@@ -104,10 +104,12 @@ class Settings:
 
 class TargetSettings:
 
-    def __init__(self):
-        self.arch = None
+    def __init__(self, arch, profile):
+        assert arch in ["alpha", "amd64", "arm64", "hppa", "ia64", "m68k", "mips", "ppc", "riscv", "s390", "sh", "sparc", "x86"]
+        self._arch = arch
 
-        self.profile = None
+        assert profile is not None and isinstance(profile, str)
+        self._profile = profile
 
         self.package_manager = "portage"         # "portage"
         self.kernel_manager = "none"             # "none", "genkernel", "fake". kernel source and kernel config is select by emerge/pre-command
@@ -138,6 +140,14 @@ class TargetSettings:
 
         self.degentoo = False
 
+    @property
+    def arch(self):
+        return self._arch
+
+    @property
+    def profile(self):
+        return self._profile
+
     @classmethod
     def check_object(cls, obj, raise_exception=None):
         assert raise_exception is not None
@@ -151,33 +161,33 @@ class TargetSettings:
             if not isinstance(obj, cls):
                 raise SettingsError("invalid object type")
 
-            if obj.arch == "alpha":
+            if obj._arch == "alpha":
                 pass
-            elif obj.arch == "amd64":
+            elif obj._arch == "amd64":
                 pass
-            elif obj.arch == "arm":
+            elif obj._arch == "arm":
                 pass
-            elif obj.arch == "arm64":
+            elif obj._arch == "arm64":
                 pass
-            elif obj.arch == "hppa":
+            elif obj._arch == "hppa":
                 pass
-            elif obj.arch == "ia64":
+            elif obj._arch == "ia64":
                 pass
-            elif obj.arch == "m68k":
+            elif obj._arch == "m68k":
                 pass
-            elif obj.arch == "mips":
+            elif obj._arch == "mips":
                 pass
-            elif obj.arch == "ppc":
+            elif obj._arch == "ppc":
                 pass
-            elif obj.arch == "riscv":
+            elif obj._arch == "riscv":
                 pass
-            elif obj.arch == "s390":
+            elif obj._arch == "s390":
                 pass
-            elif obj.arch == "sh":
+            elif obj._arch == "sh":
                 pass
-            elif obj.arch == "sparc":
+            elif obj._arch == "sparc":
                 pass
-            elif obj.arch == "x86":
+            elif obj._arch == "x86":
                 pass
             else:
                 raise SettingsError("invalid value of arch")
