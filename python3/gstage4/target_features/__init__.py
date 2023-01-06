@@ -39,6 +39,6 @@ from ._common import ChronyDaemon
 from ._common import NetworkManager
 
 from ._common import GettyAutoLogin
-
 from ._common import SetPasswordForUserRoot
 from ._common import AddUser
+from ._common import DisablePcSpeaker

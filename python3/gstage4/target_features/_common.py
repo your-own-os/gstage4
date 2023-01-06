@@ -296,3 +296,15 @@ class AddUser:
 
     def get_custom_action(self):
         assert False
+
+
+class DisablePcSpeaker:
+
+    def get_custom_action(self):
+        return SimpleCustomAction(ScriptFromBuffer(self._scriptFileContent),
+                                  after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
+
+    _scriptFileContent = """
+#!/bin/sh
+echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf
+"""
