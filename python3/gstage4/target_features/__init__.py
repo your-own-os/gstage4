@@ -42,3 +42,11 @@ from ._common import GettyAutoLogin
 from ._common import SetPasswordForUserRoot
 from ._common import AddUser
 from ._common import DisablePcSpeaker
+
+from ._common import SupportAllVideoFormat
+from ._common import SupportAllAudioFormat
+from ._common import SupportAllImageFormat
+from ._common import SupportAllDocumentFormat
+from ._common import SupportAllCompressFormat
+
+

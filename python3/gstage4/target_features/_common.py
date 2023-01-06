@@ -308,3 +308,68 @@ class DisablePcSpeaker:
 #!/bin/sh
 echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf
 """
+
+
+class SupportAllVideoFormat:
+
+    def update_target_settings(self, target_settings):
+        assert "10-video-formats" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-video-formats"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# video formats
+*/*                 bluray dv dvb dvd mms mpeg openh264 theora vcd x264 x265 xvid vpx
+"""
+
+
+class SupportAllAudioFormat:
+
+    def update_target_settings(self, target_settings):
+        assert "10-audio-formats" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-audio-formats"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# audio formats
+*/*                 a52 aac airplay alac aptx cdda dts flac lame ldac mad mp3 musepack ogg opus sndfile speex vorbis wavpack
+"""
+
+
+class SupportAllImageFormat:
+
+    def update_target_settings(self, target_settings):
+        assert "10-image-formats" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-image-formats"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# image formats
+*/*                 a52 aac airplay alac aptx cdda dts flac lame ldac mad mp3 musepack ogg opus sndfile speex vorbis wavpack
+"""
+
+
+class SupportAllDocumentFormat:
+
+    def update_target_settings(self, target_settings):
+        assert "10-document-formats" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-document-formats"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# document formats
+*/*                 djvu xps
+"""
+
+
+class SupportAllCompressFormat:
+
+    def update_target_settings(self, target_settings):
+        assert "10-compress-formats" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-compress-formats"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# compress formats
+*/*                 bzip2 gzip lz4 lzma lzo szip xz
+"""
