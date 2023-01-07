@@ -330,12 +330,12 @@ class Builder:
             assert False
 
     @Action(after=["init_confdir", "install_packages", "update_world", "install_kernel", "enable_services"])
-    def action_cleanup(self):
+    def action_cleanup(self, degentoo=False):
         with _MyChrooter(self) as m:
             m.shell_call("", "eselect news read all")
             m.script_exec(ScriptDepClean(self._s.verbose_level), quiet=self._getQuiet())
 
-            if self._ts.degentoo:
+            if degentoo:
                 # FIXME
                 # m.shell_exec("", "%s/run-merge.sh -C sys-devel/gcc" % (scriptDirPath))
                 # m.shell_exec("", "%s/run-merge.sh -C sys-apps/portage" % (scriptDirPath))
@@ -345,7 +345,7 @@ class Builder:
         t.cleanup_repos_conf_dir()
         t.cleanup_make_conf()
 
-        if self._ts.degentoo:
+        if degentoo:
             # FIXME
             robust_layer.simple_fops.rm(t.confdir_hostpath)
             robust_layer.simple_fops.rm(t.statedir_hostpath)

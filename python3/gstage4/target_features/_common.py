@@ -311,6 +311,16 @@ class AddUser:
         assert False
 
 
+class RemovePackagesFromWorld:
+
+    def __init__(self, packages):
+        self._pkgList = packages
+
+    def get_custom_action(self):
+        # FIXME: must after "install_packages", "update_world"
+        assert False
+
+
 class DisablePcSpeaker:
 
     def get_custom_action(self):

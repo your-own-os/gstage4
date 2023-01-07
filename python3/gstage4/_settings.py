@@ -104,11 +104,11 @@ class Settings:
 class TargetSettings:
 
     def __init__(self):
-        self._profile = None
+        self.profile = None
 
-        self._managerPackage = "portage"         # "portage"
-        self._managerKernel = "none"             # "none", "genkernel", "fake". kernel source and kernel config is select by emerge/pre-command
-        self._managerService = "none"            # "none", "systemd"
+        self.package_manager = "portage"         # "portage"
+        self.kernel_manager = "none"             # "none", "genkernel", "binary-kernel", "fake"
+        self.service_manager = "none"            # "none", "openrc", "systemd"
 
         self.pkg_use = dict()                    # dict<package-wildcard, use-flag-list>
         self.pkg_mask = []                       # list<package-wildcard>
@@ -133,55 +133,6 @@ class TargetSettings:
 
         self.pkg_build_opts = dict()
 
-        self.degentoo = False
-
-        # internal state
-        self.__gentooRepoDir = None
-        self.__frozeProfile = False
-        self.__frozeManagerPackage = False
-        self.__frozeManagerKernel = False
-        self.__frozeManagerService = False
-
-    @property
-    def profile(self):
-        return self._profile
-
-    @profile.setter
-    def profile(self, value):
-        assert not self.__frozeProfile
-        assert os.path.isdir(os.path.normpath(os.path.join(self.__gentooRepoDir, "profiles", value)))
-        self._profile = value
-
-    @property
-    def package_manager(self):
-        return self._managerPackage
-
-    @package_manager.setter
-    def package_manager(self, value):
-        assert not self.__frozeManagerPackage
-        assert value in ["portage"]                         # ["portage", "pkgcore", "pkgwh"]
-        self._managerPackage = value
-
-    @property
-    def kernel_manager(self):
-        return self._managerKernel
-
-    @kernel_manager.setter
-    def kernel_manager(self, value):
-        assert not self.__frozeManagerKernel
-        assert value in ["none", "genkernel", "binary-kernel", "fake"]
-        self._managerKernel = value
-
-    @property
-    def service_manager(self):
-        return self._managerService
-
-    @service_manager.setter
-    def service_manager(self, value):
-        assert not self.__frozeManagerService
-        assert value in ["none", "openrc", "systemd"]
-        self._managerService = value
-
     @classmethod
     def check_object(cls, obj, raise_exception=None):
         assert raise_exception is not None
@@ -194,6 +145,20 @@ class TargetSettings:
         try:
             if not isinstance(obj, cls):
                 raise SettingsError("invalid object type")
+
+            if not isinstance(obj.profile, str):
+                raise SettingsError("invalid value for \"profile\"")
+
+            # if obj.package_manager not in ["portage", "pkgcore", "pkgwh"]:
+            if obj.package_manager not in ["portage"]:
+                raise SettingsError("invalid value of \"package_manager\"")
+
+            # if obj.kernel_manager not in ["none", "genkernel", "binary-kernel", "fake"]:
+            if obj.kernel_manager not in ["none", "genkernel", "binary-kernel", "fake"]:
+                raise SettingsError("invalid value of \"kernel_manager\"")
+
+            if obj.service_manager not in ["none", "openrc", "systemd"]:
+                raise SettingsError("invalid value of \"service_manager\"")
 
             if obj.pkg_use is None or not isinstance(obj.pkg_use, dict):
                 raise SettingsError("invalid value for \"pkg_use\"")
@@ -251,9 +216,6 @@ class TargetSettings:
                 if v.ccache is not None:
                     raise SettingsError("invalid value for key \"ccache\" in build_opts of package %s" % (k))  # ccache is only allowed in global build options
 
-            if obj.degentoo is None or not isinstance(obj.degentoo, bool):
-                raise SettingsError("invalid value for key \"degentoo\"")
-
             return True
         except SettingsError:
             if raise_exception:
@@ -262,38 +224,6 @@ class TargetSettings:
                 return False
 
 
-<<<<<<< HEAD
-class TargetSettingsOverlayList(list):
-
-    def __init__(self, iterable):
-        super().__init__()
-        for item in iterable:
-            self.append(item)
-
-    def __setitem__(self, index, item):
-        self._assertItem(item)
-        super().__setitem__(index, item)
-
-    def insert(self, index, item):
-        self._assertItem(item)
-        super().insert(index, item)
-
-    def append(self, item):
-        self._assertItem(item)
-        super().append(item)
-
-    def extend(self, other):
-        for item in other:
-            self.append(item)
-
-    def _assertItem(item):
-        assert Util.isInstanceList(item, ManualSyncRepository, EmergeSyncRepository, MountRepository)
-        assert item.get_name() != "gentoo"
-        assert all([x.get_name() for x in self]) != item.get_name()])
-
-
-=======
->>>>>>> parent of ecb4b6b (fix)
 class TargetSettingsBuildOpts:
 
     def __init__(self, name):
