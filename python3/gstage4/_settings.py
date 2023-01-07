@@ -293,23 +293,28 @@ class TargetSettings:
 
 class TargetSettingsOverlayList(list):
 
+    def __init__(self, iterable):
+        super().__init__()
+        for item in iterable:
+            self.append(item)
+
     def __setitem__(self, index, item):
-        self._assertCheckItem(item)
+        self._assertItem(item)
         super().__setitem__(index, item)
 
     def insert(self, index, item):
-        self._assertCheckItem(item)
+        self._assertItem(item)
         super().insert(index, item)
 
     def append(self, item):
-        self._assertCheckItem(item)
+        self._assertItem(item)
         super().append(item)
 
     def extend(self, other):
         for item in other:
             self.append(item)
 
-    def _assertCheckItem(item):
+    def _assertItem(item):
         assert Util.isInstanceList(item, ManualSyncRepository, EmergeSyncRepository, MountRepository)
         assert item.get_name() != "gentoo"
         assert all([x.get_name() for x in self]) != item.get_name()])
