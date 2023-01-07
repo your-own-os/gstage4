@@ -184,8 +184,10 @@ class TargetSettings:
     @overlays.setter
     def overlays(self, value):
         assert not self.__frozeOverlayList
-        assert isinstance(value, TargetSettingsOverlayList)
-        self._overlayList = value
+        if isinstance(value, TargetSettingsOverlayList):
+            self._overlayList = value
+        else:
+            self._overlayList = TargetSettingsOverlayList(value)
 
     @property
     def package_manager(self):
