@@ -23,8 +23,6 @@
 
 import os
 import re
-import typing
-from ._util import Util
 from ._errors import SettingsError
 
 
@@ -105,17 +103,12 @@ class Settings:
 
 class TargetSettings:
 
-    def __init__(self, arch):
-        assert arch in ["alpha", "amd64", "arm64", "hppa", "ia64", "m68k", "mips", "ppc", "riscv", "s390", "sh", "sparc", "x86"]
-        self._arch = arch
-
-        self._repo = None
+    def __init__(self):
         self._profile = None
-        self._overlayList = TargetSettingsOverlayList()
 
         self._managerPackage = "portage"         # "portage"
-        self._managerKernel = "none"             # "none", "genkernel", "fake"
-        self._managerService = "none"            # "none", "openrc", "systemd"
+        self._managerKernel = "none"             # "none", "genkernel", "fake". kernel source and kernel config is select by emerge/pre-command
+        self._managerService = "none"            # "none", "systemd"
 
         self.pkg_use = dict()                    # dict<package-wildcard, use-flag-list>
         self.pkg_mask = []                       # list<package-wildcard>
@@ -143,51 +136,21 @@ class TargetSettings:
         self.degentoo = False
 
         # internal state
-        self.__frozeRepo = False
+        self.__gentooRepoDir = None
         self.__frozeProfile = False
-        self.__frozeOverlayList = False
         self.__frozeManagerPackage = False
         self.__frozeManagerKernel = False
         self.__frozeManagerService = False
 
     @property
-    def arch(self):
-        return self._arch
-
-    @property
-    def repo(self):
-        return self._repo
-
-    @repo.setter
-    def repo(self, value):
-        assert not self.__frozeRepo
-        assert isinstance(value, Repository) and value.get_name() == "gentoo"
-        self._repo = value
-
-    @property
     def profile(self):
-        return self._repo
+        return self._profile
 
     @profile.setter
     def profile(self, value):
         assert not self.__frozeProfile
-        assert isinstance(value, str)
+        assert os.path.isdir(os.path.normpath(os.path.join(self.__gentooRepoDir, "profiles", value)))
         self._profile = value
-
-    @property
-    def overlays(self):
-        if not self.__frozeOverlayList
-            return self._overlayList                        # returns a typed list
-        else:
-            return tuple(self._overlayList)                 # returns a read-only list
-
-    @overlays.setter
-    def overlays(self, value):
-        assert not self.__frozeOverlayList
-        if isinstance(value, TargetSettingsOverlayList):
-            self._overlayList = value
-        else:
-            self._overlayList = TargetSettingsOverlayList(value)
 
     @property
     def package_manager(self):
@@ -299,6 +262,7 @@ class TargetSettings:
                 return False
 
 
+<<<<<<< HEAD
 class TargetSettingsOverlayList(list):
 
     def __init__(self, iterable):
@@ -328,6 +292,8 @@ class TargetSettingsOverlayList(list):
         assert all([x.get_name() for x in self]) != item.get_name()])
 
 
+=======
+>>>>>>> parent of ecb4b6b (fix)
 class TargetSettingsBuildOpts:
 
     def __init__(self, name):

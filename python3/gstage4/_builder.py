@@ -66,7 +66,7 @@ class Builder:
     It is the driver class for pretty much everything that gstage4 does.
     """
 
-    def __init__(self, program_name, host_info, target_arch, work_dir, log_dir=None, verbose_level=1):
+    def __init__(self, program_name, host_info, work_dir, log_dir=None, verbose_level=1):
         assert HostInfo.check_object(host_info, raise_exception=False)
 
         self._s = Settings()
@@ -80,7 +80,7 @@ class Builder:
         if self._s.log_dir is not None:
             os.makedirs(self._s.log_dir, mode=0o750, exist_ok=True)
 
-        self._ts = TargetSettings(target_arch)
+        self._ts = TargetSettings()
 
         self._workDirObj = work_dir
 
@@ -98,7 +98,11 @@ class Builder:
         for i in range(0, len(self._actionList)):
             self._checkAction(self._actionList[i], i)
 
-        self._actionStorage = dict()
+        self._actionStorage = {
+            "arch": None,                   # target arch
+            "repo": None,                   # gentoo repository information
+            "overlays": {},                 # overlay information
+        }
 
         self._lastAction = None
         self._finished = False
@@ -110,7 +114,6 @@ class Builder:
     @Action()
     def action_unpack(self, seed_stage):
         assert isinstance(seed_stage, SeedStage)
-        assert seed_stage.get_arch() == self._ts.arch
 
         seed_stage.unpack(self._workDirObj.path)
 
@@ -123,10 +126,13 @@ class Builder:
         with open(t.world_file_hostpath, "w") as f:
             f.write("")
 
+        self._actionStorage["arch"] = seed_stage.get_arch()
+
     @Action(after=["unpack"])
-    def action_create_gentoo_repository(self):
+    def action_create_gentoo_repository(self, repo):
+        assert repo.get_name() == "gentoo"
+
         # do work
-        repo = self._ts.repo
         if isinstance(repo, ManualSyncRepository):
             _MyRepoUtil.createFromManuSyncRepo(repo, True, self._workDirObj.path)
             repo.sync(os.path.join(self._workDirObj.path, repo.get_datadir_path()[1:]))
@@ -140,8 +146,7 @@ class Builder:
         else:
             assert False
 
-        # update internal state of self._ts
-        self._ts.__frozeRepo = True
+        self._actionStorage["repo"] = repo
 
     @Action(after=["create_gentoo_repository"])
     def action_init_confdir(self):
@@ -168,10 +173,14 @@ class Builder:
         self._ts.__frozeManagerService = True
 
     @Action(after=["init_confdir"])
-    def action_create_overlays(self):
+    def action_create_overlays(self, overlay_list):
+        assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository, MountRepository) for x in overlay_list])
+        assert not any([x.get_name() == "gentoo" for x in overlay_list])
+        assert len([x.get_name() for x in overlay_list]) == len(set([x.get_name() for x in overlay_list]))        # no duplication
+
         overlayRecord = dict()
         pkgSet = set()
-        for overlay in self._ts.overlays:
+        for overlay in overlay_list:
             if isinstance(overlay, ManualSyncRepository):
                 _MyRepoUtil.createFromManuSyncRepo(overlay, False, self._workDirObj.path)
             elif isinstance(overlay, EmergeSyncRepository):
@@ -189,30 +198,24 @@ class Builder:
             else:
                 assert False
 
-        if any([isinstance(repo, EmergeSyncRepository) for repo in self._ts.overlays]):
+        if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
             with _MyChrooter(self) as m:
                 installList = [x for x in pkgSet if not Util.portageIsPkgInstalled(self._workDirObj.path, x)]
                 m.script_exec(ScriptInstallPackages(installList, self._s.verbose_level), quiet=self._getQuiet())
 
-                if any([isinstance(repo, EmergeSyncRepository) for repo in self._ts.overlays]):
+                if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
                     m.script_exec(ScriptSync(), quiet=self._getQuiet())
 
-        for overlay in self._ts.overlays:
+        for overlay in overlay_list:
             if isinstance(overlay, ManualSyncRepository):
                 overlay.sync(os.path.join(self._workDirObj.path, overlay.get_datadir_path()[1:]))
 
         self._actionStorage["overlays"] = overlayRecord
 
     @Action(after=["init_confdir", "create_overlays"])
-    def action_install_packages(self, install_list, world_set):
-        assert len(world_set & set(install_list)) == 0
-
-        def __pkgNeeded(pkg):
-            if pkg not in install_list and pkg not in world_set:
-                raise SettingsError("package %s is needed" % (pkg))
-
+    def action_install_packages(self, package_list):
         def __worldNeeded(pkg):
-            if pkg not in world_set:
+            if pkg not in package_list:
                 raise SettingsError("package %s is needed" % (pkg))
 
         # check
@@ -221,33 +224,33 @@ class Builder:
 
         # check
         if True:
-            if self._ts._managerPackage == "portage":
+            if self._ts.package_manager == "portage":
                 __worldNeeded("sys-apps/portage")
             else:
                 assert False
         if True:
-            if self._ts._managerKernel == "none":
+            if self._ts.kernel_manager == "none":
                 pass
-            elif self._ts._managerKernel == "genkernel":
-                __pkgNeeded("sys-kernel/genkernel")
-            elif self._ts._managerKernel == "binary-kernel":
-                __pkgNeeded("sys-kernel/gentoo-kernel-bin")
-            elif self._ts._managerKernel == "fake":
+            elif self._ts.kernel_manager == "genkernel":
+                __worldNeeded("sys-kernel/genkernel")
+            elif self._ts.kernel_manager == "binary-kernel":
+                __worldNeeded("sys-kernel/gentoo-kernel-bin")
+            elif self._ts.kernel_manager == "fake":
                 pass
             else:
                 assert False
         if True:
-            if self._ts._managerService == "none":
+            if self._ts.service_manager == "none":
                 pass
-            elif self._ts._managerService == "openrc":
+            elif self._ts.service_manager == "openrc":
                 __worldNeeded("sys-apps/openrc")
-            elif self._ts._managerService == "systemd":
+            elif self._ts.service_manager == "systemd":
                 __worldNeeded("sys-apps/systemd")
             else:
                 assert False
         if True:
             if self._ts.build_opts.ccache:
-                __pkgNeeded("dev-util/ccache")
+                __worldNeeded("dev-util/ccache")
         if True:
             if "git" in self._actionStorage.get("overlays", {}).values():
                 __worldNeeded("dev-vcs/git")
@@ -256,7 +259,7 @@ class Builder:
         ORDER = [
             "dev-util/ccache",
         ]
-        installList = sorted(install_list + list(world_set))
+        installList = sorted(package_list)
         for pkg in reversed(ORDER):
             if pkg in installList:
                 installList.remove(pkg)
@@ -265,10 +268,10 @@ class Builder:
         # write world file
         t = TargetFilesAndDirs(self._workDirObj.path)
         with open(t.world_file_hostpath, "w") as f:
-            for pkg in world_set:
+            for pkg in package_list:
                 f.write("%s\n" % (pkg))
 
-        # install packages, update @world
+        # install packages
         installList = [x for x in installList if not Util.portageIsPkgInstalled(self._workDirObj.path, x)]
         if len(installList) > 0:
             with _MyChrooter(self) as m:
@@ -281,7 +284,7 @@ class Builder:
 
     @Action(after=["init_confdir", "install_packages", "update_world"])
     def action_install_kernel(self):
-        if self._ts._managerKernel == "genkernel":
+        if self._ts.kernel_manager == "genkernel":
             t = TargetConfDirParser(self._workDirObj.path)
             tj = t.get_make_conf_make_opts_jobs()
             tl = t.get_make_conf_load_average()
@@ -296,10 +299,10 @@ class Builder:
 
             return
 
-        if self._ts._managerKernel == "binary-kernel":
+        if self._ts.kernel_manager == "binary-kernel":
             return
 
-        if self._ts._managerKernel == "fake":
+        if self._ts.kernel_manager == "fake":
             bootDir = os.path.join(self._workDirObj.path, "boot")
             os.makedirs(bootDir, exist_ok=True)
             with open(os.path.join(bootDir, "vmlinuz"), "w") as f:
@@ -315,11 +318,11 @@ class Builder:
         if len(service_list) == 0:
             return
 
-        if self._ts._managerService == "openrc":
+        if self._ts.service_manager == "openrc":
             with _MyChrooter(self) as m:
                 for s in service_list:
                     m.shell_exec("", "rc-update add %s default > /dev/null" % (s))
-        elif self._ts._managerService == "systemd":
+        elif self._ts.service_manager == "systemd":
             with _MyChrooter(self) as m:
                 for s in service_list:
                     m.shell_exec("", "systemctl enable %s -q" % (s))
