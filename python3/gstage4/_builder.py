@@ -85,7 +85,6 @@ class Builder:
             self.action_create_gentoo_repository,
             self.action_init_confdir,
             self.action_create_overlays,
-            self.action_install_packages,
             self.action_update_world,
             self.action_install_kernel,
             self.action_enable_services,

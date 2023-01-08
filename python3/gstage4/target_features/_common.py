@@ -153,7 +153,7 @@ class UsrMerge:
     def get_custom_action(self):
         return SimpleCustomAction(ScriptFromBuffer(self._scriptFileContent),
                                   after=["init_confdir", "create_overlays"],
-                                  before=["install_packages"])
+                                  before=["update_world"])
 
         # UNINSTALL_IGNORE="/bin /lib /lib64 /sbin /usr/sbin"
 
