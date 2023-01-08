@@ -186,6 +186,9 @@ dev-python/pytzdata
 acct-user/i2p
 acct-group/i2p
 net-vpn/i2p
+
+# why application relies on old electon?
+<dev-util/electon-6.0.0
 """
 
 
