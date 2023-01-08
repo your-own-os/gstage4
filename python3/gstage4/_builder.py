@@ -38,6 +38,8 @@ from ._host import HostInfo
 from ._target import TargetSettings
 from ._runner import Runner
 from .scripts import ScriptFromBuffer
+from .scripts import ScriptInstallPackages
+from .scripts import ScriptUpdateWorld
 
 
 def Action(after=[], before=[]):
@@ -102,6 +104,10 @@ class Builder:
 
         self._lastAction = None
         self._finished = False
+
+    @property
+    def verbose_level(self):
+        return self._s.verbose_level
 
     @Action()
     def action_unpack(self, seed_stage):
@@ -304,19 +310,19 @@ class Builder:
         assert False
 
     @Action(after=["init_confdir", "update_world", "install_kernel"])
-    def action_enable_services(self, service_list):
-        if len(service_list) == 0:
+    def action_enable_services(self, enable_service_list):
+        if len(enable_service_list) == 0:
             return
 
         ts = self._actionStorage["settings"]
 
         if ts.service_manager == "openrc":
             with _MyChrooter(self) as m:
-                for s in service_list:
+                for s in enable_service_list:
                     m.shell_exec("", "rc-update add %s default > /dev/null" % (s))
         elif ts.service_manager == "systemd":
             with _MyChrooter(self) as m:
-                for s in service_list:
+                for s in enable_service_list:
                     m.shell_exec("", "systemctl enable %s -q" % (s))
         else:
             assert False
@@ -1018,106 +1024,6 @@ export EBEEP_IGNORE=0
 export EPAUSE_IGNORE=0
 
 emerge --sync || exit 1
-"""
-
-
-class ScriptInstallPackages(ScriptFromBuffer):
-
-    def __init__(self, pkgList, verbose_level):
-        buf = self._scriptContentFirstHalf
-        if verbose_level == 0:
-            buf += self._scriptContentSecondHalfVerboseLv0
-        elif verbose_level == 1:
-            buf += self._scriptContentSecondHalfVerboseLv1
-        elif verbose_level == 2:
-            buf += self._scriptContentSecondHalfVerboseLv2
-        else:
-            assert False
-        buf = buf.replace("@@PKG_NAME@@", " ".join(pkgList))
-
-        super().__init__(buf)
-
-    _scriptContentFirstHalf = """
-#!/bin/bash
-
-export EMERGE_WARNING_DELAY=0
-export CLEAN_DELAY=0
-export EBEEP_IGNORE=0
-export EPAUSE_IGNORE=0
-export CONFIG_PROTECT="-* .x"
-"""
-
-    _scriptContentSecondHalfVerboseLv0 = """
-emerge --color=y -1 @@PKG_NAME@@ > /var/log/portage/run-merge.log 2>&1 || exit 1
-"""
-
-    _scriptContentSecondHalfVerboseLv1 = """
-# using grep to only show:
-#   >>> Emergeing ...
-#   >>> Installing ...
-#   >>> Uninstalling ...
-emerge --color=y -1 @@PKG_NAME@@ 2>&1 | tee /var/log/portage/run-merge.log | grep -E --color=never "^>>> .*\\(.*[0-9]+.*of.*[0-9]+.*\\)"
-test ${PIPESTATUS[0]} -eq 0 || exit 1
-"""
-
-    _scriptContentSecondHalfVerboseLv2 = """
-emerge --color=y -1 @@PKG_NAME@@ 2>&1 | tee /var/log/portage/run-update.log
-test ${PIPESTATUS[0]} -eq 0 || exit 1
-"""
-
-
-class ScriptUpdateWorld(ScriptFromBuffer):
-
-    def __init__(self, verbose_level):
-        buf = self._scriptContentFirstHalf
-        if verbose_level == 0:
-            buf += self._scriptContentSecondHalfVerboseLv0
-        elif verbose_level == 1:
-            buf += self._scriptContentSecondHalfVerboseLv1
-        elif verbose_level == 2:
-            buf += self._scriptContentSecondHalfVerboseLv2
-        else:
-            assert False
-        buf += self._scriptContentThirdHalf
-
-        super().__init__(buf)
-
-    _scriptContentFirstHalf = """
-#!/bin/bash
-
-die() {
-    echo "$1"
-    exit 1
-}
-
-export EMERGE_WARNING_DELAY=0
-export CLEAN_DELAY=0
-export EBEEP_IGNORE=0
-export EPAUSE_IGNORE=0
-export CONFIG_PROTECT="-* .x"
-"""
-
-    _scriptContentSecondHalfVerboseLv0 = """
-emerge --color=y -uDN --with-bdeps=y @world > /var/log/portage/run-update.log 2>&1 || exit 1
-"""
-
-    _scriptContentSecondHalfVerboseLv1 = """
-# using grep to only show:
-#   >>> Emergeing ...
-#   >>> Installing ...
-#   >>> Uninstalling ...
-#   >>> No outdated packages were found on your system.
-emerge --color=y -uDN --with-bdeps=y @world 2>&1 | tee /var/log/portage/run-update.log | grep -E --color=never "^>>> (.*\\(.*[0-9]+.*of.*[0-9]+.*\\)|No outdated packages .*)"
-test ${PIPESTATUS[0]} -eq 0 || exit 1
-"""
-
-    _scriptContentSecondHalfVerboseLv2 = """
-emerge --color=y -uDN --with-bdeps=y @world 2>&1 | tee /var/log/portage/run-update.log
-test ${PIPESTATUS[0]} -eq 0 || exit 1
-"""
-
-    _scriptContentThirdHalf = """
-perl-cleaner --pretend --all >/dev/null 2>&1 || die "perl cleaning is needed, your seed stage is too old"
 """
 
 

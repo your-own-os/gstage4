@@ -25,6 +25,8 @@ import crypt
 from .. import CustomAction
 from ..scripts import OneLinerScript
 from ..scripts import ScriptFromBuffer
+from ..scripts import ScriptInstallPackages
+from ..scripts import ScriptUpdateWorld
 
 
 class SimpleCustomAction(CustomAction):                         # FIXME: should be renamed to UserDefinedAction
@@ -83,6 +85,24 @@ class AddUser(CustomAction):
     @property
     def before(self):
         return []
+
+
+class InstallPackages:
+
+    def __init__(self, packages):
+        self._script = ScriptInstallPackages(packages, 0)
+
+    @property
+    def custom_scripts(self):
+        return [self._script]
+
+    @property
+    def after(self):
+        return ["init_confdir", "create_overlays"]
+
+    @property
+    def before(self):
+        return ["update_world", "install_kernel", "enable_services"]
 
 
 class RemovePackagesFromWorld:

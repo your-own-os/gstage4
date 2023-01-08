@@ -21,8 +21,11 @@
 # THE SOFTWARE.
 
 
-from ._common import ScriptFromHostFile
-from ._common import ScriptFromHostDir
-from ._common import ScriptFromBuffer
-from ._common import OneLinerScript
-from ._common import PlacingFilesScript
+from ._template import ScriptFromHostFile
+from ._template import ScriptFromHostDir
+from ._template import ScriptFromBuffer
+from ._template import OneLinerScript
+from ._template import PlacingFilesScript
+
+from ._common import ScriptInstallPackages
+from ._common import ScriptUpdateWorld
