@@ -178,7 +178,7 @@ sys-apps/sysvinit
 # deprecated by dev-libs/rocm-opencl-runtime
 dev-libs/amdgpu-pro-opencl
 
-# zoninfo in python standard library deprecates these since python 3.9
+# zoninfo in python standard library deprecates these since python3.9
 #dev-python/pytz                                                                   # FIXME
 dev-python/pytzdata
 
