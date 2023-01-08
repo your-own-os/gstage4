@@ -93,24 +93,34 @@ class DoNotUseDeprecatedPackagesAndFunctions:
 
     _useFileContent = """
 # disable deprecated functions
-*/*    -deprecated
-*/*    -fallback
+*/*                             -deprecated
+*/*                             -fallback
 
 # media-libs/libquvi depends on dev-lang/lua[deprecated]
-*/*    -quvi
+*/*                             -quvi
 
 # media-libs/libdv depends on libsdl-version-1, which is deprecated
-*/*    -dv
+*/*                             -dv
 
 # framebuffer device is deprecated by DRM
-*/*    -fbdev
+*/*                             -fbdev
 
 # "wpa_supplicant" is deprecated by "iwd", "nss" is deprecated by "gnutls", "wext" is deprecated
-net-misc/networkmanager    iwd gnutls -nss -wext
+net-misc/networkmanager         iwd gnutls -nss -wext
 
 # don't use python2.x
-*/*                      -python_targets_python2_7
-*/*                      -python_single_target_python2_7
+*/*                             -python_targets_python2_7
+*/*                             -python_single_target_python2_7
+
+# select between gtk2 and gtk3
+*/*                             -gtk2
+net-misc/spice-gtk              gtk3
+
+# select between qt4 and qt5
+*/*                             -qt4
+media-video/smplayer            qt5
+net-analyzer/wireshark          qt5
+net-p2p/bitcoin-qt              qt5
 """
 
     _maskFileContent = """
