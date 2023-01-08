@@ -253,6 +253,11 @@ class PreferGnuAndGpl:
 """
 
     _maskFileContent = """
+# use free java implementation
+dev-java/oracle-jdk-bin
+dev-java/oracle-jre-bin
+dev-java/ibm-jdk-bin
+dev-java/ibm-jre-bin
 """
 
 
