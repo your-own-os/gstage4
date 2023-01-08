@@ -410,6 +410,7 @@ class SupportAllCompressFormat:
 */*                 bzip2 gzip lz4 lzma lzo szip xz
 """
 
+
 class SupportAllGraphicsApi:
 
     def update_target_settings(self, target_settings):
