@@ -255,7 +255,7 @@ class SshServer:
     def update_world_set(self, world_set):
         world_set.add("net-misc/openssh")
 
-    def update_service_list(self, service_list):
+    def update_enable_service_list(self, service_list):
         if "sshd" not in service_list:
             service_list.append("sshd")
 
@@ -269,7 +269,7 @@ class ChronyDaemon:
     def update_world_set(self, world_set):
         world_set.add("net-misc/chrony")
 
-    def update_service_list(self, service_list):
+    def update_enable_service_list(self, service_list):
         if "chronyd" not in service_list:
             service_list.append("chronyd")
 
@@ -279,7 +279,7 @@ class NetworkManager:
     def update_world_set(self, world_set):
         world_set.add("net-misc/networkmanager")
 
-    def update_service_list(self, service_list):
+    def update_enable_service_list(self, service_list):
         if "NetworkManager" not in service_list:
             service_list.append("NetworkManager")
 
