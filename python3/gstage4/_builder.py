@@ -152,7 +152,7 @@ class Builder:
         t = TargetConfDirWriter(self._s, settings, self._workDirObj.path)
 
         # set profile
-        profile = settings.profile is not None if settings.profile else "1"     # generally the default profile is the first in list
+        profile = settings.profile if settings.profile is not None else "1"     # generally the default profile is the first in list
         with _MyChrooter(self) as m:
             m.shell_call("", "eselect profile set %s" % (profile))
 
