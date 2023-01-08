@@ -101,6 +101,7 @@ class Builder:
         self._actionStorage = {
             "arch": None,                   # target arch
             "repo": None,                   # gentoo repository information
+            "settings": None,               # target settings
             "overlays": {},                 # overlay information
         }
 
@@ -149,15 +150,15 @@ class Builder:
         self._actionStorage["repo"] = repo
 
     @Action(after=["create_gentoo_repository"])
-    def action_init_confdir(self):
+    def action_init_confdir(self, settings):
+        assert TargetSettings.check_object(settings, raise_exception=False)
+
         # set profile
-        if self._ts.profile is not None:
-            raise SettingsError('invalid value of "profile"')
         with _MyChrooter(self) as m:
-            m.shell_call("", "eselect profile set %s" % (self._ts.profile))
+            m.shell_call("", "eselect profile set %s" % (settings.profile))
 
         # write /etc/portage
-        t = TargetConfDirWriter(self._s, self._ts, self._workDirObj.path)
+        t = TargetConfDirWriter(self._s, settings, self._workDirObj.path)
         t.write_make_conf()
         t.write_package_use()
         t.write_package_mask()
@@ -166,11 +167,7 @@ class Builder:
         t.write_package_license()
         t.write_use_mask()
 
-        # update internal state of self._ts
-        self._ts.__frozeProfile = True
-        self._ts.__frozeManagerPackage = True
-        self._ts.__frozeManagerKernel = True
-        self._ts.__frozeManagerService = True
+        self._actionStorage["settings"] = settings
 
     @Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
@@ -214,42 +211,44 @@ class Builder:
 
     @Action(after=["init_confdir", "create_overlays"])
     def action_install_packages(self, package_list):
+        ts = self._actionStorage["settings"]
+
         def __worldNeeded(pkg):
             if pkg not in package_list:
                 raise SettingsError("package %s is needed" % (pkg))
 
         # check
-        if self._ts.build_opts.ccache and self._s.host_ccache_dir is None:
+        if ts.build_opts.ccache and self._s.host_ccache_dir is None:
             raise SettingsError("ccache is enabled but host ccache directory is not specified")
 
         # check
         if True:
-            if self._ts.package_manager == "portage":
+            if ts.package_manager == "portage":
                 __worldNeeded("sys-apps/portage")
             else:
                 assert False
         if True:
-            if self._ts.kernel_manager == "none":
+            if ts.kernel_manager == "none":
                 pass
-            elif self._ts.kernel_manager == "genkernel":
+            elif ts.kernel_manager == "genkernel":
                 __worldNeeded("sys-kernel/genkernel")
-            elif self._ts.kernel_manager == "binary-kernel":
+            elif ts.kernel_manager == "binary-kernel":
                 __worldNeeded("sys-kernel/gentoo-kernel-bin")
-            elif self._ts.kernel_manager == "fake":
+            elif ts.kernel_manager == "fake":
                 pass
             else:
                 assert False
         if True:
-            if self._ts.service_manager == "none":
+            if ts.service_manager == "none":
                 pass
-            elif self._ts.service_manager == "openrc":
+            elif ts.service_manager == "openrc":
                 __worldNeeded("sys-apps/openrc")
-            elif self._ts.service_manager == "systemd":
+            elif ts.service_manager == "systemd":
                 __worldNeeded("sys-apps/systemd")
             else:
                 assert False
         if True:
-            if self._ts.build_opts.ccache:
+            if ts.build_opts.ccache:
                 __worldNeeded("dev-util/ccache")
         if True:
             if "git" in self._actionStorage.get("overlays", {}).values():
@@ -284,7 +283,9 @@ class Builder:
 
     @Action(after=["init_confdir", "install_packages", "update_world"])
     def action_install_kernel(self):
-        if self._ts.kernel_manager == "genkernel":
+        ts = self._actionStorage["settings"]
+
+        if ts.kernel_manager == "genkernel":
             t = TargetConfDirParser(self._workDirObj.path)
             tj = t.get_make_conf_make_opts_jobs()
             tl = t.get_make_conf_load_average()
@@ -295,14 +296,14 @@ class Builder:
                 dotConfigFile = "/usr/src/dot-config"
                 if not os.path.exists(os.path.join(self._workDirObj.path, dotConfigFile[1:])):
                     dotConfigFile = None
-                m.script_exec(ScriptGenkernel(self._s.verbose_level, tj, tl, self._ts.build_opts.ccache, dotConfigFile), quiet=self._getQuiet())
+                m.script_exec(ScriptGenkernel(self._s.verbose_level, tj, tl, ts.build_opts.ccache, dotConfigFile), quiet=self._getQuiet())
 
             return
 
-        if self._ts.kernel_manager == "binary-kernel":
+        if ts.kernel_manager == "binary-kernel":
             return
 
-        if self._ts.kernel_manager == "fake":
+        if ts.kernel_manager == "fake":
             bootDir = os.path.join(self._workDirObj.path, "boot")
             os.makedirs(bootDir, exist_ok=True)
             with open(os.path.join(bootDir, "vmlinuz"), "w") as f:
@@ -318,11 +319,13 @@ class Builder:
         if len(service_list) == 0:
             return
 
-        if self._ts.service_manager == "openrc":
+        ts = self._actionStorage["settings"]
+
+        if ts.service_manager == "openrc":
             with _MyChrooter(self) as m:
                 for s in service_list:
                     m.shell_exec("", "rc-update add %s default > /dev/null" % (s))
-        elif self._ts.service_manager == "systemd":
+        elif ts.service_manager == "systemd":
             with _MyChrooter(self) as m:
                 for s in service_list:
                     m.shell_exec("", "systemctl enable %s -q" % (s))
