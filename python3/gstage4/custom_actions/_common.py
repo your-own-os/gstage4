@@ -24,7 +24,7 @@
 from .. import CustomAction
 
 
-class SimpleCustomAction(CustomAction):
+class SimpleCustomAction(CustomAction):                         # FIXME: should be renamed to UserDefinedAction
 
     def __init__(self, *custom_scripts, after=[], before=[]):
         self._custom_scripts = custom_scripts
