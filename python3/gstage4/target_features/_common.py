@@ -84,17 +84,24 @@ class UseSystemd:
 
 class NotUseDeprecatedPackagesAndFunctions:
 
-    def __init__(self, with_systemd=False):
-        self._systemd = with_systemd
+    def __init__(self, service_manager="none"):
+        assert service_manager in ["none", "openrc", "systemd"]
+        self._serviceManager = service_manager
 
     def update_target_settings(self, target_settings):
         assert "10-no-deprecated" not in target_settings.pkg_use_files
         assert "10-no-deprecated" not in target_settings.pkg_mask_files
 
         buf = self._useFileContent.strip("\n") + "\n"
-        if self._systemd:
+        if self._serviceManager == "none":
+            pass
+        elif self._serviceManager == "openrc":
+            pass
+        elif self._serviceManager == "systemd":
             buf += "\n"
             buf += self._systemdUseContent.strip("\n") + "\n"
+        else:
+            assert False
         target_settings.pkg_use_files["10-no-deprecated"] = buf
 
         target_settings.pkg_mask_files["10-no-deprecated"] = self._maskFileContent.strip("\n") + "\n"
