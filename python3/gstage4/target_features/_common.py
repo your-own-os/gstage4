@@ -280,7 +280,7 @@ class GettyAutoLogin:
         s.append_dir("/etc/systemd/system/getty@.service.d")
         s.append_file("/etc/systemd/system/getty@.service.d/getty-autologin.conf",
                       self._fileContent.strip("\n") + "\n")  # remove all redundant carrage returns)
-        return SimpleCustomAction(s, after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
+        return SimpleCustomAction(s, after=["init_confdir", "create_overlays", "update_world", "install_kernel", "enable_services"])
 
     _fileContent = """
 [Service]
@@ -297,7 +297,7 @@ class SetPasswordForUserRoot:
     def get_custom_action(self):
         # modify /etc/shadow directly so that password complexity check won't be in our way
         return SimpleCustomAction(OneLinerScript("sed -i 's#^root:[^:]*:#root:%s:#' /etc/shadow" % (self._hash)),
-                                  after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
+                                  after=["init_confdir", "create_overlays", "update_world", "install_kernel", "enable_services"])
 
 
 class AddUser:
@@ -317,7 +317,7 @@ class RemovePackagesFromWorld:
         self._pkgList = packages
 
     def get_custom_action(self):
-        # FIXME: must after "install_packages", "update_world"
+        # FIXME: must after "update_world"
         assert False
 
 
@@ -325,7 +325,7 @@ class DisablePcSpeaker:
 
     def get_custom_action(self):
         return SimpleCustomAction(ScriptFromBuffer(self._scriptFileContent),
-                                  after=["init_confdir", "create_overlays", "install_packages", "update_world", "install_kernel", "enable_services"])
+                                  after=["init_confdir", "create_overlays", "update_world", "install_kernel", "enable_services"])
 
     _scriptFileContent = """
 #!/bin/sh

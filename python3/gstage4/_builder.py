@@ -206,7 +206,7 @@ class Builder:
 
         self._actionStorage["overlays"] = overlayRecord
 
-    @Action(after=["init_confdir", "create_overlays", "install_packages"])
+    @Action(after=["init_confdir", "create_overlays"])
     def action_update_world(self, world_set):
         ts = self._actionStorage["settings"]
 
@@ -271,7 +271,7 @@ class Builder:
 
             m.script_exec(ScriptUpdateWorld(self._s.verbose_level), quiet=self._getQuiet())
 
-    @Action(after=["init_confdir", "install_packages", "update_world"])
+    @Action(after=["init_confdir", "update_world"])
     def action_install_kernel(self):
         ts = self._actionStorage["settings"]
 
@@ -304,7 +304,7 @@ class Builder:
 
         assert False
 
-    @Action(after=["init_confdir", "install_packages", "update_world", "install_kernel"])
+    @Action(after=["init_confdir", "update_world", "install_kernel"])
     def action_enable_services(self, service_list):
         if len(service_list) == 0:
             return
@@ -322,7 +322,7 @@ class Builder:
         else:
             assert False
 
-    @Action(after=["init_confdir", "install_packages", "update_world", "install_kernel", "enable_services"])
+    @Action(after=["init_confdir", "update_world", "install_kernel", "enable_services"])
     def action_cleanup(self, degentoo=False):
         with _MyChrooter(self) as m:
             m.shell_call("", "eselect news read all")
