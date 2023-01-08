@@ -31,6 +31,7 @@ __author__ = 'Fpemud <fpemud@sina.com>'
 
 
 from ._host import HostInfo
+from ._target import TargetSettings
 
 from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
