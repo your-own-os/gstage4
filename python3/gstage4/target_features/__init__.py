@@ -33,6 +33,7 @@ from ._common import UsrMerge
 from ._common import PreferGnuAndGpl
 from ._common import PreferBinaryPackage
 from ._common import PreferSourcePackage
+from ._common import PreferSystemComponent
 from ._common import PreferWayland
 from ._common import PreferPipewire
 

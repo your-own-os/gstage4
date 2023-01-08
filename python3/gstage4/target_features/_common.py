@@ -257,6 +257,21 @@ sys-firmware/edk2-ovmf-bin
 """
 
 
+class PreferSystemComponent:
+
+    def update_target_settings(self, target_settings):
+        assert "10-prefer-system-component" not in target_settings.pkg_mask_files
+
+        target_settings.pkg_mask_files["10-prefer-system-component"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+# don't use package built-in component
+app-editors/vscode                             system-electron system-ripgrep
+net-libs/nodejs                                system-icu
+net-im/zoom                                    -bundled-qt
+"""
+
+
 class GettyAutoLogin:
 
     def get_custom_action(self):
