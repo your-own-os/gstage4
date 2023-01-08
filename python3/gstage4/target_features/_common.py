@@ -82,7 +82,7 @@ class UseSystemd:
         world_set.add("sys-apps/systemd")
 
 
-class DoNotUseDeprecatedPackagesAndFunctions:
+class NotUseDeprecatedPackagesAndFunctions:
 
     def update_target_settings(self, target_settings):
         assert "10-no-deprecated" not in target_settings.pkg_use_files

@@ -28,7 +28,7 @@ from ._common import UseFakeKernel
 from ._common import UseOpenrc
 from ._common import UseSystemd
 
-from ._common import DoNotUseDeprecatedPackagesAndFunctions
+from ._common import NotUseDeprecatedPackagesAndFunctions
 from ._common import UsrMerge
 from ._common import PreferGnuAndGpl
 from ._common import PreferBinaryPackage
