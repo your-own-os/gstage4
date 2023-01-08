@@ -153,6 +153,10 @@ sys-apps/sysvinit
 
 # deprecated by dev-libs/rocm-opencl-runtime
 dev-libs/amdgpu-pro-opencl
+
+# zoninfo in python standard library deprecates these since python 3.9
+#dev-python/pytz                                                                   # FIXME
+dev-python/pytzdata
 """
 
 
@@ -414,4 +418,16 @@ media-sound/pulseaudio                                      -*
 #              |
 #              +-------> Bluetooth
 media-sound/bluez-alsa
+
+# use pipewire instead of pulseaudio (media-sound/pulseaudio is still needed, see package.use)
+media-plugins/gst-plugins-pulse
+media-sound/apulse
+
+# use pipewire, only limited package can access camera directly
+media-plugins/gst-plugins-v4l2
+
+# use pipewire, instead of jack
+virtual/jack
+media-sound/jack2
+media-sound/jack-audio-connection-kit
 """
