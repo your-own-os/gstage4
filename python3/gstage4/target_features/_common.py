@@ -383,6 +383,7 @@ class PreferWayland:
 
     _useFileContent = """
 # we use wayland
+*/*                                           wayland
 */*                                           -X
 */*                                           INPUT_DEVICES: -* libinput
 """
