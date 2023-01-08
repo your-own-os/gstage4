@@ -136,11 +136,6 @@ net-misc/spice-gtk              gtk3
 media-video/smplayer            qt5
 net-analyzer/wireshark          qt5
 net-p2p/bitcoin-qt              qt5
-
-# replaced by net-vpn/i2pd
-acct-user/i2p
-acct-group/i2p
-net-vpn/i2p
 """
 
     _systemdUseContent = """
@@ -186,6 +181,11 @@ dev-libs/amdgpu-pro-opencl
 # zoninfo in python standard library deprecates these since python 3.9
 #dev-python/pytz                                                                   # FIXME
 dev-python/pytzdata
+
+# replaced by net-vpn/i2pd
+acct-user/i2p
+acct-group/i2p
+net-vpn/i2p
 """
 
 
