@@ -512,4 +512,9 @@ media-plugins/gst-plugins-v4l2
 virtual/jack
 media-sound/jack2
 media-sound/jack-audio-connection-kit
+
+# don't redirect alsa to sound servers
+#media-plugins/alsa-plugins                                                                                                # FIXME
+#media-sound/alsa-tools                                                                                                    # FIXME
+#media-sound/alsa-utils                                                                                                    # FIXME
 """
