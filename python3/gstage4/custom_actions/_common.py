@@ -120,23 +120,3 @@ class RemovePackagesFromWorld:
     @property
     def before(self):
         return []
-
-
-class DisablePcSpeaker:
-
-    @property
-    def custom_scripts(self):
-        return [ScriptFromBuffer(self._scriptFileContent)]
-
-    @property
-    def after(self):
-        return ["init_confdir", "create_overlays", "update_world", "install_kernel", "enable_services"]
-
-    @property
-    def before(self):
-        return []
-
-    _scriptFileContent = """
-#!/bin/sh
-echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf
-"""

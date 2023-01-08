@@ -366,3 +366,15 @@ class SupportAllCompressFormat:
 # compress formats
 */*                 bzip2 gzip lz4 lzma lzo szip xz
 """
+
+
+class DisablePcSpeaker:
+
+    def get_custom_action(self):
+        return SimpleCustomAction(ScriptFromBuffer(self._scriptFileContent),
+                                  after=["init_confdir", "create_overlays", "update_world", "install_kernel", "enable_services"])
+
+    _scriptFileContent = """
+#!/bin/sh
+echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf
+"""
