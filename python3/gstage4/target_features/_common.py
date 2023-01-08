@@ -406,11 +406,14 @@ class PreferWayland:
 
     def update_target_settings(self, target_settings):
         assert "10-prefer-wayland" not in target_settings.pkg_use_files
+        assert "10-prefer-wayland" not in target_settings.pkg_mask_files
 
         buf = self._useFileContent.strip("\n") + "\n"
         if self._xwayland:
             buf += self._xwaylandContent.strip("\n") + "\n"
         target_settings.pkg_use_files["10-prefer-wayland"] = buf
+
+        target_settings.pkg_mask_files["10-prefer-wayland"] = self._maskFileContent.strip("\n") + "\n"
 
     _useFileContent = """
 # we use wayland
@@ -420,7 +423,6 @@ class PreferWayland:
 """
 
     _xwaylandContent = """
-
 # of course, we also use X when we have to
 app-emulation/wine-vanilla                    X                               # wine has no wayland support, it has to use Xwayland
 app-emulation/wine-staging                    X
@@ -434,6 +436,10 @@ x11-base/xorg-server						  -suid -systemd -udev -xorg
 """
 
     _maskFileContent = """
+# vdpau is from NVIDIA (it does not support pure wayland yet), use vaapi is enough
+x11-libs/libvdpau
+x11-libs/libva-vdpau-driver
+x11-misc/vdpauinfo
 """
 
 
