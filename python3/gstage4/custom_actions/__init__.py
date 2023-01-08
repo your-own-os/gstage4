@@ -23,6 +23,6 @@
 
 from ._common import SimpleCustomAction
 
-from ._common import SetPasswordForUserRoot
+from ._common import SetRootPassword
 from ._common import AddUser
 from ._common import RemovePackagesFromWorld

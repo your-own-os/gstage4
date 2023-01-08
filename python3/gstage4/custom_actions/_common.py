@@ -47,7 +47,7 @@ class SimpleCustomAction(CustomAction):                         # FIXME: should 
         return self._before
 
 
-class SetPasswordForUserRoot(CustomAction):
+class SetRootPassword(CustomAction):
 
     def __init__(self, password):
         self._hash = crypt.crypt(password)
