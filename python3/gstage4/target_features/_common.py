@@ -92,6 +92,7 @@ class NotUseDeprecatedPackagesAndFunctions:
         assert "10-no-deprecated" not in target_settings.pkg_use_files
         assert "10-no-deprecated" not in target_settings.pkg_mask_files
 
+        # use content
         buf = self._useFileContent.strip("\n") + "\n"
         if self._serviceManager == "none":
             pass
@@ -104,7 +105,18 @@ class NotUseDeprecatedPackagesAndFunctions:
             assert False
         target_settings.pkg_use_files["10-no-deprecated"] = buf
 
-        target_settings.pkg_mask_files["10-no-deprecated"] = self._maskFileContent.strip("\n") + "\n"
+        # mask content
+        buf = self._maskFileContent.strip("\n") + "\n"
+        if self._serviceManager == "none":
+            pass
+        elif self._serviceManager == "openrc":
+            pass
+        elif self._serviceManager == "systemd":
+            buf += "\n"
+            buf += self._systemdMaskContent.strip("\n") + "\n"
+        else:
+            assert False
+        target_settings.pkg_mask_files["10-no-deprecated"] = buf
 
     _useFileContent = """
 # disable deprecated functions
@@ -169,9 +181,6 @@ net-wireless/wpa_supplicant
 # libstdc++ is integrated in gcc
 sys-libs/libstdc++-v3
 
-# too old
-sys-apps/sysvinit
-
 # deprecated by dev-libs/rocm-opencl-runtime
 dev-libs/amdgpu-pro-opencl
 
@@ -189,6 +198,11 @@ net-vpn/i2p
 
 # why use the old version openssl?
 <dev-libs/openssl-3.0.0
+"""
+
+    _systemdMaskContent = """
+# too old
+sys-apps/sysvinit
 """
 
 
