@@ -70,6 +70,7 @@ class UseOpenrc:
         target_settings.service_manager = "openrc"
 
     def update_world_set(self, world_set):
+        world_set.add("sys-apps/sysvinit")              # FIXME: maybe we should make it "openrc+sysvinit" and "openrc+s6-linux-init"
         world_set.add("sys-apps/openrc")
 
 

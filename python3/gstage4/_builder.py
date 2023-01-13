@@ -240,6 +240,7 @@ class Builder:
             if ts.service_manager == "none":
                 pass
             elif ts.service_manager == "openrc":
+                __worldNeeded("sys-apps/sysvinit")
                 __worldNeeded("sys-apps/openrc")
             elif ts.service_manager == "systemd":
                 __worldNeeded("sys-apps/systemd")
