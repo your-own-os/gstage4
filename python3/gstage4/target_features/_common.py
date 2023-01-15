@@ -60,8 +60,8 @@ class UseGenkernel:
 
 class UseBinaryKernel:
 
-    def __init__(self, kernel_sources_pkg_atom="sys-kernel/gentoo-kernel-bin"):
-        self._kernelPkg = kernel_sources_pkg_atom
+    def __init__(self, kernel_pkg_atom="sys-kernel/gentoo-kernel-bin"):
+        self._kernelPkg = kernel_pkg_atom
 
     def update_target_settings(self, target_settings):
         target_settings.kernel_manager = "binary-kernel"
