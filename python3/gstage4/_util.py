@@ -24,26 +24,11 @@
 import os
 import re
 import time
-import pickle
 import tempfile
 import subprocess
 
 
 class Util:
-
-    def saveObj(filepath, obj):
-        with open(filepath, 'wb') as fh:
-            pickle.dump(obj, fh)
-
-    def loadObj(filepath, klass):
-        with open(filepath, "rb") as fh:
-            return pickle.load(fh)
-
-    def saveEnum(filepath, obj):
-        Util.saveObj(filepath, obj)
-
-    def loadEnum(filepath, klass):
-        return Util.loadObj(filepath)
 
     @staticmethod
     def pathCompare(path1, path2):
@@ -117,21 +102,6 @@ class Util:
             print(ret.stdout)
             ret.check_returncode()
         return ret.stdout.rstrip()
-
-    @staticmethod
-    def shellCallTestSuccess(cmd):
-        ret = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                             shell=True, universal_newlines=True)
-        if ret.returncode > 128:
-            time.sleep(1.0)
-        return (ret.returncode == 0)
-
-    @staticmethod
-    def shellExec(cmd):
-        ret = subprocess.run(cmd, shell=True, universal_newlines=True)
-        if ret.returncode > 128:
-            time.sleep(1.0)
-        ret.check_returncode()
 
     @staticmethod
     def portageIsPkgInstalled(rootDir, pkg):
