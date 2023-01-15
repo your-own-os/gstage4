@@ -289,10 +289,13 @@ class Builder:
             with _MyChrooter(self) as m:
                 m.shell_call("", "eselect kernel set 1")
 
-                dotConfigFile = "/usr/src/dot-config"
-                if not os.path.exists(os.path.join(self._workDirObj.path, dotConfigFile[1:])):
-                    dotConfigFile = None
-                m.script_exec(ScriptGenkernel(self._s.verbose_level, tj, tl, ts.build_opts.ccache, dotConfigFile), quiet=self._getQuiet())
+                if ts.kernel_manager_genkernel["kernel_config"] is not None:
+                    customDotConfigFile = "/usr/src/custom-kernel-config"
+                    with open(os.path.join(self._workDirObj.path, customDotConfigFile[1:]), "w") as f:
+                        f.write(ts.kernel_manager_genkernel["kernel_config"])
+                else:
+                    customDotConfigFile = None
+                m.script_exec(ScriptGenkernel(self._s.verbose_level, tj, tl, ts.build_opts.ccache, customDotConfigFile), quiet=self._getQuiet())
 
             return
 

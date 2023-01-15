@@ -37,11 +37,15 @@ class UsePortage:
 
 class UseGenkernel:
 
-    def __init__(self, kernel="gentoo-sources"):
+    def __init__(self, kernel="gentoo-sources", kernel_config=None):
         self._kernel = kernel
+        self._kernelCfg = kernel_config
 
     def update_target_settings(self, target_settings):
         target_settings.kernel_manager = "genkernel"
+        target_settings.kernel_manager_genkernel = {
+            "kernel_config": self._kernelCfg,
+        }
 
     def update_world_set(self, world_set):
         world_set.add("sys-kernel/%s" % (self._kernel))
