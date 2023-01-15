@@ -37,14 +37,19 @@ class UsePortage:
 
 class UseGenkernel:
 
-    def __init__(self, kernel="gentoo-sources", kernel_config=None):
+    def __init__(self, kernel="gentoo-sources", kernel_config=None, check_kernel_config_version=False):
+        if kernel_config is None:
+            assert not check_kernel_config_version
+
         self._kernel = kernel
         self._kernelCfg = kernel_config
+        self._checkVer = check_kernel_config_version
 
     def update_target_settings(self, target_settings):
         target_settings.kernel_manager = "genkernel"
         target_settings.kernel_manager_genkernel = {
             "kernel_config": self._kernelCfg,
+            "check_kernel_config_version": self._checkVer
         }
 
     def update_world_set(self, world_set):
