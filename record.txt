@@ -274,3 +274,4 @@ If diskchecker.pl fails, storage is unreliable for PostgreSQL, period. Don't put
 
 https://wiki.postgresql.org/wiki/Reliable_Writes
 
+https://davecturner.github.io/2020/12/26/testing-corruption.html
