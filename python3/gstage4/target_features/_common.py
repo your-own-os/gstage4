@@ -116,6 +116,8 @@ class UseSystemd:
         world_set.add("sys-apps/systemd")
 
     _useFileContent = """
+# so that we can use systemd-udev
+virtual/libudev                        systemd
 """
 
     _maskFileContent = """
