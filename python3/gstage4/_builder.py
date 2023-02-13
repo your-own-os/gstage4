@@ -794,7 +794,7 @@ class TargetConfDirWriter:
                 else:
                     myf.write('%s="%s"\n' % (flags, value))
 
-        # Modify and write out make.conf (in chroot)
+        # modify and write out make.conf (in chroot)
         makepath = os.path.join(self._dir, "make.conf")
         with open(makepath, "w") as myf:
             myf.write("# These settings were set by %s that automatically built this stage.\n" % (self._s.program_name))
@@ -830,7 +830,7 @@ class TargetConfDirWriter:
             myf.write('\n')
 
     def write_package_use(self):
-        # Modify and write out package.use (in chroot)
+        # modify and write out package.use (in chroot)
         fpath = os.path.join(self._dir, "package.use")
         robust_layer.simple_fops.rm(fpath)
 
@@ -861,7 +861,7 @@ class TargetConfDirWriter:
                 myf.write(buf)
 
     def write_package_mask(self):
-        # Modify and write out package.mask (in chroot)
+        # modify and write out package.mask (in chroot)
         fpath = os.path.join(self._dir, "package.mask")
         robust_layer.simple_fops.rm(fpath)
 
@@ -887,7 +887,7 @@ class TargetConfDirWriter:
                 myf.write(buf)
 
     def write_package_unmask(self):
-        # Modify and write out package.unmask (in chroot)
+        # modify and write out package.unmask (in chroot)
         fpath = os.path.join(self._dir, "package.unmask")
         robust_layer.simple_fops.rm(fpath)
 
@@ -911,7 +911,7 @@ class TargetConfDirWriter:
                 myf.write(buf)
 
     def write_package_accept_keywords(self):
-        # Modify and write out package.accept_keywords (in chroot)
+        # modify and write out package.accept_keywords (in chroot)
         fpath = os.path.join(self._dir, "package.accept_keywords")
         robust_layer.simple_fops.rm(fpath)
 
@@ -937,7 +937,7 @@ class TargetConfDirWriter:
                 myf.write(buf)
 
     def write_package_license(self):
-        # Modify and write out package.license (in chroot)
+        # modify and write out package.license (in chroot)
         fpath = os.path.join(self._dir, "package.license")
         robust_layer.simple_fops.rm(fpath)
 
@@ -963,8 +963,38 @@ class TargetConfDirWriter:
                 with open(fpath, "w") as myf:
                     myf.write(buf)
 
+    def write_package_env(self):
+        # modify and write out package.env and env directory (in chroot)
+        fpath = os.path.join(self._dir, "package.env")
+        fpath2 = os.path.join(self._dir, "env")
+        robust_layer.simple_fops.rm(fpath)
+
+        data = self._ts.install_mask_files.copy()
+        assert "00-common" not in data
+        if len(self._ts.install_mask) > 0:
+            data["00-common"] = self._ts.install_mask
+
+        if len(data) > 0:
+            os.mkdir(fpath)
+            os.makedirs(fpath2, exists_ok=True)
+            for file_name, obj in data.items():
+                assert len(obj) >= 1
+                innerFnDict = dict()
+                for pkgWildcard, installMaskList in obj.items():
+                    if len(obj) > 1:
+                        innerFn = "%s-%02d.env" % (file_name, len(innerFnDict) + 1)
+                    else:
+                        innerFn = "%s.env" % (file_name)
+                    with open(os.path.join(fpath2, innerFn), "w") as f:
+                        for x in installMaskList:
+                            f.write('INSTALL_MASK="${INSTALL_MASK} %s"\n' % (x))
+                    innerFnDict[pkgWildcard] = innerFn
+                with open(os.path.join(fpath, file_name), "w") as f:
+                    for pkgWildcard in obj.keys():
+                        f.write('%s %s\n' % (pkgWildcard, innerFnDict[pkgWildcard]))
+
     def write_use_mask(self):
-        # Modify and write out use.mask (in chroot)
+        # modify and write out use.mask (in chroot)
         if len(self._ts.use_mask) > 0:
             fpath = os.path.join(self._dir, "profile", "use.mask")
             os.makedirs(os.path.dirname(fpath), exist_ok=True)

@@ -47,8 +47,8 @@ class TargetSettings:
         self.pkg_accept_keywords_files = dict()  # dict<file-name, file-content>
         self.pkg_license_files = dict()          # dict<file-name, file-content>
 
-        self.install_mask = []                   # list<install-mask>
-        self.pkg_install_mask = dict()           # dict<package-wildcard, install-mask>
+        self.install_mask = []                   # dict<package-wildcard, list<install-mask>>
+        self.install_mask_files = dict()         # dict<file-name, dict<package-wildcard, list<install-mask>>>
 
         self.build_opts = TargetSettingsBuildOpts("build_opts")
         self.build_opts.ccache = False
@@ -97,10 +97,11 @@ class TargetSettings:
             if obj.use_mask is None or not isinstance(obj.use_mask, list):
                 raise SettingsError("invalid value for \"use_mask\"")
 
-            if obj.install_mask is None or not isinstance(obj.install_mask, list):
+            if obj.install_mask is None or not isinstance(obj.install_mask, dict):
                 raise SettingsError("invalid value for \"install_mask\"")
-            if obj.pkg_install_mask is None or not isinstance(obj.pkg_install_mask, dict):
-                raise SettingsError("invalid value for \"pkg_install_mask\"")
+            if obj.install_mask_files is None or not isinstance(obj.install_mask_files, dict):
+                raise SettingsError("invalid value for \"install_mask_files\"")
+            __checkFilenames(obj.install_mask_files.keys(), "install_mask_files")
 
             if not isinstance(obj.pkg_use_files, dict):
                 raise SettingsError("invalid value for \"pkg_use_files\"")
