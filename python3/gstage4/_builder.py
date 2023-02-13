@@ -163,6 +163,7 @@ class Builder:
         t.write_package_unmask()
         t.write_package_accept_keywords()
         t.write_package_license()
+        t.write_package_env()
         t.write_use_mask()
 
         # create ccache directory
