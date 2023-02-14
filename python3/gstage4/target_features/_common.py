@@ -111,123 +111,150 @@ class UseSystemd:
         assert "10-systemd" not in target_settings.pkg_mask_files
         assert "10-systemd" not in target_settings.install_mask_files
 
-        def _updateDict(dst, src):
-            for k, v in src.items():
-                if k not in dst:
-                    dst[k] = v
-                dst[k] += v
-
-        def _flagExec(flag_name, disable_func=None, exclude_func=None):
-            ret = self._mFlagDict.get(flag_name, None)
-            if ret is None:
-                pass
-            elif ret == "disable":
-                if disable_func is not None:
-                    disable_func()
-                else:
-                    assert False
-            elif ret == "exclude":
-                if exclude_func is not None:
-                    exclude_func()
-                else:
-                    assert False
-            else:
-                assert False
-
         target_settings.service_manager = "systemd"
 
         target_settings.pkg_use_files["10-systemd"] = self._useFileContent.strip("\n") + "\n"
 
         target_settings.pkg_mask_files["10-systemd"] = self._maskFileContent.strip("\n") + "\n"
 
-        td = {}
-        _flagExec("sysvinit", exclude_func=lambda: _updateDict(td, {
-            "*/*": [
-                "/etc/init.d /etc/conf.d /etc/rc.d",                    # removing sys-apps/openrc init files
-            ],
-            "sys-apps/systemd": [
-                "*rc-local*",
-            ],
-        }))
-        _flagExec("systemd-boot", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*bootctl*",
-                "*/systemd-boot.7.bz2",
-                "*systemd-boot-system-token*",
-            ],
-        }))
-        _flagExec("systemd-hostnamed", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*hostname1*",
-                "*hostnamed*",
-                "*hostnamectl*",
-            ],
-        }))
-        _flagExec("systemd-localed", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*locale1*",
-                "*localed*",
-                "*localectl*",
-            ],
-        }))
-        _flagExec("systemd-machined", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*machine*",
-                "*nspawn*",
-                "*detect-virt*",
-                "*exit.target",
-                "*systemd-exit.service",
-            ],
-        }))
-        _flagExec("systemd-networkd", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*network*",
-                "/lib/systemd/network*",
-                "/etc/systemd/network",
-            ],
-        }))
-        _flagExec("systemd-portabled", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*portable*",
-                "/lib/systemd/portable",
-            ],
-        }))
-        _flagExec("systemd-oomd", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*oom1*",
-                "*oomd*",
-                "*oomctl",
-            ],
-        }))
-        _flagExec("systemd-pstore", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*pstore*",
-            ],
-        }))
-        _flagExec("systemd-resolvd", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*resolv*",
-            ],
-        }))
-        _flagExec("systemd-userdbd", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*userdb*",
-            ],
-        }))
-        _flagExec("systemd-timedated", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*timedate*",
-            ],
-        }))
-        _flagExec("systemd-timesyncd", exclude_func=lambda: _updateDict(td, {
-            "sys-apps/systemd": [
-                "*timesync*",
-                "*ntp*",
-                "/lib/systemd/ntp-units.d*",
-            ],
-        }))
-        if len(td) > 0:
-            target_settings.install_mask_files["10-systemd"] = td
+        if True:
+            td = {}
+            flagRecord = set()
+
+            def _updateDict(src):
+                for k, v in src.items():
+                    if k not in td:
+                        td[k] = v
+                    td[k] += v
+
+            def _flagExec(flag_name, disable_func=None, exclude_func=None):
+                ret = self._mFlagDict.get(flag_name, None)
+                if ret is None:
+                    pass
+                elif ret == "disable":
+                    if disable_func is not None:
+                        disable_func()
+                    else:
+                        assert False
+                elif ret == "exclude":
+                    if exclude_func is not None:
+                        exclude_func()
+                    else:
+                        assert False
+                else:
+                    assert False
+                if True:
+                    assert flag_name not in flagRecord
+                    flagRecord.add(flag_name)
+
+            _flagExec("sysvinit", exclude_func=lambda: _updateDict(td, {
+                "*/*": [
+                    "/etc/init.d /etc/conf.d /etc/rc.d",                    # removing sys-apps/openrc init files
+                ],
+                "sys-apps/systemd": [
+                    "*initctl*",
+                    "*runlevel*",
+                    "*systemd-sysv-generator*",
+                    "*rc-local*",
+                ],
+            }))
+            _flagExec("systemd-boot", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*bootctl*",
+                    "*/systemd-boot.7.bz2",
+                    "*systemd-boot-system-token*",
+                ],
+            }))
+            _flagExec("systemd-coredump", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*coredump*",
+                ],
+            }))
+            _flagExec("systemd-hostnamed", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*hostname1*",
+                    "*hostnamed*",
+                    "*hostnamectl*",
+                ],
+            }))
+            _flagExec("systemd-firstboot", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*firstboot*",
+                ],
+            }))
+            _flagExec("systemd-kexec", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*kexec*",
+                ],
+            }))
+            _flagExec("systemd-localed", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*locale1*",
+                    "*localed*",
+                    "*localectl*",
+                ],
+            }))
+            _flagExec("systemd-machined", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*machine*",
+                    "*nspawn*",
+                    "*detect-virt*",
+                    "*exit.target",
+                    "*systemd-exit.service",
+                ],
+            }))
+            _flagExec("systemd-networkd", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*network*",
+                    "/lib/systemd/network*",
+                    "/etc/systemd/network",
+                ],
+            }))
+            _flagExec("systemd-portabled", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*portable*",
+                    "/lib/systemd/portable",
+                ],
+            }))
+            _flagExec("systemd-oomd", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*oom1*",
+                    "*oomd*",
+                    "*oomctl",
+                ],
+            }))
+            _flagExec("systemd-pstore", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*pstore*",
+                ],
+            }))
+            _flagExec("systemd-resolvd", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*resolv*",
+                ],
+            }))
+            _flagExec("systemd-userdbd", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*userdb*",
+                ],
+            }))
+            _flagExec("systemd-timedated", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*timedate*",
+                ],
+            }))
+            _flagExec("systemd-timesyncd", exclude_func=lambda: _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*timesync*",
+                    "*ntp*",
+                    "/lib/systemd/ntp-units.d*",
+                ],
+            }))
+
+            assert len(set(self._mFlagDict.keys()) - flagRecord) > 0
+
+            if len(td) > 0:
+                target_settings.install_mask_files["10-systemd"] = td
 
     def update_world_set(self, world_set):
         world_set.add("sys-apps/systemd")
