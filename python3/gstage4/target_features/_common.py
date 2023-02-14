@@ -170,14 +170,60 @@ class UseSystemd:
                 "*localectl*",
             ],
         }))
+        _flagExec("systemd-machined", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*machine*",
+                "*nspawn*",
+                "*detect-virt*",
+                "*exit.target",
+                "*systemd-exit.service",
+            ],
+        }))
+        _flagExec("systemd-networkd", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*network*",
+                "/lib/systemd/network*",
+                "/etc/systemd/network",
+            ],
+        }))
+        _flagExec("systemd-portabled", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*portable*",
+                "/lib/systemd/portable",
+            ],
+        }))
+        _flagExec("systemd-oomd", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*oom1*",
+                "*oomd*",
+                "*oomctl",
+            ],
+        }))
         _flagExec("systemd-pstore", exclude_func=lambda: _updateDict(td, {
             "sys-apps/systemd": [
                 "*pstore*",
             ],
         }))
+        _flagExec("systemd-resolvd", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*resolv*",
+            ],
+        }))
+        _flagExec("systemd-userdbd", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*userdb*",
+            ],
+        }))
         _flagExec("systemd-timedated", exclude_func=lambda: _updateDict(td, {
             "sys-apps/systemd": [
                 "*timedate*",
+            ],
+        }))
+        _flagExec("systemd-timesyncd", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*timesync*",
+                "*ntp*",
+                "/lib/systemd/ntp-units.d*",
             ],
         }))
         if len(td) > 0:
