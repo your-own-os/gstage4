@@ -103,14 +103,27 @@ sys-apps/systemd
 
 class UseSystemd:
 
+    def __init__(self):
+        # FIXME
+        pass
+
     def update_target_settings(self, target_settings):
         assert "10-systemd" not in target_settings.pkg_use_files
         assert "10-systemd" not in target_settings.pkg_mask_files
+        assert "10-systemd" not in target_settings.install_mask_files
 
         target_settings.service_manager = "systemd"
 
         target_settings.pkg_use_files["10-systemd"] = self._useFileContent.strip("\n") + "\n"
+
         target_settings.pkg_mask_files["10-systemd"] = self._maskFileContent.strip("\n") + "\n"
+
+        target_settings.install_mask_files["10-systemd"] = {
+            "*/*": [
+                "/etc/init.d /etc/conf.d /etc/rc.d",                    # removing sys-apps/openrc init files
+                "/lib/netifrc",                                         # removing net-misc/netifrc scripts
+            ],
+        }
 
     def update_world_set(self, world_set):
         world_set.add("sys-apps/systemd")
