@@ -103,14 +103,39 @@ sys-apps/systemd
 
 class UseSystemd:
 
-    def __init__(self):
-        # FIXME
-        pass
+    MODULE_FLAG_DISABLE = 1
+    MODULE_FLAG_EXCLUDE = 2
+
+    def __init__(self, module_flags={}):
+        self._mFlagDict = module_flags
 
     def update_target_settings(self, target_settings):
         assert "10-systemd" not in target_settings.pkg_use_files
         assert "10-systemd" not in target_settings.pkg_mask_files
         assert "10-systemd" not in target_settings.install_mask_files
+
+        def _updateDict(dst, src):
+            for k, v in src.items():
+                if k not in dst:
+                    dst[k] = v
+                dst[k] += v
+
+        def _flagExec(flag_name, disable_func=None, exclude_func=None):
+            ret = self._mFlagDict.get(flag_name, None)
+            if ret is None:
+                pass
+            elif ret == self.MODULE_FLAG_DISABLE:
+                if disable_func is not None:
+                    disable_func()
+                else:
+                    assert False
+            elif ret == self.MODULE_FLAG_EXCLUDE:
+                if exclude_func is not None:
+                    exclude_func()
+                else:
+                    assert False
+            else:
+                assert False
 
         target_settings.service_manager = "systemd"
 
@@ -118,12 +143,21 @@ class UseSystemd:
 
         target_settings.pkg_mask_files["10-systemd"] = self._maskFileContent.strip("\n") + "\n"
 
-        target_settings.install_mask_files["10-systemd"] = {
+        td = {}
+        _flagExec("sysvinit", exclude_func=lambda: _updateDict(td, {
             "*/*": [
                 "/etc/init.d /etc/conf.d /etc/rc.d",                    # removing sys-apps/openrc init files
-                "/lib/netifrc",                                         # removing net-misc/netifrc scripts
             ],
-        }
+            "sys-apps/systemd": [
+                "*rc-local*",
+            ],
+        }))
+        _flagExec("systemd-pstore", exclude_func=lambda: _updateDict(td, {
+            "sys-apps/systemd": [
+                "*pstore*",
+            ],
+        }))
+        target_settings.install_mask_files["10-systemd"] = td
 
     def update_world_set(self, world_set):
         world_set.add("sys-apps/systemd")
