@@ -1,0 +1,230 @@
+#!/usr/bin/python3
+# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
+
+import os
+import re
+import sys
+import glob
+import shutil
+import pathlib
+import asyncio
+import asyncio_pool
+import subprocess
+
+
+def usage():
+    print("Usage:")
+    print("  %s [-s source-directory] [-j N] <-all|-p patch-name> <target-directory>" % (sys.argv[0]))
+    print("Example:")
+    print("  %s -all foodir                                            # apply all patches for repository or overlay located in foodir" % (sys.argv[0]))
+    print("  %s -s sourcedir -j 10 -p usrmerge -p remove-x11 foodir    # apply usermerge and remove-x11 patches" % (sys.argv[0]))
+
+
+def die(msg):
+    print(msg, file=sys.stderr)
+    sys.exit(1)
+
+
+class TempChdir:
+
+    def __init__(self, dirname):
+        self.olddir = os.getcwd()
+        os.chdir(dirname)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        os.chdir(self.olddir)
+
+
+def getRepoName(repoDir):
+    layoutFn = os.path.join(repoDir, "metadata", "layout.conf")
+    if os.path.exists(layoutFn):
+        m = re.search("repo-name = (\\S+)", pathlib.Path(layoutFn).read_text(), re.M)
+        if m is not None:
+            return m.group(1)
+
+    repoNameFn = os.path.join(repoDir, "profiles", "repo_name")
+    if os.path.exists(repoNameFn):
+        ret = pathlib.Path(repoNameFn).read_text()
+        ret = ret.rstrip("\n").rstrip()
+        ret = ret.replace(" ", "-")                         # it seems this translation is neccessary
+        return ret
+
+    # fatal error: can not get repoName
+    return None
+
+
+def patchRepository(targetDir, patchDir, jobNumber=None):
+    # patch eclass files
+    eclassDir = os.path.join(patchDir, "eclass")
+    if os.path.exists(eclassDir):
+        dstDir = os.path.join(targetDir, "eclass")
+        execPatchScript(patchDir, eclassDir, dstDir)
+
+    # patch profile files
+    profilesDir = os.path.join(patchDir, "profiles")
+    if os.path.exists(profilesDir):
+        dstDir = os.path.join(targetDir, "profiles")
+        execPatchScript(patchDir, profilesDir, dstDir)
+
+    # patch packages
+    pendingDstDirList = []
+    for categoryDir in os.listdir(patchDir):
+        if categoryDir in ["README", "eclass", "profiles"]:
+            continue
+        fullCategoryDir = os.path.join(patchDir, categoryDir)
+        for ebuildDir in os.listdir(fullCategoryDir):
+            srcDir = os.path.join(fullCategoryDir, ebuildDir)
+            dstDir = os.path.join(targetDir, categoryDir, ebuildDir)
+            execPatchScript(patchDir, srcDir, dstDir)
+            if len(glob.glob(os.path.join(dstDir, "*.ebuild"))) == 0:
+                # all ebuild files are deleted, it means this package is removed
+                shutil.rmtree(dstDir)
+                if len(os.listdir(fullCategoryDir)) == 0:
+                    os.rmdir(fullCategoryDir)
+                continue
+            pendingDstDirList.append(dstDir)
+
+    return set(pendingDstDirList)
+
+
+def execPatchScript(patchDir, srcDir, dstDir):
+    patchTypeName = os.path.basename(patchDir)
+
+    for fullfn in glob.glob(os.path.join(srcDir, "*")):
+        if not os.path.isfile(fullfn):
+            continue
+        if not os.path.exists(dstDir):
+            print("Warning: patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchDir) + 1:]))
+            continue
+        out = None
+        with TempChdir(dstDir):
+            assert fullfn.endswith(".py")
+            out = subprocess.check_output(["python3", fullfn], text=True)     # FIXME, should respect shebang
+        if out == "outdated":
+            print("Warning: patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchDir) + 1:]))
+        elif out == "":
+            pass
+        else:
+            die("Error: patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, fullfn[len(patchDir) + 1:], out))
+
+
+async def doWork(pendingDstDirSet, jobNumber):
+    # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
+    if jobNumber is None:
+        pool = asyncio_pool.AioPool()
+    else:
+        pool = asyncio_pool.AioPool(size=jobNumber)
+    for dstDir in pendingDstDirSet:
+        pool.spawn_n(generateEbuildManifest(dstDir))
+    await pool.join()
+
+
+async def generateEbuildManifest(ebuildDir):
+    # operate on any ebuild file generates manifest for the whole ebuild directory
+    fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
+    args = ["ebuild", fn, "manifest"]
+    proc = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.DEVNULL)
+    retcode = await proc.wait()
+    if retcode != 0:
+        raise subprocess.CalledProcessError(retcode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
+
+
+if __name__ == "__main__":
+    sourceDir = None
+    patchNameList = []
+    jobNumber = None
+    targetDir = None
+
+    if len(sys.argv) == 2 and sys.argv[1] == "--help":
+        usage()
+        sys.exit(1)
+
+    if True:
+        bAll = False
+        i = 1
+        while i < len(sys.argv):
+            if sys.argv[i] == "-s":
+                if i == len(sys.argv) - 1:
+                    die("Error: no source directory after -s.")
+                sourceDir = sys.argv[i + 1]
+                if not os.path.isdir(sourceDir):
+                    die("Error: invalid source directory.")
+                i += 2
+                continue
+
+            if sys.argv[i] == "-all":
+                if len(patchNameList) > 0:
+                    die("Error: -all and -p are mutually exclusive.")
+                bAll = True
+                i += 1
+                continue
+
+            if sys.argv[i] == "-p":
+                if i == len(sys.argv) - 1:
+                    die("Error: no patch name after -p.")
+                if bAll:
+                    die("Error: -all and -p are mutually exclusive.")
+                patchNameList.append(sys.argv[i + 1])
+                i += 2
+                continue
+
+            if sys.argv[i] == "-j":
+                if jobNumber is not None:
+                    die("Error: job number can be specified only once.")
+                if i == len(sys.argv) - 1:
+                    die("Error: no job number after -j.")
+                try:
+                    jobNumber = int(sys.argv[i + 1])
+                except ValueError:
+                    die("Error: invalid job number.")
+                if jobNumber < 1:
+                    die("Error: invalid job number.")
+                i += 2
+                continue
+
+            if True:
+                if i < len(sys.argv) - 1:
+                    die("Error: unknown parameter.")
+                targetDir = sys.argv[i]
+                i += 1
+                continue
+
+        if sourceDir is None:
+            sourceDir = os.path.dirname(os.path.realpath(__file__))
+        if not bAll:
+            if len(patchNameList) == 0:
+                die("Error: no patch specified.")
+            for patchName in patchNameList:
+                if not os.path.isdir(os.path.join(sourceDir, patchName)):
+                    die("Error: invalid patch name %s." % (patchName))
+        else:
+            patchNameList = [x for x in os.listdir(sourceDir) if os.path.isdir(os.path.join(sourceDir, x))]
+        if jobNumber is None:
+            jobNumber = 1
+
+    targetDirRepoName = getRepoName(targetDir)
+    if targetDirRepoName is None:
+        die("Error: target directory is not a Gentoo repository or overlay.")
+
+    patchDirList = []
+    for patchName in patchNameList:
+        patchDir = os.path.join(sourceDir, patchName, targetDirRepoName)
+        if os.path.isdir(patchDir):
+            patchDirList.append(patchDir)
+
+    if len(patchDirList) > 0:
+        print("Patching...")
+
+        # patch packages
+        pendingDstDirSet = set()
+        for patchDir in patchDirList:
+            pendingDstDirSet |= patchRepository(targetDir, patchDir, jobNumber)
+
+        # generate manifest for patched packages
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        asyncio.get_event_loop().run_until_complete(doWork(pendingDstDirSet, jobNumber))
+
+        print("Done.")
