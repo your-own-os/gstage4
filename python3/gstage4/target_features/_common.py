@@ -149,7 +149,9 @@ class UseSystemd:
 
             _flagExec("sysvinit", exclude_func=lambda: _updateDict({
                 "*/*": [
-                    "/etc/init.d /etc/conf.d /etc/rc.d",                    # removing sys-apps/openrc init files
+                    "/etc/init.d",
+                    "/etc/conf.d",
+                    "/etc/rc.d",
                 ],
                 "sys-apps/systemd": [
                     "*initctl*",
