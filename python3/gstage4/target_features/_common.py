@@ -260,9 +260,7 @@ class UseSystemd:
                     "*ldconfig*",
                 ],
             }))
-
-            assert len(set(self._mFlagDict.keys()) - flagRecord) > 0
-
+            assert len(set(self._mFlagDict.keys()) - flagRecord) == 0
             if len(td) > 0:
                 target_settings.install_mask_files["10-systemd"] = td
 
