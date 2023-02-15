@@ -985,7 +985,7 @@ class TargetConfDirWriter:
                 innerFnDict = dict()
                 for pkgWildcard, installMaskList in obj.items():
                     if len(obj) > 1:
-                        innerFn = "%s-%02d.env" % (file_name, len(innerFnDict) + 1)
+                        innerFn = "%s-%d.env" % (file_name, len(innerFnDict) + 1)
                     else:
                         innerFn = "%s.env" % (file_name)
                     with open(os.path.join(fpath2, innerFn), "w") as f:
