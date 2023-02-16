@@ -72,6 +72,22 @@ class TailorShadow:
             })
             self._items.remove("chsh")
 
+        if "pwck" in self._items:
+            _updateDict({
+                "sys-apps/shadow": [
+                    "*pwck*",
+                ],
+            })
+            self._items.remove("pwck")
+
+        if "grpck" in self._items:
+            _updateDict({
+                "sys-apps/shadow": [
+                    "*grpck*",
+                ],
+            })
+            self._items.remove("grpck")
+
         assert len(self._items) == 0
         if len(td) > 0:
             target_settings.install_mask_files["10-tailor-shadow"] = td
