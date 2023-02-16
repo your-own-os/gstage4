@@ -80,6 +80,14 @@ class TailorShadow:
             })
             self._items.remove("chsh")
 
+        if "groupmems" in self._items:
+            _updateDict({
+                "sys-apps/shadow": [
+                    "*groupmems*",
+                ],
+            })
+            self._items.remove("groupmems")
+
         if "pwck-and-grpck" in self._items:
             _updateDict({
                 "sys-apps/shadow": [
