@@ -27,6 +27,21 @@ class TailorSystemd:
         self._items = items
         assert False
 
+    def update_target_settings(self, target_settings):
+        assert "10-tailor-systemd" not in target_settings.install_mask_files
+
+        td = {}
+
+        def _updateDict(src):
+            for k, v in src.items():
+                if k not in td:
+                    td[k] = v
+                td[k] += v
+
+        assert len(self._items) == 0
+        if len(td) > 0:
+            target_settings.install_mask_files["10-tailor-systemd"] = td
+
 
 class TailorShadow:
 
