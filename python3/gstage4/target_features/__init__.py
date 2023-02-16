@@ -28,7 +28,7 @@ from ._common import UseBinaryKernel
 from ._common import UseFakeKernel
 
 from ._common import UseOpenrc
-from ._use_systemd import UseSystemd
+from ._common import UseSystemd
 
 from ._common import AcceptAllLicenses
 from ._common import NotUseDeprecatedPackagesAndFunctions

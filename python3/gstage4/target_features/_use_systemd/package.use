@@ -1,2 +1,0 @@
-# so that we can use systemd-udev
-virtual/libudev                        systemd
