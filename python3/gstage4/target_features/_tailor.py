@@ -49,6 +49,7 @@ class TailorSystemd:
             self._excludeItems.remove("systemd-boot")
 
         if "systemd-coredump" in self._excludeItems:
+            target_settings.postsync_patch_directories.append("/usr/libexec/tailor-systemd-remove-coredump-user")
             _updateDict({
                 "sys-apps/systemd": [
                     "*coredump*",
@@ -105,6 +106,7 @@ class TailorSystemd:
             self._excludeItems.remove("systemd-machined")
 
         if "systemd-networkd" in self._excludeItems:
+            target_settings.postsync_patch_directories.append("/usr/libexec/tailor-systemd-remove-network-user")
             _updateDict({
                 "sys-apps/systemd": [
                     "*network*",
@@ -124,6 +126,7 @@ class TailorSystemd:
             self._excludeItems.remove("systemd-portabled")
 
         if "systemd-oomd" in self._excludeItems:
+            target_settings.postsync_patch_directories.append("/usr/libexec/tailor-systemd-remove-oom-user")
             _updateDict({
                 "sys-apps/systemd": [
                     "*oom1*",
@@ -142,6 +145,7 @@ class TailorSystemd:
             self._excludeItems.remove("systemd-pstore")
 
         if "systemd-resolvd" in self._excludeItems:
+            target_settings.postsync_patch_directories.append("/usr/libexec/tailor-systemd-remove-resolve-user")
             _updateDict({
                 "sys-apps/systemd": [
                     "*resolv*",
@@ -182,6 +186,7 @@ class TailorSystemd:
             self._excludeItems.remove("systemd-timedated")
 
         if "systemd-timesyncd" in self._excludeItems:
+            target_settings.postsync_patch_directories.append("/usr/libexec/tailor-systemd-remove-timesync-user")
             _updateDict({
                 "sys-apps/systemd": [
                     "*timesync*",
