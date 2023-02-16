@@ -106,7 +106,7 @@ class TailorShadow:
             _updateDict({
                 "sys-apps/shadow": [
                     "*chage*",              # for root to change a user's password expiration
-                    "*chpasswd*",           # change passwords in batch mode, obviously it's for root although it has a pam config
+                    "*chpasswd*",           # change passwords in batch mode, obviously it's for root although it has a PAM config
                     "*pwck*",
                     "*grpck*",
                     "*pwconv*",
@@ -116,7 +116,7 @@ class TailorShadow:
                     "*useradd*",
                     "*usermod*",
                     "*userdel*",
-                    "*newusers*",
+                    "*newusers*",           # create users in batch mode, obviously it's for root although it has a PAM config
                     "*groupadd*",
                     "*groupmod*",
                     "*groupdel*",
