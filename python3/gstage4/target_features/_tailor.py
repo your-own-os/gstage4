@@ -279,7 +279,7 @@ class TailorShadow:
             target_settings.repo_postsync_patch_directories.append("/usr/libexec/gstage4/tailor-shadow-remove-chsh")
             _updateDict({
                 "sys-apps/baselayout": [
-                    "/etc/shells",
+                    "/etc/shells",              # no other application uses /etc/shells
                 ],
             })
             self._items.remove("chsh")
