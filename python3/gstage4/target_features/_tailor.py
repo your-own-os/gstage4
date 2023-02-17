@@ -33,6 +33,8 @@ class TailorSystemd:
     def update_target_settings(self, host_info, target_settings):
         assert "10-tailor-systemd" not in target_settings.install_mask_files
 
+        disableItems = list(self._disableItems)
+        excludeItems = list(self._excludeItems)
         td = {}
 
         def _updateDict(src):
@@ -41,7 +43,7 @@ class TailorSystemd:
                     td[k] = v
                 td[k] += v
 
-        if "systemd-boot" in self._excludeItems:
+        if "systemd-boot" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*bootctl*",
@@ -49,18 +51,18 @@ class TailorSystemd:
                     "*systemd-boot-system-token*",
                 ],
             })
-            self._excludeItems.remove("systemd-boot")
+            excludeItems.remove("systemd-boot")
 
-        if "systemd-coredump" in self._excludeItems:
+        if "systemd-coredump" in excludeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-coredump-user"))
             _updateDict({
                 "sys-apps/systemd": [
                     "*coredump*",
                 ],
             })
-            self._excludeItems.remove("systemd-coredump")
+            excludeItems.remove("systemd-coredump")
 
-        if "systemd-hostnamed" in self._excludeItems:
+        if "systemd-hostnamed" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*hostname1*",
@@ -68,25 +70,25 @@ class TailorSystemd:
                     "*hostnamectl*",
                 ],
             })
-            self._excludeItems.remove("systemd-hostnamed")
+            excludeItems.remove("systemd-hostnamed")
 
-        if "systemd-firstboot" in self._excludeItems:
+        if "systemd-firstboot" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*firstboot*",
                 ],
             })
-            self._excludeItems.remove("systemd-firstboot")
+            excludeItems.remove("systemd-firstboot")
 
-        if "systemd-kexec" in self._excludeItems:
+        if "systemd-kexec" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*kexec*",
                 ],
             })
-            self._excludeItems.remove("systemd-kexec")
+            excludeItems.remove("systemd-kexec")
 
-        if "systemd-localed" in self._excludeItems:
+        if "systemd-localed" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*locale1*",
@@ -94,9 +96,9 @@ class TailorSystemd:
                     "*localectl*",
                 ],
             })
-            self._excludeItems.remove("systemd-localed")
+            excludeItems.remove("systemd-localed")
 
-        if "systemd-machined" in self._excludeItems:
+        if "systemd-machined" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*machine*",
@@ -106,9 +108,9 @@ class TailorSystemd:
                     "*systemd-exit.service",
                 ],
             })
-            self._excludeItems.remove("systemd-machined")
+            excludeItems.remove("systemd-machined")
 
-        if "systemd-networkd" in self._excludeItems:
+        if "systemd-networkd" in excludeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-network-user"))
             _updateDict({
                 "sys-apps/systemd": [
@@ -117,18 +119,18 @@ class TailorSystemd:
                     "/etc/systemd/network",
                 ],
             })
-            self._excludeItems.remove("systemd-networkd")
+            excludeItems.remove("systemd-networkd")
 
-        if "systemd-portabled" in self._excludeItems:
+        if "systemd-portabled" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*portable*",
                     "/lib/systemd/portable",
                 ],
             })
-            self._excludeItems.remove("systemd-portabled")
+            excludeItems.remove("systemd-portabled")
 
-        if "systemd-oomd" in self._excludeItems:
+        if "systemd-oomd" in excludeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-oom-user"))
             _updateDict({
                 "sys-apps/systemd": [
@@ -137,58 +139,58 @@ class TailorSystemd:
                     "*oomctl",
                 ],
             })
-            self._excludeItems.remove("systemd-oomd")
+            excludeItems.remove("systemd-oomd")
 
-        if "systemd-pstore" in self._excludeItems:
+        if "systemd-pstore" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*pstore*",
                 ],
             })
-            self._excludeItems.remove("systemd-pstore")
+            excludeItems.remove("systemd-pstore")
 
-        if "systemd-resolvd" in self._excludeItems:
+        if "systemd-resolvd" in excludeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-resolve-user"))
             _updateDict({
                 "sys-apps/systemd": [
                     "*resolv*",
                 ],
             })
-            self._excludeItems.remove("systemd-resolvd")
+            excludeItems.remove("systemd-resolvd")
 
-        if "systemd-sysext" in self._excludeItems:
+        if "systemd-sysext" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*sysext*",
                 ],
             })
-            self._excludeItems.remove("systemd-sysext")
+            excludeItems.remove("systemd-sysext")
 
-        if "systemd-sysupdate" in self._excludeItems:
+        if "systemd-sysupdate" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*sysupdate*",
                 ],
             })
-            self._excludeItems.remove("systemd-sysupdate")
+            excludeItems.remove("systemd-sysupdate")
 
-        if "systemd-sysusers" in self._excludeItems:
+        if "systemd-sysusers" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*systemd-sysusers*",
                 ],
             })
-            self._excludeItems.remove("systemd-sysusers")
+            excludeItems.remove("systemd-sysusers")
 
-        if "systemd-timedated" in self._excludeItems:
+        if "systemd-timedated" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*timedate*",
                 ],
             })
-            self._excludeItems.remove("systemd-timedated")
+            excludeItems.remove("systemd-timedated")
 
-        if "systemd-timesyncd" in self._excludeItems:
+        if "systemd-timesyncd" in excludeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-timesync-user"))
             _updateDict({
                 "sys-apps/systemd": [
@@ -197,34 +199,34 @@ class TailorSystemd:
                     "/lib/systemd/ntp-units.d*",
                 ],
             })
-            self._excludeItems.remove("systemd-timesyncd")
+            excludeItems.remove("systemd-timesyncd")
 
-        if "systemd-update" in self._excludeItems:
+        if "systemd-update" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*system-update*",
                     "*update-done*",
                 ],
             })
-            self._excludeItems.remove("systemd-update")
+            excludeItems.remove("systemd-update")
 
-        if "systemd-userdbd" in self._excludeItems:
+        if "systemd-userdbd" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*userdb*",
                 ],
             })
-            self._excludeItems.remove("systemd-userdbd")
+            excludeItems.remove("systemd-userdbd")
 
-        if "fstab" in self._excludeItems:
+        if "fstab" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*fstab*",
                 ],
             })
-            self._excludeItems.remove("fstab")
+            excludeItems.remove("fstab")
 
-        if "fs-operations" in self._excludeItems:
+        if "fs-operations" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*repart*",
@@ -233,17 +235,17 @@ class TailorSystemd:
                     "*mkswap*",
                 ],
             })
-            self._excludeItems.remove("fs-operations")
+            excludeItems.remove("fs-operations")
 
-        if "ldconfig.service" in self._excludeItems:
+        if "ldconfig.service" in excludeItems:
             _updateDict({
                 "sys-apps/systemd": [
                     "*ldconfig*",
                 ],
             })
-            self._excludeItems.remove("ldconfig.service")
+            excludeItems.remove("ldconfig.service")
 
-        assert len(self._excludeItems) == 0
+        assert len(excludeItems) == 0
         if len(td) > 0:
             target_settings.install_mask_files["10-tailor-systemd"] = td
 
@@ -256,6 +258,7 @@ class TailorShadow:
     def update_target_settings(self, host_info, target_settings):
         assert "10-tailor-shadow" not in target_settings.install_mask_files
 
+        items = self._items
         td = {}
 
         def _updateDict(src):
@@ -264,20 +267,20 @@ class TailorShadow:
                     td[k] = v
                 td[k] += v
 
-        if "logoutd" in self._items:
+        if "logoutd" in items:
             _updateDict({
                 "sys-apps/shadow": [
                     "*logoutd*",
                 ],
             })
-            self._items.remove("logoutd")
+            items.remove("logoutd")
 
-        if "chfn" in self._items:
+        if "chfn" in items:
             # INSTALL_MASK can not eliminate possibly empty /etc/pam.d directory, so we modify ebuild
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "shadow-remove-chfn"))
-            self._items.remove("chfn")
+            items.remove("chfn")
 
-        if "chsh" in self._items:
+        if "chsh" in items:
             # INSTALL_MASK can not eliminate possibly empty /etc/pam.d directory, so we modify ebuild
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "shadow-remove-chsh"))
             _updateDict({
@@ -285,26 +288,26 @@ class TailorShadow:
                     "/etc/shells",              # no other application uses /etc/shells
                 ],
             })
-            self._items.remove("chsh")
+            items.remove("chsh")
 
-        if "expiry" in self._items:
+        if "expiry" in items:
             _updateDict({
                 "sys-apps/shadow": [
                     "*expiry*",
                 ],
             })
-            self._items.remove("expiry")
+            items.remove("expiry")
 
-        if "groupmems" in self._items:
+        if "groupmems" in items:
             # INSTALL_MASK can not eliminate possibly empty /etc/pam.d directory, so we modify ebuild
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "shadow-remove-groupmems"))
-            self._items.remove("groupmems")
+            items.remove("groupmems")
 
-        if "user-and-group-operations-for-admin" in self._items:
+        if "user-and-group-operations-for-admin" in items:
             # INSTALL_MASK can not eliminate possibly empty /etc/pam.d directory, so we modify ebuild
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "shadow-remove-user-and-group-operations-for-admin"))
-            self._items.remove("user-and-group-operations-for-admin")
+            items.remove("user-and-group-operations-for-admin")
 
-        assert len(self._items) == 0
+        assert len(items) == 0
         if len(td) > 0:
             target_settings.install_mask_files["10-tailor-shadow"] = td
