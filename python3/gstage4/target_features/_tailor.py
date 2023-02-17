@@ -40,7 +40,7 @@ class TailorSystemd:
         def _updateDict(src):
             for k, v in src.items():
                 if k not in td:
-                    td[k] = v
+                    td[k] = []
                 td[k] += v
 
         if "systemd-boot" in excludeItems:
