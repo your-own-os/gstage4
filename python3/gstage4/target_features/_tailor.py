@@ -255,7 +255,7 @@ class TailorShadow:
     def __init__(self, exclude_items):
         self._items = exclude_items
 
-    def update_target_settings(self, host_info, target_settings):
+    def update_target_settings(self, target_settings):
         assert "10-tailor-shadow" not in target_settings.install_mask_files
 
         items = self._items
