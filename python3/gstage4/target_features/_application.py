@@ -84,9 +84,15 @@ class NetworkManager:
 
     def update_target_settings(self, target_settings):
         assert "10-networkmanager" not in target_settings.pkg_mask_files
+        assert "10-networkmanager" not in target_settings.install_mask_files
 
         if self._exclusive:
             target_settings.pkg_mask_files["10-networkmanager"] = self._maskFileContent.strip("\n") + "\n"
+            target_settings.install_mask_files["10-networkmanager"] = {
+                "*/*": [
+                    "/lib/netifrc",         # removing net-misc/netifrc scripts
+                ],
+            }
 
     def update_world_set(self, world_set):
         world_set.add("net-misc/networkmanager")
