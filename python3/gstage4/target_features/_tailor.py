@@ -430,12 +430,8 @@ class TailorGit:
         self._enableItems = enable_items
 
     def update_target_settings(self, host_info, target_settings):
-        assert "10-tailor-git" not in target_settings.install_mask_files
-
         items = self._enableItems
-
         if "add-http-connection-timeout" in items:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "git-add-http-connection-timeout"))
             items.remove("add-http-connection-timeout")
-
         assert len(items) == 0
