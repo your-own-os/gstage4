@@ -45,7 +45,7 @@ class TailorSystemd:
 
         if "systemd-udevd-socket-activation" in disableItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-disable-systemd-udevd-socket-activation"))
-            disableItems.remove("systemd-udev-socket-activation")
+            disableItems.remove("systemd-udevd-socket-activation")
 
         if "kmod-static-nodes" in disableItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-disable-kmod-static-nodes"))
