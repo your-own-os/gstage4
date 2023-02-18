@@ -56,6 +56,9 @@ from ._tailor import TailorSystemd
 from ._tailor import TailorShadow
 from ._tailor import TailorAvahi
 
+from ._mirror import UseGogMirror
+from ._mirror import UseHbMirror
+
 from ._application import UseAllQemuTargets
 from ._application import NotUseLogrotate
 from ._application import NotUseUdisks
