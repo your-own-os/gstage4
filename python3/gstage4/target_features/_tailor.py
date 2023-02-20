@@ -266,7 +266,7 @@ class TailorBaselayout:
     def update_target_settings(self, target_settings):
         assert "10-tailor-baselayout" not in target_settings.install_mask_files
 
-        items = self._items
+        items = list(self._items)
         td = {}
 
         def _updateDict(src):
@@ -296,7 +296,7 @@ class TailorShadow:
     def update_target_settings(self, target_settings):
         assert "10-tailor-shadow" not in target_settings.install_mask_files
 
-        items = self._items
+        items = list(self._items)
         td = {}
 
         def _updateDict(src):
