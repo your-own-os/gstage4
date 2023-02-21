@@ -489,6 +489,7 @@ class TailorLmSensors:
             _updateDict({
                 "sys-apps/lm-sensors": [
                     "*fancontrol*",
+                    "*pwmconfig*",
                 ],
             })
             items.remove("fancontrol")
