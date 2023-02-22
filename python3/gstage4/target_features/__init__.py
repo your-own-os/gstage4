@@ -42,6 +42,7 @@ from ._common import PreferWayland
 from ._common import PreferPipewire
 
 from ._common import DisablePcSpeaker
+from ._common import RemoveDoc
 
 from ._common import SupportAllVideoFormat
 from ._common import SupportAllAudioFormat

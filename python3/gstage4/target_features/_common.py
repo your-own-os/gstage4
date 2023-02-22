@@ -518,6 +518,28 @@ echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf
 """
 
 
+class RemoveDoc:
+
+    def update_target_settings(self, target_settings):
+        assert "10-remove-doc" not in target_settings.pkg_use_files
+        assert "10-remove-doc" not in target_settings.install_mask_files
+
+        target_settings.pkg_use_files["10-remove-doc"] = self._useFileContent.strip("\n") + "\n"
+
+        target_settings.install_mask_files["10-remove-doc"] = {
+            "*/*": [
+                "/usr/share/doc",
+                "/usr/share/info",
+                "/usr/share/man",
+            ],
+        }
+
+    _useFileContent = """
+# remove all document
+*/*                     -doc
+"""
+
+
 class PreferWayland:
 
     def __init__(self, xwayland=True):
