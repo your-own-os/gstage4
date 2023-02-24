@@ -497,3 +497,34 @@ class TailorLmSensors:
         assert len(items) == 0
         if len(td) > 0:
             target_settings.install_mask_files["10-tailor-lm-sensors"] = td
+
+
+class TailorPam:
+
+    def __init__(self, remove_items=[]):
+        self._removeItems = remove_items
+
+    def update_target_settings(self, host_info, target_settings):
+        assert "10-tailor-pam" not in target_settings.install_mask_files
+
+        items = list(self._removeItems)
+        td = {}
+
+        def _updateDict(src):
+            for k, v in src.items():
+                if k not in td:
+                    td[k] = []
+                td[k] += v
+
+        if "pam_group" in items:
+            _updateDict({
+                "sys-libs/pam": [
+                    "*pam_group.so",
+                    "/etc/security/group.conf",
+                ],
+            })
+            items.remove("pam_group")
+
+        assert len(items) == 0
+        if len(td) > 0:
+            target_settings.install_mask_files["10-tailor-pam"] = td
