@@ -331,6 +331,26 @@ media-libs/libcanberra                                                          
 """
 
 
+class UseCapability:
+
+    def update_target_settings(self, target_settings):
+        assert "10-capability" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-capability"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# don't enable caps globally, at least sys-auth/pambase, sys-apps/smartmontools has some complexity with it
+app-crypt/pinentry                                                                                              caps
+app-misc/pax-utils                                                                                              caps
+net-misc/iputils                                                                                                caps
+sys-apps/coreutils                                                                                              caps
+sys-apps/iproute2                                                                                               caps
+sys-apps/util-linux                                                                                             caps
+sys-libs/basu                                                                                                   caps
+sys-libs/glibc                                                                                                  caps
+"""
+
+
 class PreferGnuAndGpl:
 
     def update_target_settings(self, target_settings):
