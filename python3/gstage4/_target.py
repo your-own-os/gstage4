@@ -53,6 +53,9 @@ class TargetSettings:
         self.repo_postsync_scripts = dict()           # dict<file-name, file-content>
         self.repo_postsync_patch_directories = []     # list<patch-directory>
 
+        self.fetch_command = None                     # tuple(fetch-command, resume-command)
+        self.git_fetch_command = None                 # tuple(clone-command, pull-command)
+
         self.build_opts = TargetSettingsBuildOpts("build_opts")
         self.build_opts.ccache = False
 
@@ -131,6 +134,12 @@ class TargetSettings:
             if obj.repo_postsync_patch_directories is None or not isinstance(obj.repo_postsync_patch_directories, list):
                 raise SettingsError("invalid value for \"repo_postsync_patch_directories\"")
             __checkFilenames(obj.repo_postsync_scripts.keys(), "repo_postsync_scripts")
+
+            if obj.fetch_command is not None and (not isinstance(obj.fetch_command, tuple) or len(obj.fetch_command) != 2):
+                raise SettingsError("invalid value for \"fetch_command\"")
+
+            if obj.git_fetch_command is not None and (not isinstance(obj.git_fetch_command, tuple) or len(obj.git_fetch_command) != 2):
+                raise SettingsError("invalid value for \"git_fetch_command\"")
 
             if obj.build_opts is None or not TargetSettingsBuildOpts.check_object(obj.build_opts, raise_exception=raise_exception):
                 raise SettingsError("invalid value for \"build_opts\"")
