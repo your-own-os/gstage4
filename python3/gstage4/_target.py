@@ -30,6 +30,7 @@ class TargetSettings:
     def __init__(self):
         self.profile = None
 
+        self.datafile_layout = "vanilla"              # "vanilla", "all-in-var"
         self.package_manager = "portage"              # "portage"
         self.kernel_manager = "none"                  # "none", "genkernel", "binary-kernel", "fake"
         self.service_manager = "none"                 # "none", "openrc", "systemd"
@@ -75,6 +76,9 @@ class TargetSettings:
 
             if obj.profile is not None and not isinstance(obj.profile, str):
                 raise SettingsError("invalid value for \"profile\"")
+
+            if obj.datafile_layout not in ["vanilla", "all-in-var"]:
+                raise SettingsError("invalid value of \"datafile_layout\"")
 
             # if obj.package_manager not in ["portage", "pkgcore", "pkgwh"]:
             if obj.package_manager not in ["portage"]:
