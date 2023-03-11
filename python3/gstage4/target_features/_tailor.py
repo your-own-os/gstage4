@@ -465,6 +465,10 @@ class TailorGit:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "git-add-http-connection-timeout"))
             items.remove("http-connection-timeout")
 
+        if "robust-extension" in items:
+            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "git-add-robust-extension"))
+            items.remove("robust-extension")
+
         assert len(items) == 0
 
 
