@@ -213,7 +213,7 @@ media-libs/libquvi
 media-libs/libquvi-scripts
 
 # FUSE2 is deprecated
-sys-fs/fuse:0
+#sys-fs/fuse:0              FIXME
 
 # replaced by net-wireless/iwd
 net-wireless/wpa_supplicant
