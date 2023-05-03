@@ -676,8 +676,7 @@ class _MyChrooter(Runner):
 
 class TargetFilesAndDirs:
 
-    def __init__(self, target_settings, chrootDir):
-        self._ts = target_settings
+    def __init__(self, chrootDir):
         self._chroot_path = chrootDir
 
     @property
