@@ -588,6 +588,10 @@ games-engines/scummvm                                                           
 """
 
 
+class KillConfigVT:
+
+    
+
 class DisablePcSpeaker:
 
     def get_custom_action(self):

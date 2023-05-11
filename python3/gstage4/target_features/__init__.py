@@ -48,6 +48,7 @@ from ._common import PreferSystemComponent
 from ._common import PreferWayland
 from ._common import PreferPipewire
 
+from ._common import KillConfigVT
 from ._common import DisablePcSpeaker
 from ._common import RemoveDoc
 
