@@ -591,7 +591,7 @@ games-engines/scummvm                                                           
 class KillConfigVT:
     # makes userspace be ready for CONFIG_VT=n, we don't manipulate kernel config file
 
-    def update_target_settings(self, target_settings):
+    def update_target_settings(self, host_info, target_settings):
         assert "10-kill-configvt" not in target_settings.install_mask_files
 
         target_settings.install_mask_files["10-kill-configvt"] = {
@@ -602,6 +602,8 @@ class KillConfigVT:
                 "/etc/systemd/system/getty.target.wants",
             ],
         }
+
+        target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "kill-config-vt"))
 
 
 class DisablePcSpeaker:
