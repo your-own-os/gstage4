@@ -44,6 +44,10 @@ class SetTargetUseFlagsBase:
         def __init__(self, package_list):
             self._packageList = package_list
 
+
+class SetPythonTargetUseFlags(SetTargetUseFlagsBase):
+    pass
+
     # def __init__(self, name, filters, getDefaultTargetsUseFlag, cmpTargetsUseFlag, checkMainPackageOfTargetUseFlag):
     #     self._name = name
     #     self._filters = filters
@@ -112,7 +116,7 @@ class SetTargetUseFlagsBase:
     #                 f.write(fnContent)
 
 
-class SetRubyTargetUseFlags:
+class SetRubyTargetUseFlags(SetTargetUseFlagsBase):
 
     class SelectOnlyLatestVersion:
         pass
