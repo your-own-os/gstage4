@@ -622,6 +622,12 @@ echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf
 """
 
 
+class DisableFstab:
+
+    def update_target_settings(self, host_info, target_settings):
+        target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "remove-fstab"))
+
+
 class RemoveDoc:
 
     def update_target_settings(self, target_settings):
