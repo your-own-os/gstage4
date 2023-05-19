@@ -730,10 +730,10 @@ games-engines/scummvm                                       alsa                
 gui-libs/gtk                                                gstreamer
 media-libs/libmikmod                                        -alsa openal        # doesn't support gstreamer and pipewire
 media-libs/libsdl                                           alsa                # doesn't support gstreamer and pipewire
-media-libs/libsdl2                                          pipewire
+media-libs/libsdl2                                          -alsa pipewire
 media-libs/mediastreamer2                                   alsa                # doesn't support gstreamer and pipewire
 media-sound/audacity                                        alsa                # doesn't support gstreamer and pipewire
-media-sound/fluidsynth                                      pipewire
+media-sound/fluidsynth                                      -alsa pipewire
 media-sound/lmms                                            alsa                # doesn't support gstreamer and pipewire
 media-sound/mpg123                                          alsa                # doesn't support gstreamer and pipewire
 media-sound/moc                                             alsa                # doesn't support gstreamer and pipewire
@@ -744,14 +744,14 @@ media-sound/vkeybd                                          alsa                
 media-video/mpv                                             -alsa pipewire
 net-im/zoom                                                 pulseaudio          # doesn't support alsa, gstreamer and pipewire
 net-misc/freerdp                                            pulseaudio          # strange, it has USE flag alsa, ffmepg, gstreamer and pulseaudio. It seems disable alsa+pulseaudio would make it route to OSS.
-media-libs/libcanberra                                      gstreamer
+media-libs/libcanberra                                      -alsa gstreamer
 media-sound/spotify                                         pulseaudio          # doesn't support alsa, gstreamer and pipewire
 www-client/firefox-bin                                      -alsa pulseaudio    # doesn't support alsa, gstreamer and pipewire, it's alsa flag is for medis-sound/apulse
 www-client/chromium                                         pulseaudio          # doesn't support alsa, gstreamer and pipewire
 x11-libs/wxGTK                                              gstreamer
 
 # keep pulseaudio minimal
-*/*                                                         -pulseaudio
+*/*                                                         -pulseaudio         # note: */* USE flag has a lower priority than package specific USE flags above
 media-sound/pulseaudio                                      -*
 """
 
