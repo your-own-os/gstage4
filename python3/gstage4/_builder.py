@@ -265,7 +265,7 @@ class Builder:
             if "dev-util/ccache" in world_set and not Util.portageIsPkgInstalled(self._workDirObj.path, "dev-util/ccache"):
                 m.script_exec(ScriptInstallPackages(["dev-util/ccache"], False, self._s.verbose_level), quiet=self._getQuiet())
 
-            # we don't install packages seperately.
+            # we don't install packages seperately
             # many packages change global USE flag when installing, such as python_targets_XXX, so it needs to be combined with updating world to solve conflicts
             m.script_exec(ScriptUpdateWorld(self._s.verbose_level), quiet=self._getQuiet())
 
