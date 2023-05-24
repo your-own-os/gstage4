@@ -64,9 +64,6 @@ from ._common import SupportAllGraphicsApi
 
 from ._common import GettyAutoLogin
 
-from ._selector import SetPythonTargetUseFlags
-from ._selector import SetRubyTargetUseFlags
-
 from ._tailor import TailorBaselayout
 from ._tailor import TailorSystemd
 from ._tailor import TailorShadow
