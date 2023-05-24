@@ -435,6 +435,7 @@ class UseWget2:
 net-misc/wget
 """
 
+
 class PreferGnuAndGpl:
 
     def update_target_settings(self, target_settings):

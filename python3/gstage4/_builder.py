@@ -256,14 +256,19 @@ class Builder:
         # write world file
         t = TargetFilesAndDirs(self._workDirObj.path)
         with open(t.world_file_hostpath, "w") as f:
-            for pkg in pkgList:
+            for pkg in sorted(list(world_set)):
                 f.write("%s\n" % (pkg))
 
         # install packages & update world
         with _MyChrooter(self) as m:
             # we need to install ccache first
+            installList = []
             if "dev-util/ccache" in world_set and not Util.portageIsPkgInstalled(self._workDirObj.path, "dev-util/ccache"):
-                m.script_exec(ScriptInstallPackages(["dev-util/ccache"], False, self._s.verbose_level), quiet=self._getQuiet())
+                installList.append("dev-util/ccache")
+            if "dev-vcs/git" in world_set and not Util.portageIsPkgInstalled(self._workDirObj.path, "dev-vcs/git"):
+                installList.append("dev-vcs/git")
+            if len(installList) > 0:
+                m.script_exec(ScriptInstallPackages(installList, False, self._s.verbose_level), quiet=self._getQuiet())
 
             # we don't install packages seperately
             # many packages change global USE flag when installing, such as python_targets_XXX, so it needs to be combined with updating world to solve conflicts

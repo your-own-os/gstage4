@@ -206,8 +206,8 @@ sec-keys/openpgp-keys-sudo
 sec-policy/selinux-sudo
 """
 
+
 class Kmscon:
     # FIXME
     # check kmscon service, check no display-manager service
     pass
-
