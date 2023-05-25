@@ -22,7 +22,7 @@
 
 
 import os
-import robust_layer.simple_fops
+from ._util import Util
 
 
 class WorkDir:
@@ -34,7 +34,7 @@ class WorkDir:
         assert path is not None
 
         self._path = path
-        robust_layer.simple_fops.rm(self._path)
+        Util.forceDelete(self._path)
         os.mkdir(self._path, mode=0o40700)
 
         if chroot_uid_map is None:

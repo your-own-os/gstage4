@@ -25,7 +25,6 @@ import os
 import re
 import abc
 import pathlib
-import robust_layer.simple_fops
 from ._util import Util
 from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
@@ -354,13 +353,13 @@ class Builder:
 
         if degentoo:
             # FIXME
-            robust_layer.simple_fops.rm(t.confdir_hostpath)
-            robust_layer.simple_fops.rm(t.statedir_hostpath)
-            robust_layer.simple_fops.rm(t.pkgdbdir_hostpath)
-            robust_layer.simple_fops.rm(t.srcdir_hostpath)
-            robust_layer.simple_fops.rm(t.logdir_hostpath)
-            robust_layer.simple_fops.rm(t.distdir_hostpath)
-            robust_layer.simple_fops.rm(t.binpkgdir_hostpath)
+            Util.forceDelete(t.confdir_hostpath)
+            Util.forceDelete(t.statedir_hostpath)
+            Util.forceDelete(t.pkgdbdir_hostpath)
+            Util.forceDelete(t.srcdir_hostpath)
+            Util.forceDelete(t.logdir_hostpath)
+            Util.forceDelete(t.distdir_hostpath)
+            Util.forceDelete(t.binpkgdir_hostpath)
 
     def finish(self):
         assert not self._finished
@@ -717,8 +716,40 @@ class TargetFilesAndDirs:
         return "/usr/src"
 
     @property
+    def confdir_metadata(self):
+        return ("root", "root", 0o40755)
+
+    @property
+    def statedir_metadata(self):
+        return ("root", "portage", 0o42755)        # rwxr-sr-x
+
+    @property
+    def pkgdbdir_metadata(self):
+        return ("root", "root", 0o40755)
+
+    @property
+    def logdir_metadata(self):
+        return ("portage", "portage", 0o42755)     # rwxr-sr-x
+
+    @property
+    def distdir_metadata(self):
+        return ("root", "portage", 0o40775)        # rwxrwxr-x
+
+    @property
+    def binpkgdir_metadata(self):
+        return ("root", "root", 0o40755)           # FIXME
+
+    @property
+    def ccachedir_metadata(self):
+        return ("root", "root", 0o40755)           # FIXME
+
+    @property
+    def srcdir_metadata(self):
+        return ("root", "root", 0o40755)           # FIXME
+
+    @property
     def world_file_path(self):
-        return "/var/lib/portage/world"
+        return os.path.join(self.statedir_path, "world")
 
     @property
     def confdir_hostpath(self):
@@ -837,7 +868,7 @@ class TargetConfDirWriter:
     def write_package_use(self):
         # modify and write out package.use (in chroot)
         fpath = os.path.join(self._dir, "package.use")
-        robust_layer.simple_fops.rm(fpath)
+        Util.forceDelete(fpath)
 
         # generate main file content
         # buf = "*/* compile-locales\n"   # compile all locales
@@ -868,7 +899,7 @@ class TargetConfDirWriter:
     def write_package_mask(self):
         # modify and write out package.mask (in chroot)
         fpath = os.path.join(self._dir, "package.mask")
-        robust_layer.simple_fops.rm(fpath)
+        Util.forceDelete(fpath)
 
         # generate main file content
         buf = ""
@@ -894,7 +925,7 @@ class TargetConfDirWriter:
     def write_package_unmask(self):
         # modify and write out package.unmask (in chroot)
         fpath = os.path.join(self._dir, "package.unmask")
-        robust_layer.simple_fops.rm(fpath)
+        Util.forceDelete(fpath)
 
         # generate main file content
         buf = ""
@@ -918,7 +949,7 @@ class TargetConfDirWriter:
     def write_package_accept_keywords(self):
         # modify and write out package.accept_keywords (in chroot)
         fpath = os.path.join(self._dir, "package.accept_keywords")
-        robust_layer.simple_fops.rm(fpath)
+        Util.forceDelete(fpath)
 
         # generate main file content
         buf = ""
@@ -944,7 +975,7 @@ class TargetConfDirWriter:
     def write_package_license(self):
         # modify and write out package.license (in chroot)
         fpath = os.path.join(self._dir, "package.license")
-        robust_layer.simple_fops.rm(fpath)
+        Util.forceDelete(fpath)
 
         # generate main file content
         buf = ""
@@ -972,7 +1003,7 @@ class TargetConfDirWriter:
         # modify and write out package.env and env directory (in chroot)
         fpath = os.path.join(self._dir, "package.env")
         fpath2 = os.path.join(self._dir, "env")
-        robust_layer.simple_fops.rm(fpath)
+        Util.forceDelete(fpath)
 
         data = self._ts.install_mask_files.copy()
         assert "00-common" not in data
@@ -1003,7 +1034,7 @@ class TargetConfDirWriter:
     def write_repo_postsync(self):
         # modify and write out repo.postsync.d (in chroot)
         fpath = os.path.join(self._dir, "repo.postsync.d")
-        robust_layer.simple_fops.rm(fpath)
+        Util.forceDelete(fpath)
 
         # FIXME
         assert False

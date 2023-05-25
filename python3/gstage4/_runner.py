@@ -24,7 +24,6 @@
 import os
 import platform
 import subprocess
-import robust_layer.simple_fops
 from ._util import Util
 
 
@@ -136,11 +135,11 @@ class Runner:
                 subprocess.check_call(["umount", "-l", fullfn])
         self._mountList = []
 
-        robust_layer.simple_fops.rm(os.path.join(self._dir, "etc", "resolv.conf"))
+        Util.forceDelete(os.path.join(self._dir, "etc", "resolv.conf"))
 
         if remove_scripts:
             for hostPath in reversed(self._scriptDirList):
-                robust_layer.simple_fops.rm(hostPath)
+                Util.forceDelete(hostPath)
         self._scriptDirList = []
 
     def _detectArch(self):
