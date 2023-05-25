@@ -25,6 +25,7 @@ import os
 import re
 import time
 import shutil
+import pathlib
 import tempfile
 import subprocess
 
@@ -43,6 +44,47 @@ class Util:
             os.remove(path)             # other type of file, such as device node
         else:
             pass                        # path does not exist, do nothing
+
+    @staticmethod
+    def makeDir(passwd_file, group_file, path, owner, group, mode, exist_ok=False):
+        if owner == "root":
+            owner = 0
+        else:
+            data = Util.parsePasswdOrGroup(passwd_file)
+            owner = data[owner]
+
+        if group == "root":
+            group = 0
+        else:
+            data = Util.parsePasswdOrGroup(group_file)
+            group = data[group]
+
+        if os.path.exists(path):
+            if not exist_ok:
+                raise FileExistsError("%s exists" % (path))
+            else:
+                st = os.stat(path)
+                if st.st_uid != owner:
+                    raise FileExistsError("existing directory %s has invalid owner %d" % (path, st.st_uid))
+                if st.st_gid != group:
+                    raise FileExistsError("existing directory %s has invalid group %d" % (path, st.st_gid))
+                if st.st_mode != mode:
+                    raise FileExistsError("existing directory %s has invalid mode 0o%o" % (path, st.st_mode))
+        else:
+            os.mkdir(path)
+            os.chown(path, owner)
+            os.chgrp(path, group)
+            os.chmod(path, mode)
+
+    @staticmethod
+    def parsePasswdOrGroup(path):
+        ret = dict()
+        for line in pathlib.Path(path).read_text().split("\n"):
+            if line == "" or line.startswith("#"):
+                continue
+            t = line.split(":")
+            ret[t[0]] = int(t[2])      # <username, user-id> or <group-name, group-id>
+        return ret
 
     @staticmethod
     def pathCompare(path1, path2):
