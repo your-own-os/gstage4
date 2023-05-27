@@ -806,7 +806,11 @@ class TargetFilesAndDirs:
                 if st.st_gid != group:
                     raise FileExistsError("existing directory %s has invalid group %d" % (path, st.st_gid))
                 if st.st_mode != mode:
-                    raise FileExistsError("existing directory %s has invalid mode 0o%o" % (path, st.st_mode))
+                    if path_id == "logdir":
+                        # FIXME: it seems gentoo minimal disk has a bug that /var/log/portage has wrong mode
+                        os.chmod(path, mode)
+                    else:
+                        raise FileExistsError("existing directory %s has invalid mode 0o%o" % (path, st.st_mode))
         else:
             os.mkdir(path)
             os.chown(path, owner)
