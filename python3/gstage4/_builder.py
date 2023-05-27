@@ -804,10 +804,14 @@ class TargetFilesAndDirs:
                 if st.st_uid != owner:
                     raise FileExistsError("existing directory %s has invalid owner %d" % (path, st.st_uid))
                 if st.st_gid != group:
-                    raise FileExistsError("existing directory %s has invalid group %d" % (path, st.st_gid))
+                    if path_id == "distdir":
+                        # FIXME: it seems gentoo stage3 has a bug that /var/cache/distfiles has wrong mode
+                        os.chgrp(path, group)
+                    else:
+                        raise FileExistsError("existing directory %s has invalid group %d" % (path, st.st_gid))
                 if st.st_mode != mode:
                     if path_id == "logdir":
-                        # FIXME: it seems gentoo minimal disk has a bug that /var/log/portage has wrong mode
+                        # FIXME: it seems gentoo stage3 has a bug that /var/log/portage has wrong mode
                         os.chmod(path, mode)
                     else:
                         raise FileExistsError("existing directory %s has invalid mode 0o%o" % (path, st.st_mode))
