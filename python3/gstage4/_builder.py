@@ -737,7 +737,7 @@ class TargetFilesAndDirs:
 
     @property
     def distdir_metadata(self):
-        return ("root", "portage", 0o40775)        # rwxrwxr-x
+        return ("root", "portage", 0o40755)
 
     @property
     def binpkgdir_metadata(self):
