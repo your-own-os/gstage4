@@ -27,9 +27,9 @@ import os
 import re
 import sys
 import time
+import selectors
 import subprocess
 import urllib.parse
-from ._util import Util
 
 
 def additional_environ():
@@ -59,7 +59,7 @@ class PrivateUrlNotExistError(Exception):
 
 
 def _doGitNetOp(action, cmdList):
-    # Util.cmdListExec() use pipe to do advanced process, we add "--progress" so that progress can still be displayed
+    # we use pipe to do advanced process, we add "--progress" so that progress can still be displayed
     # "--quiet" would take priority if specified by user
     if sys.stderr.isatty() and "--progress" not in cmdList:
         cmdList.insert(0, "--progress")
@@ -68,7 +68,7 @@ def _doGitNetOp(action, cmdList):
         try:
             proc = subprocess.Popen(["/usr/bin/git-reference", action] + cmdList, env=Util.mergeDict(os.environ, additional_environ()),
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            Util._communicate(proc)
+            Util.communicate(proc)
             break
         except subprocess.CalledProcessError as e:
             # terminated by signal, no retry needed
@@ -87,6 +87,39 @@ def _doGitNetOp(action, cmdList):
             _checkPrivateDomainNotExist(e)
 
             time.sleep(1)
+
+
+class Util:
+
+    @staticmethod
+    def communicate(proc):
+        if hasattr(selectors, 'PollSelector'):
+            pselector = selectors.PollSelector
+        else:
+            pselector = selectors.SelectSelector
+
+        # redirect proc.stdout/proc.stderr to stdout/stderr
+        # make CalledProcessError contain stdout/stderr content
+        sStdout = b''
+        with pselector() as selector:
+            os.set_blocking(proc.stdout.fileno(), False)
+            selector.register(proc.stdout, selectors.EVENT_READ)
+            while selector.get_map():
+                res = selector.select(TIMEOUT)
+                for key, events in res:
+                    data = key.fileobj.read()
+                    if data == b'':
+                        selector.unregister(key.fileobj)
+                        continue
+                    sStdout += data
+                    sys.stdout.buffer.write(data)
+                    sys.stdout.flush()
+
+        retcode = proc.wait()
+        if retcode > 128:
+            time.sleep(PARENT_WAIT)
+        if retcode != 0:
+            raise subprocess.CalledProcessError(retcode, proc.args, sStdout.decode(sys.stdout.encoding), "")
 
 
 def _checkPrivateDomainNotExist(e):
@@ -110,23 +143,18 @@ def _checkPrivateDomainNotExist(e):
 
 
 if __name__ == "__main__":
-    try:
-        if len(sys.argv) >= 2:
-            if sys.argv[1] == "clone":
-                assert not any(x in os.environ for x in additional_environ())
-                _doGitNetOp("clone", sys.argv[2:])
-            elif sys.argv[1] == "fetch":
-                assert not any(x in os.environ for x in additional_environ())
-                _doGitNetOp("fetch", sys.argv[2:])
-            elif sys.argv[1] == "pull":
-                robust_layer.git.pull(*sys.argv[2:])
-            elif sys.argv[1] == "push":
-                robust_layer.git.push(*sys.argv[2:])
-            else:
-                print("Operation \"%s\" not supported" % (sys.argv[1]), file=sys.stderr)
-                sys.exit(1)
-    except robust_layer.git.PrivateUrlNotExistError:
-        print("Unrecoverable error: Private URL doest not exist.", file=sys.stderr)
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        sys.exit(e.returncode)
+    if len(sys.argv) >= 2:
+        if sys.argv[1] == "clone":
+            assert not any(x in os.environ for x in additional_environ())
+            _doGitNetOp("clone", sys.argv[2:])
+        elif sys.argv[1] == "fetch":
+            assert not any(x in os.environ for x in additional_environ())
+            _doGitNetOp("fetch", sys.argv[2:])
+        elif sys.argv[1] == "pull":
+            robust_layer.git.pull(*sys.argv[2:])
+        elif sys.argv[1] == "push":
+            robust_layer.git.push(*sys.argv[2:])
+        else:
+            print("Operation \"%s\" not supported" % (sys.argv[1]), file=sys.stderr)
+            sys.exit(1)
+    
