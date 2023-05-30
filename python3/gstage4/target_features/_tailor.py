@@ -461,12 +461,14 @@ class TailorGit:
     def update_target_settings(self, host_info, target_settings):
         items = list(self._addItems)
 
+        bHttpConnectionTimeout = False
         if "http-connection-timeout" in items:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "git-add-http-connection-timeout"))
             items.remove("http-connection-timeout")
+            bHttpConnectionTimeout = True
 
-        # FIXME: move processes in robust_layer here
         if "robust-extension" in items:
+            assert bHttpConnectionTimeout
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "git-add-robust-extension"))
             items.remove("robust-extension")
 
