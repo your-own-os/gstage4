@@ -720,19 +720,20 @@ class PreferPipewire:
 # prefered sound route: 1. pipewire -> alsa
 #                       2. gstreamer -> pipewire -> alsa
 #                       3. openal -> pipewire -> alsa
-#                       4. alsa (bad)
-#                       5. pulseaudio -> alsa (bad)
-app-emulation/spice                                         gstreamer
-app-emulation/wine-vanilla                                  alsa                # gstreamer support in wine is not an alsa replacement, doesn't support pipewire
-app-emulation/wine-staging                                  alsa                # gstreamer support in wine is not an alsa replacement, doesn't support pipewire
-app-emulation/virtualbox                                    alsa                # does not and should not support gstreamer?
-games-emulation/dosbox-staging                              alsa                # doesn't support gstreamer and pipewire
-games-engines/scummvm                                       alsa                # doesn't support gstreamer and pipewire
-gui-libs/gtk                                                gstreamer
-media-libs/libmikmod                                        -alsa openal        # doesn't support gstreamer and pipewire
-media-libs/libsdl                                           -alsa               # support pipewire through media-libs/libsdl2
-media-libs/libsdl2                                          -alsa pipewire
-media-libs/openal                                           -alsa pipewire
+#                       4. pulseaudio -> pipewire -> alsa (bad)
+#                       5. alsa -> pipewire -> alsa (worse)
+#                       6. alsa (forbidden)
+app-emulation/spice                                         gstreamer           # sound route #2
+app-emulation/wine-vanilla                                  -alsa pulseaudio    # sound route #4 (bad), gstreamer support in wine is not what we image
+app-emulation/wine-staging                                  -alsa pulseaudio    # sound route #4 (bad), gstreamer support in wine is not what we image
+app-emulation/virtualbox                                    alsa                # sound route #5 (worse)
+games-emulation/dosbox-staging                              alsa                # sound route #5 (worse)
+games-engines/scummvm                                       alsa                # sound route #5 (worse)
+gui-libs/gtk                                                gstreamer           # sound route #2
+media-libs/libmikmod                                        -alsa openal        # sound route #3
+media-libs/libsdl                                           -alsa               # sound route #1, support pipewire through media-libs/libsdl2
+media-libs/libsdl2                                          -alsa pipewire      # sound route #1
+media-libs/openal                                           -alsa pipewire      # sound route #1
 media-libs/mediastreamer2                                   alsa                # doesn't support gstreamer and pipewire
 media-sound/audacity                                        alsa                # doesn't support gstreamer and pipewire
 media-sound/fluidsynth                                      -alsa pipewire
