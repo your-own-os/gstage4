@@ -2,8 +2,32 @@
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
+# https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/git-retry.html
+# https://chromium.googlesource.com/chromium/tools/depot_tools.git/+/01d2cde990f22d409e74e239de7e4d347102d6f6/git_retry.py
+
+
+#!/usr/bin/env bash
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+SCRIPT=git_retry.py
+set -- retry "$@"
+. "$(type -P python_runner.sh)"
+
+
+
+#!/usr/bin/env python3
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+"""Generic retry wrapper for Git operations.
+This is largely DEPRECATED in favor of the Infra Git wrapper:
+https://chromium.googlesource.com/infra/infra/+/HEAD/go/src/infra/tools/git
+"""
 import logging
 import optparse
+import os
 import subprocess
 import sys
 import threading
@@ -18,6 +42,7 @@ class TeeThread(threading.Thread):
   def run(self):
     chunks = []
     for line in self.fd:
+      line = line.decode('utf-8')
       chunks.append(line)
       self.out_fd.write(line)
     self.data = ''.join(chunks)
@@ -70,7 +95,7 @@ class GitRetry(object):
     return (self.delay_factor ** (iteration - 1)) * self.delay
   def __call__(self, *args):
     returncode = 0
-    for i in xrange(self.retry_count):
+    for i in range(self.retry_count):
       # If the previous run failed and a delay is configured, delay before the
       # next run.
       delay = self.computeDelay(i)
@@ -89,6 +114,18 @@ class GitRetry(object):
         break
     return returncode
 def main(args):
+  # If we're using the Infra Git wrapper, do nothing here.
+  # https://chromium.googlesource.com/infra/infra/+/HEAD/go/src/infra/tools/git
+  if 'INFRA_GIT_WRAPPER' in os.environ:
+    # Remove Git's execution path from PATH so that our call-through re-invokes
+    # the Git wrapper.
+    # See crbug.com/721450
+    env = os.environ.copy()
+    git_exec = subprocess.check_output([GIT_EXE, '--exec-path']).strip()
+    env['PATH'] = os.pathsep.join([
+      elem for elem in env.get('PATH', '').split(os.pathsep)
+      if elem != git_exec])
+    return subprocess.call([GIT_EXE] + args, env=env)
   parser = optparse.OptionParser()
   parser.disable_interspersed_args()
   parser.add_option('-v', '--verbose',
