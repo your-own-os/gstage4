@@ -139,8 +139,5 @@ if __name__ == "__main__":
         elif sys.argv[1] == "pull":
             doGitNetOp("pull", sys.argv[2:])
             sys.exit(0)
-        elif sys.argv[1] == "push":
-            doGitNetOp("push", sys.argv[2:])
-            sys.exit(0)
 
     subprocess.check_call(["/usr/bin/git-reference"] + sys.argv[1:])

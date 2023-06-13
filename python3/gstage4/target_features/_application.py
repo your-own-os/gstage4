@@ -208,6 +208,28 @@ sec-policy/selinux-sudo
 
 
 class Kmscon:
+
     # FIXME
-    # check kmscon service, check no display-manager service
-    pass
+    def __init__(self, exclusive=False):
+        self._exclusive = exclusive
+
+    def update_target_settings(self, host_info, target_settings):
+        assert target_settings.service_manager == "systemd"
+        assert "10-kmscon" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-kmscon"] = self._useFileContent.strip("\n") + "\n"
+
+        target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "kmscon-enable-multiseat"))
+
+    def update_world_set(self, world_set):
+        world_set.add("sys-apps/kmscon")
+
+    def update_service_list(self, service_list):
+        # display-manager service should not be enabled, but we can't check it
+        if "kmscon" not in service_list:
+            service_list.append("kmscon")
+
+    _useFileContent = """
+sys-apps/kmscon systemd
+"""
+
