@@ -209,13 +209,11 @@ sec-policy/selinux-sudo
 
 class Kmscon:
 
-    def update_target_settings(self, host_info, target_settings):
+    def update_target_settings(self, target_settings):
         assert target_settings.service_manager == "systemd"
         assert "10-kmscon" not in target_settings.pkg_use_files
 
         target_settings.pkg_use_files["10-kmscon"] = self._useFileContent.strip("\n") + "\n"
-
-        target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "kmscon-enable-multiseat"))
 
     def update_world_set(self, world_set):
         world_set.add("sys-apps/kmscon")

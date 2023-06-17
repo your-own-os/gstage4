@@ -27,6 +27,12 @@ from ..scripts import ScriptFromBuffer
 from ..scripts import PlacingFilesScript
 
 
+class FixBugs:
+
+    def update_target_settings(self, host_info, target_settings):
+        target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "bugfix"))
+
+
 class UsePortage:
 
     def update_target_settings(self, target_settings):
