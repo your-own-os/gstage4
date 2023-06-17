@@ -7,7 +7,7 @@ import pathlib
 try:
     # what to insert (with blank line in the beginning and the end)
     buf2 = r"""
-sed -i 's/kmscon -l/kmscon --listen -l/g' docs/kmscon.service.in
+sed -i 's/--ms-enable-electron-run-as-node/--ms-enable-electron-run-as-node --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations/g' ${D}/opt/vscode/bin/code
 """
     buf2 = buf2.replace("\n", "\n\t")
     buf2 += "\n"
@@ -16,7 +16,7 @@ sed -i 's/kmscon -l/kmscon --listen -l/g' docs/kmscon.service.in
         buf = pathlib.Path(fn).read_text()
 
         # insert to the end of src_install()
-        pos = buf.find("src_prepare() {")
+        pos = buf.find("src_install() {")
         if pos == -1:
             raise ValueError()
         pos = buf.find("\n}\n", pos)
