@@ -16,6 +16,7 @@ try:
 mv "${D}/usr/bin/git" "${D}/usr/bin/git-reference"
 dobin "${FILESDIR}/git"
 """
+    buf2 = ""                            # FIXME
     buf2 = buf2.replace("\n", "\n\t")
     buf2 += "\n"
 
