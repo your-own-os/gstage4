@@ -608,10 +608,12 @@ class SupportAllGraphicsApi:
 
     _useFileContent = """
 # graphics api
-*/*                                                                                  egl eglfs gles2 gles2-only gles3 vaapi vulkan zink
+*/*                                                                                  egl eglfs gles gles2 gles2-only gles3 vaapi vulkan zink
 
 # we prefer gles, but we also enable opengl when it doesn't conflict with gles
+*/*                                                                                  -opengl
 app-emulation/qemu                                                                   opengl
+dev-lang/fbc                                                                         opengl
 games-emulation/dosbox-staging                                                       opengl
 games-engines/scummvm                                                                opengl
 """

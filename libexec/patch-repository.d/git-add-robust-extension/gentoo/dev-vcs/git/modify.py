@@ -3,6 +3,7 @@
 
 import os
 import glob
+import shutil
 import pathlib
 
 selfDir = os.path.dirname(os.path.realpath(__file__))
