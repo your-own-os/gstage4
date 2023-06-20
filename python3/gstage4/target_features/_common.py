@@ -738,6 +738,10 @@ app-emulation/wine-staging                                  -alsa pulseaudio    
 app-emulation/virtualbox                                    alsa                # sound route 5 (worse)
 games-emulation/dosbox-staging                              alsa                # sound route 5 (worse)
 games-engines/scummvm                                       alsa                # sound route 5 (worse)
+games-fps/serioussam-tfe                                    -alsa pipewire      # sound route 1
+games-fps/serioussam-tfe-vk                                 -alsa pipewire      # sound route 1
+games-fps/serioussam-tse                                    -alsa pipewire      # sound route 1
+games-fps/serioussam-tse-vk                                 -alsa pipewire      # sound route 1
 gui-libs/gtk                                                gstreamer           # sound route 2
 media-libs/libmikmod                                        -alsa openal        # sound route 3
 media-libs/libsdl                                           -alsa               # sound route 1, support pipewire through media-libs/libsdl2
