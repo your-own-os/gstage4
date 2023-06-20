@@ -1,0 +1,9 @@
+#!/bin/sh
+while true ; do
+    wget-reference $@
+    if [ $? == 4 ] ; then
+        sleep 10
+        continue
+    fi
+    break
+done
