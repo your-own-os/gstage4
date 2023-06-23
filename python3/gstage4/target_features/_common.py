@@ -754,6 +754,7 @@ media-sound/lmms                                            alsa                
 media-sound/mpg123                                          alsa                # sound route 5 (worse)
 media-sound/moc                                             alsa                # sound route 5 (worse)
 media-sound/musescore                                       alsa                # sound route 5 (worse)
+media-sound/sonic-visualiser                                pulseaudio          # sound route 4 (bad)
 media-sound/timidity++                                      alsa                # sound route 5 (worse)
 media-sound/wildmidi                                        -alsa openal        # sound route 3
 media-sound/vkeybd                                          alsa                # sound route 5 (worse)
@@ -765,6 +766,7 @@ media-sound/spotify                                         pulseaudio          
 www-client/firefox-bin                                      -alsa pulseaudio    # sound route 4 (bad), doesn't support alsa, gstreamer and pipewire, it's alsa flag is for medis-sound/apulse
 www-client/chromium                                         pulseaudio          # sound route 4 (bad), doesn't support alsa, gstreamer and pipewire
 x11-libs/wxGTK                                              gstreamer           # sound route 2
+
 
 # keep pulseaudio minimal
 */*                                                         -pulseaudio         # note: */* USE flag has a lower priority than package specific USE flags above
