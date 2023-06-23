@@ -225,6 +225,9 @@ net-p2p/bitcoin-qt              qt5
 """
 
     _maskFileContent = """
+# don't use python2.x
+<dev-lang/python-3.0.0
+
 # deprecated gnome libs
 gnome-base/gconf
 
