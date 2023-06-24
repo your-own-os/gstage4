@@ -14,7 +14,7 @@ try:
     # what to insert (with blank line in the beginning and the end)
     buf2 = r"""
 mv "${D}/usr/bin/rsync" "${D}/usr/bin/rsync-reference"
-dobin "${FILESDIR}/git"     \# /usr/bin/git is the same as /usr/libexec/git-core/git, replace /usr/bin/git with our own robust script that calls /usr/libexec/git-core/git
+dobin "${FILESDIR}/rsync"
 """
     buf2 = buf2.replace("\n", "\n\t")
     buf2 += "\n"
