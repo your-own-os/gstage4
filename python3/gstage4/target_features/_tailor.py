@@ -462,9 +462,9 @@ class TailorGit:
         items = list(self._addItems)
 
         bHttpConnectionTimeout = False
-        if "http-connection-timeout" in items:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "git-add-http-connection-timeout"))
-            items.remove("http-connection-timeout")
+        if "http-connection-timeout-extension" in items:
+            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "git-add-http-connection-timeout-extension"))
+            items.remove("http-connection-timeout-extension")
             bHttpConnectionTimeout = True
 
         if "robust-extension" in items:

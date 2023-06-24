@@ -1,143 +1,179 @@
 #!/usr/bin/env python3
 
-# robust git operations
-#
-# Copyright (c) 2019-2020 Fpemud <fpemud@sina.com>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-
-
 import os
 import re
 import sys
 import time
-import selectors
+import threading
 import subprocess
-import urllib.parse
-
-
-def additional_environ():
-    return {
-        "GIT_HTTP_LOW_SPEED_LIMIT": "1024",
-        "GIT_HTTP_LOW_SPEED_TIME": "60",            # we don't use GIT_HTTP_CONNECT_TIMEOUT as git network operation is not "continuable"
-        "GIT_HTTP_CONNECT_TIMEOUT": "10",           # only has effect for patched git (https://stackoverflow.com/questions/28180013/can-you-specify-a-timeout-to-git-fetch)
-    }
-
-
-class PrivateUrlNotExistError(Exception):
-    pass
-
-
-def doGitNetOp(action, cmdList):
-    # we use pipe to do advanced process, we add "--progress" so that progress can still be displayed
-    # "--quiet" would take priority if specified by user
-    if sys.stderr.isatty() and "--progress" not in cmdList:
-        cmdList.insert(0, "--progress")
-
-    while True:
-        try:
-            proc = subprocess.Popen(["/usr/bin/git-reference", action] + cmdList, env=Util.mergeDict(os.environ, additional_environ()),
-                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            Util.communicate(proc)
-            break
-        except subprocess.CalledProcessError as e:
-            # terminated by signal, no retry needed
-            if e.returncode > 128:
-                raise
-
-            # unrecoverable error
-            if re.search("^fatal: unknown index entry format .*", e.stdout, re.M) is not None:
-                raise
-            if re.search("^error: cannot pull with rebase: You have unstaged changes.", e.stdout, re.M) is not None:
-                raise
-
-            # unrecoverable error: private domain name does not exists
-            # we think public domain names are always well maintained, but private domain names are not.
-            # always retry for public domain name failure of any reason, abort opertaion when private domain name does not exist
-            Util.checkPrivateDomainNotExist(e)
-
-            time.sleep(1)
 
 
 class Util:
 
     @staticmethod
-    def communicate(proc):
-        if hasattr(selectors, 'PollSelector'):
-            pselector = selectors.PollSelector
-        else:
-            pselector = selectors.SelectSelector
+    def rangeMayInfinite(start, end):
+        assert start == 0 and end >= 0
 
-        # redirect proc.stdout/proc.stderr to stdout/stderr
-        # make CalledProcessError contain stdout/stderr content
-        sStdout = b''
-        with pselector() as selector:
-            os.set_blocking(proc.stdout.fileno(), False)
-            selector.register(proc.stdout, selectors.EVENT_READ)
-            while selector.get_map():
-                res = selector.select(TIMEOUT)
-                for key, events in res:
-                    data = key.fileobj.read()
-                    if data == b'':
-                        selector.unregister(key.fileobj)
-                        continue
-                    sStdout += data
-                    sys.stdout.buffer.write(data)
-                    sys.stdout.flush()
-
-        retcode = proc.wait()
-        if retcode != 0:
-            raise subprocess.CalledProcessError(retcode, proc.args, sStdout.decode(sys.stdout.encoding), "")
+        i = 0
+        while end == 0 or i < end:
+            yield i
+            if i >= sys.maxsize:
+                raise ValueError("value too large")
+            i += 1
 
     @staticmethod
-    def checkPrivateDomainNotExist(e):
-        # note: we are matching the output of a pty, take control characters into consideration
-
-        m = re.search("^fatal: unable to access '.*': Couldn't resolve host '(.*)'", e.stdout, re.M)
-        if m is not None:
-            if Util.domainNameIsPrivate(m.group(1)) and Util.domainNameNotExist(m.group(1)):
-                raise PrivateUrlNotExistError()
-
-        m = re.search("^fatal: unable to access '.*': Could not resolve host: (\\S+)", e.stdout, re.M)
-        if m is not None:
-            if Util.domainNameIsPrivate(m.group(1)) and Util.domainNameNotExist(m.group(1)):
-                raise PrivateUrlNotExistError()
-
-        m = re.search("^fatal: unable to access '(.*)': name lookup timed out", e.stdout, re.M)
-        if m is not None:
-            domain = urllib.parse.urlparse(m.group(1)).netloc
-            if Util.domainNameIsPrivate(domain) and Util.domainNameNotExist(domain):
-                raise PrivateUrlNotExistError()
+    def mergeDict(dict1, dict2):
+        ret = dict(dict1)
+        for k, v in dict2.items():
+            if k not in ret:
+                ret[k] = v
+        return ret
 
 
-if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        if sys.argv[1] == "clone":
-            assert not any(x in os.environ for x in additional_environ())
-            doGitNetOp("clone", sys.argv[2:])
-            sys.exit(0)
-        elif sys.argv[1] == "fetch":
-            assert not any(x in os.environ for x in additional_environ())
-            doGitNetOp("fetch", sys.argv[2:])
-            sys.exit(0)
-        elif sys.argv[1] == "pull":
-            doGitNetOp("pull", sys.argv[2:])
-            sys.exit(0)
+class TeeThread(threading.Thread):
 
-    subprocess.check_call(["/usr/bin/git-reference"] + sys.argv[1:])
+    def __init__(self, fd, out_fd, name):
+        super().__init__(name='git.tee.%s' % (name))
+        self.data = None
+        self.fd = fd
+        self.out_fd = out_fd
+
+    def run(self):
+        chunks = []
+        for line in self.fd:
+            chunks.append(line)
+            self.out_fd.write(line)
+        self.data = ''.join(chunks)
+
+
+class GitHttpConnectionTimeoutExtension:
+
+    @staticmethod
+    def additional_environ():
+        return {
+            "GIT_HTTP_LOW_SPEED_LIMIT": "1024",
+            "GIT_HTTP_LOW_SPEED_TIME": "60",            # we don't use GIT_HTTP_CONNECT_TIMEOUT as git network operation is not "continuable"
+            "GIT_HTTP_CONNECT_TIMEOUT": "10",           # only has effect for patched git (https://stackoverflow.com/questions/28180013/can-you-specify-a-timeout-to-git-fetch)
+        }
+
+
+class GitRetry:
+
+    GIT_EXE = '/usr/libexec/git-core/git'
+
+    DEFAULT_DELAY_SECS = 3.0
+
+    DEFAULT_RETRY_COUNT = 5
+
+    DEFAULT_DELAY_FACTOR = 2
+
+    MAX_DELAY_FACTOR_ITERATION = 3
+
+    # Retry a git operation if git returns a error response with any of these
+    # messages. It's all observed 'bad' GoB responses so far.
+    #
+    # This list is from Infra Git wrapper:
+    # https://chromium.googlesource.com/infra/infra/+/HEAD/go/src/infra/tools/git
+    GIT_TRANSIENT_ERRORS_RE = re.compile('|'.join([
+        # crbug.com/285832
+        r'!.*\[remote rejected\].*\(error in hook\)',
+        # crbug.com/289932
+        r'!.*\[remote rejected\].*\(failed to lock\)',
+        # crbug.com/307156
+        r'!.*\[remote rejected\].*\(error in Gerrit backend\)',
+        # crbug.com/285832
+        r'remote error: Internal Server Error',
+        # crbug.com/294449
+        r'fatal: Couldn\'t find remote ref ',
+        # crbug.com/220543
+        r'git fetch_pack: expected ACK/NAK, got',
+        # crbug.com/189455
+        r'protocol error: bad pack header',
+        # crbug.com/202807
+        r'The remote end hung up unexpectedly',
+        # crbug.com/298189
+        r'TLS packet with unexpected length was received',
+        # crbug.com/187444
+        r'RPC failed; result=\d+, HTTP code = \d+',
+        # crbug.com/388876
+        r'Connection timed out',
+        # crbug.com/430343
+        # TODO(dnj): Resync with Chromite.
+        r'The requested URL returned error: 5\d+',
+        r'Connection reset by peer',
+        r'Unable to look up',
+        r'Couldn\'t resolve host',
+        r'Could not resolve host',
+    ]), re.IGNORECASE)
+
+    def __init__(self, retry_count=None, delay=None, delay_factor=None):
+        self.retry_count = retry_count if retry_count is not None else self.DEFAULT_RETRY_COUNT     # self.retry_count can be zero, which means retry infinitely
+        self.delay = delay if delay is not None else self.DEFAULT_DELAY_SECS
+        self.delay_factor = delay_factor if delay_factor is not None else self.DEFAULT_DELAY_FACTOR
+
+        assert self.retry_count >= 0
+        assert self.delay >= 0
+        assert self.delay_factor >= 0
+
+    def run(self, args):
+        returncode = 0
+
+        for i in Util.rangeMayInfinite(0, self.retry_count):
+            # If the previous run failed and a delay is configured, delay before the next run.
+            delay = self._computeDelay(i)
+            if delay > 0:
+                print("Delaying for %s second(s) until next retry" % (delay))
+                time.sleep(delay)
+
+            returncode, _, stderr = self._execute(args)
+            if returncode == 0:
+                break
+            if not self._shouldRetry(stderr):
+                return returncode
+
+        return returncode
+
+    def _shouldRetry(self, stderr):
+      return self.GIT_TRANSIENT_ERRORS_RE.search(stderr) is not None
+
+    def _execute(self, args):
+        args = [self.GIT_EXE] + args
+        proc = subprocess.Popen(
+            args,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            env=Util.mergeDict(os.environ, GitHttpConnectionTimeoutExtension.additional_environ()),
+        )
+        stderr_tee = TeeThread(proc.stderr, sys.stderr, 'stderr')
+        # Start our process. Collect/tee 'stdout' and 'stderr'.
+        stderr_tee.start()
+        try:
+          proc.wait()
+        except KeyboardInterrupt:
+          proc.terminate()
+          proc.wait()
+        finally:
+          stderr_tee.join()
+        return proc.returncode, None, stderr_tee.data
+
+    def _computeDelay(self, iteration):
+        """Returns: the delay (in seconds) for a given iteration. The first iteration has a delay of '0'.
+          Args: iteration: (int) The iteration index (starting with zero as the first iteration).
+        """
+
+        if self.delay == 0 or iteration == 0:
+            return 0
+
+        if self.delay_factor == 0:
+            # Linear delay
+            return iteration * self.delay
+        else:
+            # Exponential delay
+            iteration = min(iteration, self.MAX_DELAY_FACTOR_ITERATION)
+            return (self.delay_factor ** (iteration - 1)) * self.delay
+
+
+if __name__ == '__main__':
+    obj = GitRetry()
+    returncode = obj.run(sys.argv[1:])
+    sys.exit(returncode)
