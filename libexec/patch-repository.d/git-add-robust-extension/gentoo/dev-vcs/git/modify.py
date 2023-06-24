@@ -13,7 +13,7 @@ shutil.copyfile(os.path.join(selfDir, "files", "git"), os.path.join("files", "gi
 try:
     # what to insert (with blank line in the beginning and the end)
     buf2 = r"""
-dobin "${FILESDIR}/git"     \# /usr/bin/git is the same as /usr/libexec/git-core/git, replace it with our own script
+dobin "${FILESDIR}/git"     \# /usr/bin/git is the same as /usr/libexec/git-core/git, replace /usr/bin/git with our own robust script that calls /usr/libexec/git-core/git
 """
     buf2 = ""                            # FIXME
     buf2 = buf2.replace("\n", "\n\t")
