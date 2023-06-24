@@ -764,12 +764,12 @@ media-sound/vkeybd                                          alsa                
 media-video/mpv                                             -alsa pipewire      # sound route 1
 net-im/zoom                                                 pulseaudio          # sound route 4 (bad), doesn't support alsa, gstreamer and pipewire
 net-misc/freerdp                                            pulseaudio          # sound route 4 (bad), strange, it has USE flag alsa, ffmepg, gstreamer and pulseaudio. It seems disable alsa+pulseaudio would make it route to OSS.
+net-wireless/gqrx                                           pulseaudio          # sound route 4 (bad)
 media-libs/libcanberra                                      -alsa gstreamer     # sound route 2
 media-sound/spotify                                         pulseaudio          # sound route 4 (bad), doesn't support alsa, gstreamer and pipewire
 www-client/firefox-bin                                      -alsa pulseaudio    # sound route 4 (bad), doesn't support alsa, gstreamer and pipewire, it's alsa flag is for medis-sound/apulse
 www-client/chromium                                         pulseaudio          # sound route 4 (bad), doesn't support alsa, gstreamer and pipewire
 x11-libs/wxGTK                                              gstreamer           # sound route 2
-
 
 # keep pulseaudio minimal
 */*                                                         -pulseaudio         # note: */* USE flag has a lower priority than package specific USE flags above
