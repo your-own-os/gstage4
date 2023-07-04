@@ -31,11 +31,13 @@ class TailorSystemd:
         self._removeItems = remove_items
 
     def update_target_settings(self, host_info, target_settings):
+        assert "10-tailor-systemd" not in target_settings.pkg_mask_files
         assert "10-tailor-systemd" not in target_settings.install_mask_files
 
         disableItems = list(self._disableItems)
         removeItems = list(self._removeItems)
         td = {}
+        tm = []
 
         def _updateDict(src):
             for k, v in src.items():
@@ -63,6 +65,10 @@ class TailorSystemd:
 
         if "systemd-coredump" in removeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-coredump-user"))
+            tm += [
+                "acct-user/systemd-coredump",
+                "acct-group/systemd-coredump",
+            ]
             _updateDict({
                 "sys-apps/systemd": [
                     "*coredump*",
@@ -71,6 +77,9 @@ class TailorSystemd:
             removeItems.remove("systemd-coredump")
 
         if "systemd-hostnamed" in removeItems:
+            tm += [
+                "acct-group/systemd-hostname",
+            ]
             _updateDict({
                 "sys-apps/systemd": [
                     "*hostname1*",
@@ -120,6 +129,10 @@ class TailorSystemd:
 
         if "systemd-networkd" in removeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-network-user"))
+            tm += [
+                "acct-user/systemd-network",
+                "acct-group/systemd-network",
+            ]
             _updateDict({
                 "sys-apps/systemd": [
                     "*network*",
@@ -140,6 +153,10 @@ class TailorSystemd:
 
         if "systemd-oomd" in removeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-oom-user"))
+            tm += [
+                "acct-user/systemd-oom",
+                "acct-group/systemd-oom",
+            ]
             _updateDict({
                 "sys-apps/systemd": [
                     "*oom1*",
@@ -159,6 +176,10 @@ class TailorSystemd:
 
         if "systemd-resolvd" in removeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-resolve-user"))
+            tm += [
+                "acct-user/systemd-resolve",
+                "acct-group/systemd-resolve",
+            ]
             _updateDict({
                 "sys-apps/systemd": [
                     "*resolv*",
@@ -200,6 +221,10 @@ class TailorSystemd:
 
         if "systemd-timesyncd" in removeItems:
             target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-timesync-user"))
+            tm += [
+                "acct-user/systemd-timesync",
+                "acct-group/systemd-timesync",
+            ]
             _updateDict({
                 "sys-apps/systemd": [
                     "*timesync*",
@@ -253,24 +278,9 @@ class TailorSystemd:
             })
             removeItems.remove("ldconfig.service")
 
-        if "hardware-groups" in removeItems:
-            # FIXME: many applications are using them, why?
-            assert False
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-tty-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-dailout-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-kmem-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-input-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-video-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-render-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-sgx-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-audio-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-lp-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-disk-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-cdrom-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-tape-group"))
-            target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "systemd-remove-kvm-group"))
-
         assert len(removeItems) == 0
+        if len(tm) > 0:
+            target_settings.pkg_mask_files["10-tailor-systemd"] = "\n".join(tm) + "\n"
         if len(td) > 0:
             target_settings.install_mask_files["10-tailor-systemd"] = td
 
