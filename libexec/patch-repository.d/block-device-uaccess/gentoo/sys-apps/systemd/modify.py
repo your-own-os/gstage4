@@ -12,7 +12,7 @@ sed -i -E ':x; /\\$/ { N; s/\\\n +//; tx }'   ${D}/usr/lib/udev/rules.d/70-uacce
 
 sed -i '/# optical drives/i \
 # all kinds of disks\
-SUBSYSTEM=="block", TAG+="uaccess"
+SUBSYSTEM=="block", TAG+="uaccess"\
 ' ${D}/usr/lib/udev/rules.d/70-uaccess.rules
 
 sed -i -E 's/TAG=="uaccess", SUBSYSTEM!="sound"/TAG=="uaccess", SUBSYSTEM!="block|sound"/g' ${D}/usr/lib/udev/rules.d/71-seat.rules
