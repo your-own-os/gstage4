@@ -141,25 +141,6 @@ sec-policy/selinux-logrotate
 """
 
 
-class NotUseUdisks:
-
-    def update_target_settings(self, target_settings):
-        assert "10-no-udisks" not in target_settings.pkg_use_files
-        assert "10-no-udisks" not in target_settings.pkg_mask_files
-
-        target_settings.pkg_use_files["10-no-udisks"] = self._useFileContent.strip("\n") + "\n"
-        target_settings.pkg_mask_files["10-no-udisks"] = self._maskFileContent.strip("\n") + "\n"
-
-    _useFileContent = """
-*/*     -udisks
-"""
-
-    _maskFileContent = """
-sys-fs/udisks
-sys-fs/udisks-glue
-"""
-
-
 class NotUsePolicyKit:
 
     def update_target_settings(self, target_settings):

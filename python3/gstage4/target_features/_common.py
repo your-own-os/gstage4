@@ -800,3 +800,23 @@ media-sound/jack-audio-connection-kit
 #media-sound/alsa-tools                                                                                                    # FIXME
 #media-sound/alsa-utils                                                                                                    # FIXME
 """
+
+
+class BlockDeviceEnableUAccess:
+
+    def update_target_settings(self, host_info, target_settings):
+        assert "10-block-device-enable-uaccess" not in target_settings.pkg_use_files
+        assert "10-block-device-enable-uaccess" not in target_settings.pkg_mask_files
+
+        target_settings.pkg_use_files["10-block-device-enable-uaccess"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-block-device-enable-uaccess"] = self._maskFileContent.strip("\n") + "\n"
+
+        target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "block-device-uaccess"))
+
+    _useFileContent = """
+*/*     -udisks
+"""
+
+    _maskFileContent = """
+sys-fs/udisks
+"""

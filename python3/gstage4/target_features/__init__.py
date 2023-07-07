@@ -55,6 +55,7 @@ from ._common import PreferPipewire
 from ._common import DisablePcSpeaker
 from ._common import DisableFstab
 from ._common import RemoveDoc
+from ._common import BlockDeviceEnableUAccess
 
 from ._common import SupportAllVideoFormat
 from ._common import SupportAllAudioFormat
@@ -82,7 +83,6 @@ from ._application import UseAllQemuTargets
 from ._application import NotUseLogrotate
 from ._application import NotUsePolicyKit
 from ._application import NotUseSudo
-from ._application import NotUseUdisks
 
 from ._application import MemTest
 from ._application import SshServer
