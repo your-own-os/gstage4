@@ -37,8 +37,6 @@ from ._common import NotUseVT
 from ._common import UseGnomeKeyring
 from ._common import UseKeePassXc
 
-from ._common import UseWget2
-
 from ._common import AcceptAllLicenses
 from ._common import NotUseDeprecatedPackagesAndFunctions
 from ._common import UsrMerge
@@ -52,6 +50,7 @@ from ._common import PreferSystemComponent
 from ._common import PreferWayland
 from ._common import PreferPipewire
 from ._common import PreferBlockDeviceUAccess
+from ._common import PreferWget2
 
 from ._common import DisablePcSpeaker
 from ._common import DisableFstab

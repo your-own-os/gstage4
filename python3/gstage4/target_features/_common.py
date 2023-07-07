@@ -429,12 +429,12 @@ app-admin/gnome-keyring
 """
 
 
-class UseWget2:
+class PreferWget2:
 
     def update_target_settings(self, target_settings):
-        assert "10-wget2" not in target_settings.pkg_mask_files
+        assert "10-prefer-wget2" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-wget2"] = self._maskFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-prefer-wget2"] = self._maskFileContent.strip("\n") + "\n"
 
         # FIXME: keepassxc has no pam integration?
         assert False
@@ -805,11 +805,11 @@ media-sound/jack-audio-connection-kit
 class PreferBlockDeviceUAccess:
 
     def update_target_settings(self, host_info, target_settings):
-        assert "10-block-device-enable-uaccess" not in target_settings.pkg_use_files
-        assert "10-block-device-enable-uaccess" not in target_settings.pkg_mask_files
+        assert "10-prefer-block-device-uaccess" not in target_settings.pkg_use_files
+        assert "10-prefer-block-device-uaccess" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_use_files["10-block-device-enable-uaccess"] = self._useFileContent.strip("\n") + "\n"
-        target_settings.pkg_mask_files["10-block-device-enable-uaccess"] = self._maskFileContent.strip("\n") + "\n"
+        target_settings.pkg_use_files["10-prefer-block-device-uaccess"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-prefer-block-device-uaccess"] = self._maskFileContent.strip("\n") + "\n"
 
         target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "block-device-uaccess"))
 
