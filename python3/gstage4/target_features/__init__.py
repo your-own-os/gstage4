@@ -51,11 +51,11 @@ from ._common import PreferSourcePackage
 from ._common import PreferSystemComponent
 from ._common import PreferWayland
 from ._common import PreferPipewire
+from ._common import PreferBlockDeviceUAccess
 
 from ._common import DisablePcSpeaker
 from ._common import DisableFstab
 from ._common import RemoveDoc
-from ._common import BlockDeviceEnableUAccess
 
 from ._common import SupportAllVideoFormat
 from ._common import SupportAllAudioFormat

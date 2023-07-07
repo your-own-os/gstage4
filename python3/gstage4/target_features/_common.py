@@ -802,7 +802,7 @@ media-sound/jack-audio-connection-kit
 """
 
 
-class BlockDeviceEnableUAccess:
+class PreferBlockDeviceUAccess:
 
     def update_target_settings(self, host_info, target_settings):
         assert "10-block-device-enable-uaccess" not in target_settings.pkg_use_files
