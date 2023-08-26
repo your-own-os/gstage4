@@ -1,10 +1,11 @@
 #!/bin/sh
 while true ; do
     wget-reference $@
-    if [ $? == 4 ] ; then
+    ret=$?
+    if [ $ret == 4 ] ; then
         echo "Failed due to network error, will retry after 10 seconds."        # FIXME: should check --quiet in $@
         sleep 10                                                                # FIXME: should use retrywait in /etc/wgetrc and cli parameters
         continue
     fi
-    exit $?
+    exit $ret
 done
