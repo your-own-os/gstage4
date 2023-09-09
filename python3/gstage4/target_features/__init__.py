@@ -26,6 +26,7 @@ from ._common import UsePortage
 
 from ._common import UseGenkernel
 from ._common import UseBinaryKernel
+from ._common import UseBbki
 from ._common import UseFakeKernel
 
 from ._common import UseOpenrc

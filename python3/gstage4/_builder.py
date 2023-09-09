@@ -231,6 +231,9 @@ class Builder:
                 __worldNeeded("sys-kernel/genkernel")
             elif ts.kernel_manager == "binary-kernel":
                 __worldNeeded("sys-kernel/gentoo-kernel-bin")
+            elif ts.kernel_manager == "bbki":
+                # FIXME
+                assert False
             elif ts.kernel_manager == "fake":
                 pass
             else:
@@ -305,6 +308,10 @@ class Builder:
 
         if ts.kernel_manager == "binary-kernel":
             return
+
+        if ts.kernel_manager == "bbki":
+            # FIXME
+            assert False
 
         if ts.kernel_manager == "fake":
             bootDir = os.path.join(self._workDirObj.path, "boot")
