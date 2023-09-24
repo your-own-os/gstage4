@@ -1,0 +1,15 @@
+diff --git a/klaus/repo.py b/klaus/repo.py
+index 2b2315c..a3c1853 100644
+--- a/klaus/repo.py
++++ b/klaus/repo.py
+@@ -74,6 +74,10 @@ class FancyRepo:
+     def __getitem__(self, key):
+         return self.dulwich_repo[key]
+ 
++    # dulswich calls FancyRepo.get_refs(), we need to pass this call to self.dulwich_repo
++    def __getattr__(self, attr):
++        return getattr(self.dulwich_repo, attr)
++
+     # TODO: factor out stuff into dulwich
+     @synchronized
+     def get_last_updated_at(self):
