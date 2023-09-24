@@ -272,7 +272,7 @@ sys-libs/libstdc++-v3
 # deprecated by dev-libs/rocm-opencl-runtime
 dev-libs/amdgpu-pro-opencl
 
-# zoninfo in python standard library deprecates these since python3.9
+# zoneinfo in python standard library deprecates these since python3.9
 #dev-python/pytz                                                                   # FIXME
 dev-python/pytzdata
 

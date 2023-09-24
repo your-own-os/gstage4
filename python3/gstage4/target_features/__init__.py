@@ -79,6 +79,8 @@ from ._tailor import TailorLmSensors
 from ._mirror import UseGogMirror
 from ._mirror import UseHbMirror
 
+from ._new_use import AddStandaloneServiceUseFlag
+
 from ._application import UseAllQemuTargets
 from ._application import NotUseLogrotate
 from ._application import NotUsePolicyKit
