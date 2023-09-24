@@ -281,7 +281,7 @@ acct-user/i2p
 acct-group/i2p
 net-vpn/i2p
 
-# why application relies on old version electon?
+# why application relies on old version electron?
 <dev-util/electon-6.0.0
 
 # why use the old version openssl?
