@@ -153,11 +153,17 @@ class UseSystemd:
         world_set.add("sys-apps/systemd")
 
     _useFileContent = """
+# system component should use systemd
+sys-apps/util-linux                                                  systemd          # I'm not sure, but I think it'd better to enable it
+sys-libs/glibc                                                       systemd          # I'm not sure, but I think it'd better to enable it
+sys-apps/dbus                                                        systemd          # I'm not sure, but I think it'd better to enable it
+sys-auth/seatd                                                       systemd          # so that libseat can communicate with systemd
+
 # so that we can use systemd-udev
-virtual/libudev                        systemd
+virtual/libudev                                                      systemd
 
 # so that it does not depends on gui-libs/display-manager-init
-x11-base/xorg-server                   systemd
+x11-base/xorg-server                                                 systemd
 """
 
     _maskFileContent = """
