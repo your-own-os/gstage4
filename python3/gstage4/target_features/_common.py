@@ -769,6 +769,7 @@ games-fps/serioussam-tfe-vk                                 -alsa pipewire      
 games-fps/serioussam-tse                                    -alsa pipewire      # sound route 1
 games-fps/serioussam-tse-vk                                 -alsa pipewire      # sound route 1
 gui-libs/gtk                                                gstreamer           # sound route 2
+media-gfx/blender                                           openal              # sound route 3
 media-libs/libmikmod                                        -alsa openal        # sound route 3
 media-libs/libsdl                                           -alsa               # sound route 1, support pipewire through media-libs/libsdl2
 media-libs/libsdl2                                          -alsa pipewire      # sound route 1
