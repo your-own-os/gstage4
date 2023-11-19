@@ -191,6 +191,7 @@ class TailorSystemd:
             _updateDict({
                 "sys-apps/systemd": [
                     "*sysext*",
+                    "*confext*",
                 ],
             })
             removeItems.remove("systemd-sysext")
