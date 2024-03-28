@@ -161,6 +161,7 @@ sys-auth/seatd                                                       systemd    
 
 # so that we can use systemd-udev
 virtual/libudev                                                      systemd
+virtual/udev                                                         systemd
 
 # so that it does not depends on gui-libs/display-manager-init
 x11-base/xorg-server                                                 systemd
