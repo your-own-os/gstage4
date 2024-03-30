@@ -93,6 +93,14 @@ class TailorSystemd:
             })
             removeItems.remove("systemd-dissect")
 
+        if "systemd-firstboot" in removeItems:
+            _updateDict({
+                "sys-apps/systemd": [
+                    "*firstboot*",
+                ],
+            })
+            removeItems.remove("systemd-firstboot")
+
         if "systemd-hostnamed" in removeItems:
             tm += [
                 "acct-group/systemd-hostname",
@@ -105,14 +113,6 @@ class TailorSystemd:
                 ],
             })
             removeItems.remove("systemd-hostnamed")
-
-        if "systemd-firstboot" in removeItems:
-            _updateDict({
-                "sys-apps/systemd": [
-                    "*firstboot*",
-                ],
-            })
-            removeItems.remove("systemd-firstboot")
 
         if "systemd-kexec" in removeItems:
             _updateDict({
@@ -203,6 +203,15 @@ class TailorSystemd:
                 ],
             })
             removeItems.remove("systemd-resolvd")
+
+        if "systemd-storagetm" in removeItems:
+            _updateDict({
+                "sys-apps/systemd": [
+                    "*storagetm*",
+                    "*storage-target-mode.target",
+                ],
+            })
+            removeItems.remove("systemd-storagetm")
 
         if "systemd-sysext" in removeItems:
             _updateDict({
