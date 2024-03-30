@@ -252,6 +252,14 @@ class TailorSystemd:
             })
             removeItems.remove("systemd-userdbd")
 
+        if "systemd-battery-check" in removeItems:
+            _updateDict({
+                "sys-apps/systemd": [
+                    "*battery-check*",
+                ],
+            })
+            removeItems.remove("systemd-battery-check")
+
         if "fstab" in removeItems:
             _updateDict({
                 "sys-apps/systemd": [
