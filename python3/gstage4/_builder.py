@@ -154,7 +154,7 @@ class Builder:
         # set profile
         with _MyChrooter(self) as m:
             if self._ts.profile is not None:
-                profile = self._ts.profie
+                profile = self._ts.profile
             else:
                 # generally the default profile is the first stable profile in list
                 out = m.shell_call("", "eselect profile list")
