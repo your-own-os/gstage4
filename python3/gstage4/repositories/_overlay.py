@@ -65,22 +65,22 @@ class RegisteredOverlay(EmergeSyncRepository):
 
     _foreignData = (0, None)
 
-    def __init__(self, overlay_name, repositories_data=None):
-        if repositories_data is not None:
+    def __init__(self, overlay_name, local_data=None):
+        if local_data is not None:
             if self._foreignData[0] == 0:
-                self._foreignData = (1, repositories_data)
+                self._foreignData = (1, local_data)
             else:
-                assert self._foreignData[0] == 1 and self._foreignData[1] == repositories_data
+                assert self._foreignData[0] == 1 and self._foreignData[1] == local_data
         else:
             if self._foreignData[0] == 0:
                 self._foreignData = (-1, None)
             else:
                 assert self._foreignData[0] == -1
-            repositories_data = self._parse()
+            local_data = self._parse()
 
         self._name = overlay_name
-        self._syncType = repositories_data[overlay_name][0]
-        self._syncUrl = repositories_data[overlay_name][1]
+        self._syncType = local_data[overlay_name][0]
+        self._syncUrl = local_data[overlay_name][1]
 
     def get_name(self):
         return self._name
