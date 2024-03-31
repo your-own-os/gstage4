@@ -97,8 +97,8 @@ class RegisteredOverlay(EmergeSyncRepository):
         buf += "sync-uri = %s\n" % (self._syncUrl)
         return buf
 
-    @staticmethod
     @functools.cache
+    @staticmethod
     def _parse():
         cList = [
             ("git", "https", "github.com"),
