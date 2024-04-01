@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 
-import functools
 import lxml.etree
 import urllib.request
 from .. import MountRepository
@@ -73,10 +72,10 @@ class RegisteredOverlay(EmergeSyncRepository):
                 assert self._foreignData[0] == 1 and self._foreignData[1] == local_data
         else:
             if self._foreignData[0] == 0:
-                self._foreignData = (-1, None)
+                self._foreignData = (-1, self._parse())
             else:
-                assert self._foreignData[0] == -1
-            local_data = self._parse()
+                assert self._foreignData[0] == -1 and self._foreignData[1] is not None
+            local_data = self._foreignData[1]
 
         self._name = overlay_name
         self._syncType = local_data[overlay_name][0]
@@ -97,7 +96,6 @@ class RegisteredOverlay(EmergeSyncRepository):
         buf += "sync-uri = %s\n" % (self._syncUrl)
         return buf
 
-    @functools.cache
     @staticmethod
     def _parse():
         cList = [
