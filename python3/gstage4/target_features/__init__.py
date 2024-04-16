@@ -78,6 +78,7 @@ from ._tailor import TailorLmSensors
 
 from ._mirror import UseGogMirror
 from ._mirror import UseHbMirror
+from ._mirror import UseHuggingFaceMirror
 
 from ._new_use import AddSystemServiceUseFlag
 
