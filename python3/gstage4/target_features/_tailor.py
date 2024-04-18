@@ -291,8 +291,12 @@ class TailorSystemd:
             _updateDict({
                 "sys-apps/systemd": [
                     "*repart*",
+                    "/usr/lib/systemd/repart",
+                ] + [
                     "*makefs*",
+                ] + [
                     "*growfs*",
+                ] + [
                     "*mkswap*",
                 ],
             })
