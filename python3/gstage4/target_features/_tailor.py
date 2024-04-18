@@ -137,6 +137,7 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*machine*",
                     "*nspawn*",
+                    "*vmspawn*",
                     "*detect-virt*",
                     "*exit.target",
                     "*systemd-exit.service",
