@@ -678,33 +678,3 @@ class TailorPam:
         assert len(items) == 0
         if len(td) > 0:
             target_settings.install_mask_files["10-tailor-pam"] = td
-
-
-class TailorChrony:
-
-    def __init__(self, remove_items=[]):
-        self._removeItems = remove_items
-
-    def update_target_settings(self, host_info, target_settings):
-        assert "10-tailor-chrony" not in target_settings.install_mask_files
-
-        items = list(self._removeItems)
-        td = {}
-
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
-        if "ntp-units" in items:
-            _updateDict({
-                "net-misc/chrony": [
-                    "/usr/lib/systemd/ntp-units.d",
-                ],
-            })
-            items.remove("ntp-units")
-
-        assert len(items) == 0
-        if len(td) > 0:
-            target_settings.install_mask_files["10-tailor-chrony"] = td
