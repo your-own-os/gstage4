@@ -80,6 +80,9 @@ class UseBinaryKernel:
 class UseBbki:
 
     def update_target_settings(self, target_settings):
+        assert "10-bbki" not in target_settings.pkg_use_files
+        assert "10-bbki" not in target_settings.pkg_mask_files
+
         target_settings.kernel_manager = "bbki"
         target_settings.kernel_manager_bbki = {
             "kernel": "linux",
@@ -87,8 +90,25 @@ class UseBbki:
             }
         }
 
-        # FIXME
-        assert False
+        target_settings.pkg_use_files["10-bbki"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-bbki"] = self._maskFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+"""
+
+    _maskFileContent = """
+# we don't use any kernel & firmware related package
+virtual/linux-sources
+sys-kernel/*-sources
+sys-kernel/*-kernel
+sys-kernel/*-kernel-bin
+net-wireless/wireless-regdb
+app-emulation/virtualbox-modules
+sys-fs/vhba
+
+# we manage kernel ourself
+sys-kernel/installkernel-*
+"""
 
 
 class UseFakeKernel:
