@@ -30,7 +30,3 @@ sed -i 's#"$HERE/chrome" "$@"#"$HERE/chrome" --enable-features=UseOzonePlatform 
             f.write(buf)
 except ValueError:
     print("outdated")
-
-
-
-

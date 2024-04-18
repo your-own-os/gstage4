@@ -79,7 +79,7 @@ class UseBinaryKernel:
 
 class UseBbki:
 
-    def update_target_settings(self, target_settings):
+    def update_target_settings(self, host_info, target_settings):
         assert "10-bbki" not in target_settings.pkg_use_files
         assert "10-bbki" not in target_settings.pkg_mask_files
 
@@ -92,6 +92,7 @@ class UseBbki:
 
         target_settings.pkg_use_files["10-bbki"] = self._useFileContent.strip("\n") + "\n"
         target_settings.pkg_mask_files["10-bbki"] = self._maskFileContent.strip("\n") + "\n"
+        target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "use-bbki"))
 
     _useFileContent = """
 """
