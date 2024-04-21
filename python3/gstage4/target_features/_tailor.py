@@ -68,6 +68,10 @@ class TailorSystemd:
                     "*/systemd-boot.7.bz2",
                     "*systemd-boot-system-token*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*bootctl*",
+                    "*systemd-boot-system-token*",
+                ],
             })
             removeItems.remove("systemd-boot")
 
@@ -81,6 +85,9 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*coredump*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*coredump*",
+                ],
             })
             removeItems.remove("systemd-coredump")
 
@@ -90,6 +97,9 @@ class TailorSystemd:
                     "*systemd-dissect*",
                     "*mount.ddi*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*systemd-dissect*",
+                ],
             })
             removeItems.remove("systemd-dissect")
 
@@ -98,11 +108,11 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*firstboot*",
                 ],
-                "app-i18n/man-pages-l10n": [
-                    "*systemd-firstboot*",      # weird: why i18n man pages not in systemd pakage itself?
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*systemd-firstboot*",
                 ],
-                "app-i18n/man-pages-zh_CN": [
-                    "*systemd-firstboot*",      # weird: why i18n man pages not in systemd pakage itself?
+                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
+                    "*systemd-firstboot*",
                 ],
             })
             removeItems.remove("systemd-firstboot")
@@ -114,6 +124,14 @@ class TailorSystemd:
             _updateDict({
                 "sys-apps/systemd": [
                     "*hostname1*",
+                    "*hostnamed*",
+                    "*hostnamectl*",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*hostnamed*",
+                    "*hostnamectl*",
+                ],
+                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
                     "*hostnamed*",
                     "*hostnamectl*",
                 ],
@@ -135,6 +153,10 @@ class TailorSystemd:
                     "*localed*",
                     "*localectl*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*localed*",
+                    "*localectl*",
+                ],
             })
             removeItems.remove("systemd-localed")
 
@@ -148,6 +170,9 @@ class TailorSystemd:
                     "*exit.target",
                     "*systemd-exit.service",
                     "/usr/lib/systemd/system/machines.target.wants",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*machine*",                    # warn: may hide extra files
                 ],
             })
             removeItems.remove("systemd-machined")
@@ -164,6 +189,18 @@ class TailorSystemd:
                     "/usr/lib/systemd/network*",
                     "/etc/systemd/network",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*networkctl*",
+                    "*networkd*",
+                    "*systemd.network*",
+                    "*systemd-network*",
+                ],
+                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
+                    "*networkctl*",
+                    "*networkd*",
+                    "*systemd.network*",
+                    "*systemd-network*",
+                ],
                 "*/*": [
                     "/usr/lib/systemd/network",
                 ],
@@ -175,6 +212,10 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*portable*",
                     "/usr/lib/systemd/portable",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*portablectl*",
+                    "*systemd-portabled*",
                 ],
             })
             removeItems.remove("systemd-portabled")
@@ -191,6 +232,10 @@ class TailorSystemd:
                     "*oomd*",
                     "*oomctl*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*oomctl*",
+                    "*oomd*",
+                ],
             })
             removeItems.remove("systemd-oomd")
 
@@ -198,6 +243,9 @@ class TailorSystemd:
             _updateDict({
                 "sys-apps/systemd": [
                     "*pstore*",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*pstore*",                     # warn: may hide extra files
                 ],
             })
             removeItems.remove("systemd-pstore")
@@ -211,6 +259,16 @@ class TailorSystemd:
             _updateDict({
                 "sys-apps/systemd": [
                     "*resolv*",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*resolvectl*",
+                    "*resolved*",
+                    "*nss-resolve*",
+                ],
+                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
+                    "*resolvectl*",
+                    "*resolved*",
+                    "*nss-resolve*",
                 ],
             })
             removeItems.remove("systemd-resolvd")
@@ -230,6 +288,9 @@ class TailorSystemd:
                     "*sysext*",
                     "*confext*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*systemd-sysext*",
+                ],
             })
             removeItems.remove("systemd-sysext")
 
@@ -246,6 +307,9 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*sysusers*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*sysusers*",                   # warn: may hide extra files
+                ],
             })
             removeItems.remove("systemd-sysusers")
 
@@ -254,6 +318,10 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*timedate*",
                     "/usr/lib/systemd/ntp-units.d*",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*timedatectl*",
+                    "*systemd-timedated*",
                 ],
                 "*/*": [
                     "/usr/lib/systemd/ntp-units.d",
@@ -272,6 +340,9 @@ class TailorSystemd:
                     "*timesync*",
                     "*ntp*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*timesyncd*",
+                ],
             })
             removeItems.remove("systemd-timesyncd")
 
@@ -282,12 +353,18 @@ class TailorSystemd:
                     "*systemd-update-helper*",
                     "*update-done*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*systemd-system-update*",
+                ],
             })
             removeItems.remove("systemd-update")
 
         if "systemd-userdbd" in removeItems:
             _updateDict({
                 "sys-apps/systemd": [
+                    "*userdb*",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
                     "*userdb*",
                 ],
             })
@@ -298,6 +375,9 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*fstab*",
                 ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*systemd-fstab*",
+                ],
             })
             removeItems.remove("fstab")
 
@@ -306,12 +386,13 @@ class TailorSystemd:
                 "sys-apps/systemd": [
                     "*repart*",
                     "/usr/lib/systemd/repart",
-                ] + [
                     "*makefs*",
-                ] + [
                     "*growfs*",
-                ] + [
                     "*mkswap*",
+                ],
+                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                    "*repart*",
+                    "*makefs*",
                 ],
             })
             removeItems.remove("fs-operations")
