@@ -7,7 +7,7 @@ import pathlib
 try:
     # what to insert (with blank line in the beginning and the end)
     buf2 = r"""
-sed -i 's/--ms-enable-electron-run-as-node/--ms-enable-electron-run-as-node --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations/g' ${D}/opt/vscode/bin/code
+sed -i 's/ELECTRON_RUN_AS_NODE=1/ELECTRON_RUN_AS_NODE=1 ELECTRON_OZONE_PLATFORM_HINT=wayland/g' ${D}/opt/vscode/bin/code
 """
     buf2 = buf2.replace("\n", "\n\t")
     buf2 += "\n"
