@@ -803,16 +803,17 @@ class PreferPipewire:
 # prefered sound route: 1. pipewire -> alsa
 #                       2. gstreamer -> pipewire -> alsa
 #                       3. openal -> pipewire -> alsa
-#                       4. pulseaudio -> pipewire -> alsa (bad)
-#                       5. alsa -> pipewire -> alsa (worse)
-#                       6. alsa (forbidden)
+#                       4. fluidsynth -> pipewire -> alsa
+#                       5. pulseaudio -> pipewire -> alsa (bad)
+#                       6. alsa -> pipewire -> alsa (worse)
+#                       7. alsa (forbidden)
 app-emulation/qemu                                          pipewire            # sound route 1
 app-emulation/spice                                         gstreamer           # sound route 2
 app-emulation/wine-vanilla                                  -alsa pulseaudio    # sound route 4 (bad), gstreamer support in wine is not what we image
 app-emulation/wine-staging                                  -alsa pulseaudio    # sound route 4 (bad), gstreamer support in wine is not what we image
 app-emulation/virtualbox                                    alsa                # sound route 5 (worse)
 games-emulation/dosbox-staging                              alsa                # sound route 5 (worse)
-games-engines/scummvm                                       alsa                # sound route 5 (worse)
+games-engines/scummvm                                       -alsa fluidsynth    # sound route 4                       # ? really                  alsa                # sound route 5 (worse)
 games-fps/serioussam-tfe                                    -alsa pipewire      # sound route 1
 games-fps/serioussam-tfe-vk                                 -alsa pipewire      # sound route 1
 games-fps/serioussam-tse                                    -alsa pipewire      # sound route 1
