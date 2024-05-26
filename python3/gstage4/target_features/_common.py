@@ -521,7 +521,7 @@ class PreferLibtorrentRasterbar:
         target_settings.pkg_mask_files["10-prefer-libtorrent-rasterbar"] = self._maskFileContent.strip("\n") + "\n"
 
     _maskFileContent = """
-# we prefer net-libs/libtorrent-rasterbar
+# we use net-libs/libtorrent-rasterbar
 net-libs/libtorrent
 """
 
