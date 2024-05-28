@@ -8,6 +8,7 @@ import subprocess
 
 os.makedirs("files", exist_ok=True)
 subprocess.check_output(["git", "clone", "https://github.com/kjliew/qemu-3dfx", "files/qemu-3dfx"])
+subprocess.check_output("rm -rf files/qemu-3dfx/.*", shell=True)
 
 try:
     # what to insert (with blank line in the beginning and the end)
@@ -16,6 +17,7 @@ try:
 cp -r ${FILESDIR}/qemu-3dfx/qemu-0/hw/3dfx hw
 cp -r ${FILESDIR}/qemu-3dfx/qemu-1/hw/mesa hw
 patch -p0 -i ${FILESDIR}/qemu-3dfx/00-qemu82x-mesa-glide.patch
+bash ${FILESDIR}/qemu-3dfx/scripts/sign_commit
 """
     buf2 = buf2.replace("\n", "\n\t")
     buf2 += "\n"
