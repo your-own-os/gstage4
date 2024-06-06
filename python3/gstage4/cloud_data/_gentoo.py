@@ -73,10 +73,7 @@ class Gentoo:
 
         return self._snapshotList
 
-    def get_stage3_url(self, arch, subarch, stage3_release_variant, release_version):
-        self._ensureArchList()
-        self._ensureVariantDictAndVersionDict(arch)
-
+    def gen_stage3_url(self, arch, subarch, stage3_release_variant, release_version):
         releaseVariant = self.__stage3GetReleaseVariant(subarch, stage3_release_variant)
 
         fn, fnDigest = self.__getFn(releaseVariant, release_version)
@@ -100,14 +97,12 @@ class Gentoo:
 
         return (url, urlDigest)
 
-    def get_snapshot_url(self, snapshot_version):
-        self._ensureSnapshotList()
-
+    def gen_snapshot_url(self, snapshot_version):
         fn = "gentoo-%s.xz.sqfs" % (snapshot_version)
         url = os.path.join(self._baseUrl, "snapshots", "squashfs", fn)
         return url
 
-    def get_latest_snapshot(self):
+    def get_latest_snapshot_url(self):
         self._ensureSnapshotList()
 
         snapshot_version = sorted(self._snapshotList, reverse=True)[0]
