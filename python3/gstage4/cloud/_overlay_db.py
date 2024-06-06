@@ -23,31 +23,53 @@
 
 import lxml.etree
 import urllib.request
+from datetime import datetime
 from .. import UpstreamError
 
 
 class CloudOverlayDb:
 
+    URL = "https://api.gentoo.org/overlays/repositories.xml"
+
     def __init__(self):
-        self._data = self._parse()
+        self._data = None
+        self._lastModifiedTime = None
+
+    def get_last_modified_time(self):
+        self._ensureLastModifiedTime()
+        return self._lastModifiedTime
 
     def get_overlays(self):
+        self._ensureData()
         return self._data.keys()
 
     def has_overlay(self, overlay_name):
+        self._ensureData()
         return overlay_name in self._data
 
     def get_overlay_vcs_type(self, overlay_name):
+        self._ensureData()
         return self._data[overlay_name][0]
 
     def get_overlay_url(self, overlay_name):
+        self._ensureData()
         return self._data[overlay_name][1]
 
-    def export(self):
+    def export_data(self):
+        self._ensureData()
         return self._data
 
-    @staticmethod
-    def _parse():
+    def _ensureLastModifiedTime(self):
+        if self._lastModifiedTime is not None:
+            return
+
+        with urllib.request.urlopen(urllib.request.Request(self.URL, method="HEAD")) as resp:
+            self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
+
+    def _ensureData(self):
+        if self._data is not None:
+            return 
+
         cList = [
             ("git", "https", "github.com"),
             ("git", "https", "gitlab.com"),
@@ -61,8 +83,8 @@ class CloudOverlayDb:
             ("rsync", "rsync", None),
         ]
 
-        ret = dict()
-        with urllib.request.urlopen("https://api.gentoo.org/overlays/repositories.xml") as resp:
+        with urllib.request.urlopen(self.URL) as resp:
+            ret = dict()
             rootElem = lxml.etree.fromstring(resp.read()).getroot()
             for nameTag in rootElem.xpath(".//repo/name"):
                 overlayName = nameTag.text
@@ -90,4 +112,5 @@ class CloudOverlayDb:
                 if overlayName not in ret:
                     raise UpstreamError("no appropriate source for overlay \"%s\"" % (overlayName))
 
-        return ret
+            self._data = ret
+            self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
