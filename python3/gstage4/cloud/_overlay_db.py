@@ -31,7 +31,9 @@ class OverlayDb:
 
     URL = "https://api.gentoo.org/overlays/repositories.xml"
 
-    def __init__(self):
+    def __init__(self, strict=False, prefer_mirror=True):
+        self._bStrict = strict
+        self._bPreferMirror = prefer_mirror
         self._data = None
         self._lastModifiedTime = None
 
@@ -85,6 +87,7 @@ class OverlayDb:
 
         with urllib.request.urlopen(self.URL) as resp:
             ret = dict()
+
             rootElem = lxml.etree.fromstring(resp.read()).getroot()
             for nameTag in rootElem.xpath(".//repo/name"):
                 overlayName = nameTag.text
@@ -95,8 +98,11 @@ class OverlayDb:
                     for sourceTag in nameTag.xpath("../source"):
                         tVcsType = sourceTag.get("type")
                         tUrl = sourceTag.text
-                        if tUrl.startswith("git://github.com/"):                            # FIXME: github does not support git:// anymore
-                            tUrl = tUrl.replace("git://", "https://")
+                        if tUrl.startswith("git://github.com/"):
+                            if self._bStrict:
+                                raise UpstreamError("git://github.com in URL of overlay \"%s\" is not supported anymore" % (overlayName))
+                            else:
+                                tUrl = tUrl.replace("git://", "https://")
                         if tVcsType == vcsType:
                             if urlDomain is not None:
                                 if tUrl.startswith(urlProto + "://" + urlDomain + "/"):
@@ -111,6 +117,12 @@ class OverlayDb:
 
                 if overlayName not in ret:
                     raise UpstreamError("no appropriate source for overlay \"%s\"" % (overlayName))
+
+            if self._bPreferMirror:
+                for overlayName in ret.keys():
+                    # for github mirror
+                    if ret[overlayName][1].startswith("https://github.com/"):
+                        ret[overlayName] = (ret[overlayName][0], ret[overlayName][1].replace("https://github.com/", "mirror://github/"))
 
             self._data = ret
             self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")

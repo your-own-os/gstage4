@@ -21,7 +21,10 @@
 # THE SOFTWARE.
 
 
-class CloudCacheGentoo:
+import mrget
+
+
+class Gentoo:
 
     def __init__(self, cacheDir):
         self._baseUrl = mrget.target_urls("mirror://gentoo", protocols=["http", "https", "ftp"])[0]
