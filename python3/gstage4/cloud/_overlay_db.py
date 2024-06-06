@@ -27,7 +27,7 @@ from datetime import datetime
 from .. import UpstreamError
 
 
-class CloudOverlayDb:
+class OverlayDb:
 
     URL = "https://api.gentoo.org/overlays/repositories.xml"
 

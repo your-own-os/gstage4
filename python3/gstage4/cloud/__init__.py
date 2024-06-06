@@ -21,4 +21,4 @@
 # THE SOFTWARE.
 
 
-from ._overlay_db import CloudOverlayDb
+from ._overlay_db import OverlayDb
