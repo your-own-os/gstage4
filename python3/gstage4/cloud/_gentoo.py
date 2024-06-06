@@ -21,224 +21,156 @@
 # THE SOFTWARE.
 
 
+import os
+import re
 import mrget
+import lxml.html
+import urllib.request
 
 
 class Gentoo:
 
-    def __init__(self, cacheDir):
+    def __init__(self):
         self._baseUrl = mrget.target_urls("mirror://gentoo", protocols=["http", "https", "ftp"])[0]
+        self._releasesUrl = os.path.join(self._baseUrl, "releases")
+        self._snapshotsUrl = os.path.join(self._baseUrl, "snapshots")
 
-        self._dir = cacheDir
-        self._releasesDir = os.path.join(self._dir, "releases")
-        self._snapshotsDir = os.path.join(self._dir, "snapshots")
-
-        self._bSynced = (os.path.exists(self._releasesDir) and len(os.listdir(self._releasesDir)) > 0)
-
-    def sync(self):
-        os.makedirs(self._releasesDir, exist_ok=True)
-        os.makedirs(self._snapshotsDir, exist_ok=True)
-
-        # fill arch directories
-        if True:
-            archList = []
-            while True:
-                try:
-                    with urllib.request.urlopen(os.path.join(self._baseUrl, "releases"), timeout=robust_layer.TIMEOUT) as resp:
-                        root = lxml.html.parse(resp)
-                        for elem in root.xpath(".//a"):
-                            if elem.text is None:
-                                continue
-                            m = re.fullmatch("(\\S+)/", elem.text)
-                            if m is None or m.group(1) in [".", ".."]:
-                                continue
-                            archList.append(m.group(1))
-                        break
-                except Exception:
-                    print("Failed, retrying...")
-                    time.sleep(robust_layer.RETRY_WAIT)
-
-            # fill arch directories
-            FmUtil.syncDirs(archList, self._releasesDir)
-
-        # fill variant and release directories
-        for arch in archList:
-            variantList = []
-            versionList = []
-            while True:
-                try:
-                    with urllib.request.urlopen(self._getAutoBuildsUrl(arch), timeout=robust_layer.TIMEOUT) as resp:
-                        for elem in lxml.html.parse(resp).xpath(".//a"):
-                            if elem.text is not None:
-                                m = re.fullmatch("current-(\\S+)/", elem.text)
-                                if m is not None:
-                                    variantList.append(m.group(1))
-                                m = re.fullmatch("([0-9]+T[0-9]+Z)/", elem.text)
-                                if m is not None:
-                                    versionList.append(m.group(1))
-                        break
-                except Exception:
-                    print("Failed, retrying...")
-                    time.sleep(robust_layer.RETRY_WAIT)
-
-            # fill variant directories
-            archDir = os.path.join(self._releasesDir, arch)
-            FmUtil.syncDirs(variantList, archDir)
-
-            # fill release directories in variant directories
-            for variant in variantList:
-                FmUtil.syncDirs(versionList, os.path.join(archDir, variant))
-
-        # fill snapshots directory
-        if True:
-            versionList = []
-            while True:
-                try:
-                    with urllib.request.urlopen(os.path.join(self._baseUrl, "snapshots", "squashfs"), timeout=robust_layer.TIMEOUT) as resp:
-                        for elem in lxml.html.parse(resp).xpath(".//a"):
-                            if elem.text is not None:
-                                m = re.fullmatch("gentoo-([0-9]+).xz.sqfs", elem.text)
-                                if m is not None:
-                                    versionList.append(m.group(1))
-                        break
-                except Exception:
-                    print("Failed, retrying...")
-                    time.sleep(robust_layer.RETRY_WAIT)
-
-            # fill snapshots directories
-            FmUtil.syncDirs(versionList, self._snapshotsDir)
-
-        self._bSynced = True
+        self._archList = None
+        self._variantDict = dict()
+        self._versionDict = dict()
+        self._snapshotList = None
 
     def get_arch_list(self):
-        assert self._bSynced
-        return os.listdir(self._releasesDir)
+        self._ensureArchList()
+        return self._archList
 
     def get_subarch_list(self, arch):
-        assert self._bSynced
+        self._ensureArchList()
+        self._ensureVariantDictAndVersionDict(arch)
+
         ret = set()
-        for d in os.listdir(os.path.join(self._releasesDir, arch)):
+        for d in self._variantDict[arch]:
             ret.add(d.split("-")[1])
         return sorted(list(ret))
 
     def get_release_variant_list(self, arch):
-        assert self._bSynced
-        return os.listdir(os.path.join(self._releasesDir, arch))
+        self._ensureArchList()
+        self._ensureVariantDictAndVersionDict(arch)
+
+        return self._variantDict[arch]
 
     def get_release_version_list(self, arch):
-        assert self._bSynced
-        return os.listdir(os.path.join(self._releasesDir, arch, self.get_release_variant_list(arch)[0]))
+        self._ensureArchList()
+        self._ensureVariantDictAndVersionDict(arch)
+
+        return self._versionDict[arch]
 
     def get_snapshot_version_list(self):
-        assert self._bSynced
-        return os.listdir(self._snapshotsDir)
+        self._ensureSnapshotList()
 
-    def get_stage3(self, arch, subarch, stage3_release_variant, release_version, cached_only=False):
-        assert self._bSynced
+        return self._snapshotList
 
-        releaseVariant = self._stage3GetReleaseVariant(subarch, stage3_release_variant)
+    def get_stage3_url(self, arch, subarch, stage3_release_variant, release_version):
+        self._ensureArchList()
+        self._ensureVariantDictAndVersionDict(arch)
 
-        myDir = os.path.join(self._releasesDir, arch, releaseVariant, release_version)
-        if not os.path.exists(myDir):
-            raise FileNotFoundError("the specified stage3 does not exist")
+        releaseVariant = self.__stage3GetReleaseVariant(subarch, stage3_release_variant)
 
-        fn, fnDigest = self._getFn(releaseVariant, release_version)
-        fullfn = os.path.join(myDir, fn)
-        fullfnDigest = os.path.join(myDir, fnDigest)
+        fn, fnDigest = self.__getFn(releaseVariant, release_version)
 
-        url = os.path.join(self._getAutoBuildsUrl(arch), release_version, fn)
-        urlDigest = os.path.join(self._getAutoBuildsUrl(arch), release_version, fnDigest)
+        url = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), release_version, fn)
+        urlDigest = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), release_version, fnDigest)
 
-        if os.path.exists(fullfn) and os.path.exists(fullfnDigest):
-            print("Files already downloaded.")
-            return (fullfn, fullfnDigest)
+        return (url, urlDigest)
 
-        if cached_only:
-            raise FileNotFoundError("the specified stage3 does not exist")
+    def get_latest_stage3_url(self, arch, subarch, stage3_release_variant):
+        self._ensureArchList()
+        self._ensureVariantDictAndVersionDict(arch)
 
-        FmUtil.wgetDownload(url, fullfn)
-        FmUtil.wgetDownload(urlDigest, fullfnDigest)
-        return (fullfn, fullfnDigest)
+        releaseVariant = self.__stage3GetReleaseVariant(subarch, stage3_release_variant)
+        releaseVersion = sorted(self._versionDict[arch], reverse=True)[0]
 
-    def get_latest_stage3(self, arch, subarch, stage3_release_variant, cached_only=False):
-        assert self._bSynced
+        fn, fnDigest = self.__getFn(releaseVariant, releaseVersion)
 
-        releaseVariant = self._stage3GetReleaseVariant(subarch, stage3_release_variant)
+        url = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), releaseVersion, fn)
+        urlDigest = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), releaseVersion, fnDigest)
 
-        variantDir = os.path.join(self._releasesDir, arch, releaseVariant)
-        for ver in sorted(os.listdir(variantDir), reverse=True):
-            myDir = os.path.join(variantDir, ver)
+        return (url, urlDigest)
 
-            fn, fnDigest = self._getFn(releaseVariant, ver)
-            fullfn = os.path.join(myDir, fn)
-            fullfnDigest = os.path.join(myDir, fnDigest)
-
-            url = os.path.join(self._getAutoBuildsUrl(arch), ver, fn)
-            urlDigest = os.path.join(self._getAutoBuildsUrl(arch), ver, fnDigest)
-
-            if os.path.exists(fullfn) and os.path.exists(fullfnDigest):
-                print("Files already downloaded.")
-                return (fullfn, fullfnDigest)
-
-            if not cached_only:
-                if FmUtil.wgetSpider(url):
-                    FmUtil.wgetDownload(url, fullfn)
-                    FmUtil.wgetDownload(urlDigest, fullfnDigest)
-                    return (fullfn, fullfnDigest)
-
-        raise FileNotFoundError("no stage3 found")
-
-    def get_snapshot(self, snapshot_version, cached_only=False):
-        assert self._bSynced
-
-        myDir = os.path.join(self._snapshotsDir, snapshot_version)
-        if not os.path.exists(myDir):
-            raise FileNotFoundError("the specified snapshot does not exist")
+    def get_snapshot_url(self, snapshot_version):
+        self._ensureSnapshotList()
 
         fn = "gentoo-%s.xz.sqfs" % (snapshot_version)
-        fullfn = os.path.join(myDir, fn)
         url = os.path.join(self._baseUrl, "snapshots", "squashfs", fn)
+        return url
 
-        if os.path.exists(fullfn):
-            print("Files already downloaded.")
-            return fullfn
+    def get_latest_snapshot(self):
+        self._ensureSnapshotList()
 
-        if cached_only:
-            raise FileNotFoundError("the specified snapshot does not exist")
+        snapshot_version = sorted(self._snapshotList, reverse=True)[0]
+        fn = "gentoo-%s.xz.sqfs" % (snapshot_version)
+        url = os.path.join(self._baseUrl, "snapshots", "squashfs", fn)
+        return url
 
-        FmUtil.wgetDownload(url, fullfn)
-        return fullfn
+    def _ensureArchList(self):
+        if self._archList is not None:
+            return
 
-    def get_latest_snapshot(self, cached_only=False):
-        assert self._bSynced
+        self._archList = []
+        with urllib.request.urlopen(os.path.join(self._baseUrl, "releases")) as resp:
+            root = lxml.html.parse(resp)
+            for elem in root.xpath(".//a"):
+                if elem.text is None:
+                    continue
+                m = re.fullmatch("(\\S+)/", elem.text)
+                if m is None or m.group(1) in [".", ".."]:
+                    continue
+                self._archList.append(m.group(1))
 
-        for ver in sorted(os.listdir(self._snapshotsDir), reverse=True):
-            myDir = os.path.join(self._snapshotsDir, ver)
-            fn = "gentoo-%s.xz.sqfs" % (ver)
-            fullfn = os.path.join(myDir, fn)
-            url = os.path.join(self._baseUrl, "snapshots", "squashfs", fn)
+    def _ensureVariantDictAndVersionDict(self, arch):
+        if arch in self._variantDict and arch in self._versionDict:
+            return
 
-            if os.path.exists(fullfn):
-                print("Files already downloaded.")
-                return fullfn
+        variantList = []
+        versionList = []
+        with urllib.request.urlopen(self.__getAutoBuildsUrl(self._baseUrl, arch)) as resp:
+            for elem in lxml.html.parse(resp).xpath(".//a"):
+                if elem.text is not None:
+                    m = re.fullmatch("current-(\\S+)/", elem.text)
+                    if m is not None:
+                        variantList.append(m.group(1))
+                    m = re.fullmatch("([0-9]+T[0-9]+Z)/", elem.text)
+                    if m is not None:
+                        versionList.append(m.group(1))
 
-            if not cached_only:
-                if FmUtil.wgetSpider(url):
-                    FmUtil.wgetDownload(url, fullfn)
-                    return fullfn
+        self._variantDict[arch] = variantList
+        self._versionDict[arch] = versionList
 
-        raise FileNotFoundError("no snapshot found")
+    def _ensureSnapshotList(self):
+        if self._snapshotList is not None:
+            return
 
-    def _getAutoBuildsUrl(self, arch):
-        return os.path.join(self._baseUrl, "releases", arch, "autobuilds")
+        self._snapshotList = []
+        with urllib.request.urlopen(os.path.join(self._baseUrl, "snapshots", "squashfs"), timeout=robust_layer.TIMEOUT) as resp:
+            for elem in lxml.html.parse(resp).xpath(".//a"):
+                if elem.text is not None:
+                    m = re.fullmatch("gentoo-([0-9]+).xz.sqfs", elem.text)
+                    if m is not None:
+                        self._snapshotList.append(m.group(1))
 
-    def _stage3GetReleaseVariant(self, subarch, stage3ReleaseVariant):
+    @staticmethod
+    def __getAutoBuildsUrl(baseUrl, arch):
+        return os.path.join(baseUrl, "releases", arch, "autobuilds")
+
+    @staticmethod
+    def __stage3GetReleaseVariant(subarch, stage3ReleaseVariant):
         ret = "stage3-%s" % (subarch)
         if stage3ReleaseVariant != "":
             ret += "-%s" % (stage3ReleaseVariant)
         return ret
 
-    def _getFn(self, releaseVariant, releaseVersion):
+    @staticmethod
+    def __getFn(releaseVariant, releaseVersion):
         fn = releaseVariant + "-" + releaseVersion + ".tar.xz"
         fnDigest = fn + ".DIGESTS"
         return (fn, fnDigest)
