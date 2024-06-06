@@ -40,6 +40,9 @@ class Gentoo:
         self._versionDict = dict()
         self._snapshotList = None
 
+    def get_url(self):
+        return self._baseUrl
+
     def get_arch_list(self):
         self._ensureArchList()
         return self._archList
