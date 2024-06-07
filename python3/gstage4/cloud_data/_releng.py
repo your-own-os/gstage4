@@ -21,10 +21,12 @@
 # THE SOFTWARE.
 
 
+import os
 import re
+import pygit2
 
 
-class GentooReleng:
+class Releng:
 
     URL = "https://gitweb.gentoo.org/proj/releng.git"
 
@@ -78,8 +80,10 @@ class GentooReleng:
             if self.kernel_config is None:
                 raise Exception("no key \"boot/kernel/gentoo/config\" in \"%s\"" % (fullfn))
 
-    def __init__(self, cacheDir):
-        self._dir = cacheDir
+    def __init__(self, local_dir):
+        # currently there's no way to operate a remote git repository while not touching local filesystem
+        # so we need a local_dir, but it can be in tmpfs
+        self._dir = local_dir
 
     def sync(self):
         robust_layer.simple_git.pull(self._dir, reclone_on_failure=True, url=self.URL)
