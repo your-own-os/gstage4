@@ -73,14 +73,16 @@ class Gentoo:
 
         return self._snapshotList
 
-    def gen_stage3_fn(self, arch, subarch, stage3_release_variant, stage3_release_version):
-        releaseVariant = self.__stage3GetReleaseVariant(subarch, stage3_release_variant)
-        return self.__getFn(releaseVariant, stage3_release_version)
+    def gen_stage3_fn(self, arch, release_variant, release_version):
+        assert release_variant.startswith("stage3-")
+        fn = release_variant + "-" + release_version + ".tar.xz"
+        fnDigest = fn + ".DIGESTS"
+        return (fn, fnDigest)
 
-    def gen_stage3_url(self, arch, subarch, stage3_release_variant, stage3_release_version):
-        fn, fnDigest = self.gen_stage3_fn(arch, subarch, stage3_release_variant, stage3_release_version)
-        url = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), stage3_release_version, fn)
-        urlDigest = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), stage3_release_version, fnDigest)
+    def gen_stage3_url(self, arch, release_variant, release_version):
+        fn, fnDigest = self.gen_stage3_fn(arch, release_variant, release_version)
+        url = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), release_version, fn)
+        urlDigest = os.path.join(self.__getAutoBuildsUrl(self._baseUrl, arch), release_version, fnDigest)
         return (url, urlDigest)
 
     def get_latest_stage3_release_version(self, arch):
@@ -89,9 +91,9 @@ class Gentoo:
 
         return sorted(self._versionDict[arch], reverse=True)[0]
 
-    def get_latest_stage3_url(self, arch, subarch, stage3_release_variant):
+    def get_latest_stage3_url(self, arch, subarch, release_variant):
         releaseVersion = self.get_latest_stage3_release_version(arch)
-        return self.gen_stage3_url(arch, subarch, stage3_release_variant, releaseVersion)
+        return self.gen_stage3_url(arch, subarch, release_variant, releaseVersion)
 
     def gen_snapshot_fn(self, snapshot_version):
         return "gentoo-%s.xz.sqfs" % (snapshot_version)
@@ -154,16 +156,3 @@ class Gentoo:
     @staticmethod
     def __getAutoBuildsUrl(baseUrl, arch):
         return os.path.join(baseUrl, "releases", arch, "autobuilds")
-
-    @staticmethod
-    def __stage3GetReleaseVariant(subarch, stage3ReleaseVariant):
-        ret = "stage3-%s" % (subarch)
-        if stage3ReleaseVariant != "":
-            ret += "-%s" % (stage3ReleaseVariant)
-        return ret
-
-    @staticmethod
-    def __getFn(releaseVariant, releaseVersion):
-        fn = releaseVariant + "-" + releaseVersion + ".tar.xz"
-        fnDigest = fn + ".DIGESTS"
-        return (fn, fnDigest)
