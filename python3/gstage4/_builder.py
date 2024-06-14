@@ -407,9 +407,7 @@ class Builder:
         if self._lastActionIndex is not None:
             assert self._lastActionIndex < insert_before
         else:
-            # two cases:
-            # 1. no action has been executed: can add custom action freely
-            # 2. history actions has not been loaded: will do check in self._ensureLastActionAndFinished() when next action is executed
+            # no action has been executed: can add custom action freely
             pass
 
         # create new action
@@ -440,9 +438,7 @@ class Builder:
         if self._lastActionIndex is not None:
             assert self._lastActionIndex < idx
         else:
-            # two cases:
-            # 1. no action has been executed: can remove custom action freely
-            # 2. history actions has not been loaded: will do check in self._ensureLastActionAndFinished() when next action is executed
+            # no action has been executed: can remove action freely
             pass
 
         # removes action from self._actionList
