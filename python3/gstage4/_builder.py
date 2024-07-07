@@ -58,7 +58,7 @@ def Action(after=[], before=[]):
                 func(self, *kargs, **kwargs)
             except BaseException as e:
                 # we don't know in which step the error happens
-                self._finished = e.message
+                self._finished = str(e)
                 raise
             finally:
                 self._lastActionIndex = curActionIndex
