@@ -83,12 +83,8 @@ class UseBbki:
         assert "10-bbki" not in target_settings.pkg_use_files
         assert "10-bbki" not in target_settings.pkg_mask_files
 
-        target_settings.kernel_manager = "bbki"
-        target_settings.kernel_manager_bbki = {
-            "kernel": "linux",
-            "kernel_addons": {
-            }
-        }
+        # bbki is a library, it won't be used stand-alone, so we use "none" kernel manager here.
+        target_settings.kernel_manager = "none"
 
         target_settings.pkg_use_files["10-bbki"] = self._useFileContent.strip("\n") + "\n"
         target_settings.pkg_mask_files["10-bbki"] = self._maskFileContent.strip("\n") + "\n"
@@ -116,6 +112,7 @@ class UseFakeKernel:
 
     def update_target_settings(self, target_settings):
         target_settings.kernel_manager = "fake"
+        # FIXME: mask kernel related packages?
 
 
 class UseOpenrc:
