@@ -59,11 +59,9 @@ def Action(after=[], before=[]):
             except BaseException as e:
                 # we don't know in which step the error happens
                 self._finished = e.message
-                self._workDirObj.save_builder_finished(e.message)
                 raise
             finally:
                 self._lastActionIndex = curActionIndex
-                self._workDirObj.save_builder_action_to_history_actions(func.__name__)
         wrapper._func = func
         wrapper._after = after
         wrapper._before = before
