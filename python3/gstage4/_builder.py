@@ -308,9 +308,6 @@ class Builder:
     def action_install_kernel(self):
         ts = self._ts
 
-        if ts.kernel_manager == "none":
-            return
-
         if ts.kernel_manager == "genkernel":
             t = TargetConfDirParser(self._workDirObj.path)
             tj = t.get_make_conf_make_opts_jobs()
@@ -330,6 +327,7 @@ class Builder:
             return
 
         if ts.kernel_manager == "binary-kernel":
+            # FIXME
             return
 
         if ts.kernel_manager == "fake":
