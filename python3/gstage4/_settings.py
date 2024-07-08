@@ -53,6 +53,21 @@ class Settings:
         # ccache directory in host system
         self.host_ccache_dir = None
 
+    def auto_fill_computing_power(self):
+        # cpu_core_count
+        self.host_cpu_core_count = multiprocessing.cpu_count()
+
+        # memory_size
+        with open("/proc/meminfo", "r") as f:
+            # Since the memory size shown in /proc/meminfo is always a
+            # little less than the real size because various sort of
+            # reservation, so we do a "+1GB"
+            m = re.search("^MemTotal:\\s+(\\d+)", f.read())
+            self.host_memory_size = (int(m.group(1)) // 1024 // 1024 + 1) * 1024 * 1024
+
+        # cooling_level
+        self.host_cooling_level = 5
+
     @classmethod
     def check_object(cls, obj, raise_exception=None):
         assert raise_exception is not None

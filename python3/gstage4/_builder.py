@@ -34,7 +34,6 @@ from ._prototype import ScriptInChroot
 from ._errors import SettingsError
 from ._errors import BuildError
 from ._errors import CustomActionError
-from ._host import HostInfo
 from ._settings import Settings
 from ._settings import TargetSettings
 from ._runner import Runner
@@ -77,23 +76,13 @@ class Builder:
     It is the driver class for pretty much everything that gstage4 does.
     """
 
-    def __init__(self, program_name, host_info, work_dir, target_settings, log_dir=None, verbose_level=1):
+    def __init__(self, settings, target_settings, work_dir):
+        assert Settings.check_object(settings, raise_exception=False)
         assert TargetSettings.check_object(target_settings, raise_exception=False)
 
-        self._s = Settings()
-        if True:
-            assert HostInfo.check_object(host_info, raise_exception=False)
-            self._s.program_name = program_name
-            self._s.log_dir = log_dir
-            self._s.verbose_level = verbose_level
-            self._s.host_cpu_core_count = host_info.cpu_core_count
-            self._s.host_memory_size = host_info.memory_size
-            self._s.host_cooling_level = host_info.cooling_level
-            self._s.host_distfiles_dir = host_info.distfiles_dir
-            self._s.host_packages_dir = host_info.packages_dir
-            self._s.host_ccache_dir = host_info.ccache_dir
-            if self._s.log_dir is not None:
-                os.makedirs(self._s.log_dir, mode=0o750, exist_ok=True)
+        self._s = settings
+        if self._s.log_dir is not None:
+            os.makedirs(self._s.log_dir, mode=0o750, exist_ok=True)
 
         self._ts = target_settings
         assert (self._ts.build_opts.ccache and self._s.host_ccache_dir is not None) or (not self._ts.build_opts.ccache and self._s.host_ccache_dir is None)
