@@ -391,6 +391,12 @@ class Builder:
         assert self._lastActionIndex >= self._actionList.index(self.action_cleanup)
         self._finished = ""
 
+    def has_action(self, action_name):
+        for action in self._actionList:
+            if action._action_func_name == "action_" + action_name:
+                return True
+        return False
+
     def add_custom_action(self, action_name, action, insert_after=None, insert_before=None):
         assert re.fullmatch("[0-9a-z_]+", action_name) and "action_" + action_name not in dir(self)
         assert CustomAction.check_object(action, raise_exception=False)

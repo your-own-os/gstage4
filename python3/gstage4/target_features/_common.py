@@ -90,6 +90,10 @@ class UseBbki:
         target_settings.pkg_mask_files["10-bbki"] = self._maskFileContent.strip("\n") + "\n"
         target_settings.repo_postsync_patch_directories.append(os.path.join(host_info.repo_postsync_patch_source_dir, "use-bbki"))
 
+    def remove_actions(self, builder):
+        if builder.has_action("install_kernel"):
+            builder.remove_action("install_kernel")
+
     _useFileContent = """
 """
 
