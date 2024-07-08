@@ -182,10 +182,6 @@ class Builder:
         tw.write_package_env()
         tw.write_use_mask()
 
-        # create ccache directory
-        if self._ts.build_opts.ccache:
-            os.makedirs(tw.ccachedir_hostpath, exist_ok=True)
-
     @Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
         assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository, MountRepository) for x in overlay_list])
