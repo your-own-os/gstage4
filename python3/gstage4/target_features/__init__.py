@@ -83,10 +83,12 @@ from ._mirror import UseHuggingFaceMirror
 
 from ._new_use import AddSystemServiceUseFlag
 
+from ._priviledge import NotUsePolicyKit
+from ._priviledge import NotUseSudo
+from ._priviledge import UniversalWheelGroup
+
 from ._application import UseAllQemuTargets
 from ._application import NotUseLogrotate
-from ._application import NotUsePolicyKit
-from ._application import NotUseSudo
 
 from ._application import MemTest
 from ._application import SshServer
