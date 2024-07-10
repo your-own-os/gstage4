@@ -63,6 +63,7 @@ from ._common import SupportAllImageFormat
 from ._common import SupportAllDocumentFormat
 from ._common import SupportAllCompressFormat
 from ._common import SupportAllGraphicsApi
+from ._common import SupportAllTermType
 
 from ._common import GettyAutoLogin
 
