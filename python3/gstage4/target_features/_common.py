@@ -23,7 +23,7 @@
 
 import os
 from ..custom_actions import SimpleCustomAction
-from ..scripts import ScriptFromBuffer
+from ..scripts import OneLinerScript
 from ..scripts import PlacingFilesScript
 
 
@@ -173,6 +173,12 @@ class UseSystemd:
 
     def update_world_set(self, world_set):
         world_set.add("sys-apps/systemd")
+
+    def get_custom_action_set_machine_id(self, machine_id):
+        return SimpleCustomAction(OneLinerScript('echo "%s" > /etc/machine-id'), after=["unpack"])
+
+    def get_custom_action_set_random_machine_id(self):
+        assert False
 
     _useFileContent = """
 # system component should use systemd
@@ -647,13 +653,8 @@ class SupportAllTermType:
 class DisablePcSpeaker:
 
     def get_custom_action(self):
-        return SimpleCustomAction(ScriptFromBuffer(self._scriptFileContent),
+        return SimpleCustomAction(OneLinerScript('echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf'),
                                   after=["init_confdir", "create_overlays", "update_world", "install_kernel", "enable_services"])
-
-    _scriptFileContent = """
-#!/bin/sh
-echo "blacklist pcspkr" > /etc/modprobe.d/disable-pc-speaker.conf
-"""
 
 
 class DisableFstab:
