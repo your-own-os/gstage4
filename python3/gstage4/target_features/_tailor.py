@@ -21,9 +21,6 @@
 # THE SOFTWARE.
 
 
-import os
-
-
 class TailorSystemd:
 
     def __init__(self, disable_items=[], remove_items=[]):
