@@ -21,9 +21,6 @@
 # THE SOFTWARE.
 
 
-import os
-
-
 class AddSystemServiceUseFlag:
 
     def update_target_settings(self, target_settings):

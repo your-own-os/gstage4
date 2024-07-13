@@ -21,9 +21,6 @@
 # THE SOFTWARE.
 
 
-import os
-
-
 class UseGogMirror:
 
     def update_target_settings(self, target_settings):

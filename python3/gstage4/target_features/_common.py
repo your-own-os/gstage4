@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 
-import os
 from ..custom_actions import SimpleCustomAction
 from ..scripts import OneLinerScript
 from ..scripts import PlacingFilesScript
