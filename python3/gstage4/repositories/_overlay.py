@@ -22,25 +22,8 @@
 
 
 from .. import cloud_data
-from .. import MountRepository
 from .. import EmergeSyncRepository
 from .. import SettingsError
-
-
-class OverlayFromHost(MountRepository):
-
-    def __init__(self, overlay_name, hostdir):
-        self._name = overlay_name
-        self._hostDir = hostdir
-
-    def get_name(self):
-        return self._name
-
-    def get_datadir_path(self):
-        return "/var/db/overlays/%s" % (self._name)
-
-    def get_mount_params(self):
-        return (self._hostDir, "bind")
 
 
 class OverlayFromHostLayman(EmergeSyncRepository):

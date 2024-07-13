@@ -24,10 +24,7 @@
 from ._gentoo import CloudGentoo
 from ._gentoo import CloudGentooSnapshot
 from ._gentoo import GentooSnapshot
-from ._gentoo import GentooSnapshotAsSquashfs
-from ._gentoo import GentooFromHost
 
-from ._overlay import OverlayFromHost
 from ._overlay import OverlayFromHostLayman
 from ._overlay import RegisteredOverlay
 from ._overlay import UserDefinedOverlay

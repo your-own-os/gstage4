@@ -41,9 +41,8 @@ class Settings:
         self.host_memory_size = None               # in byte
         self.host_cooling_level = None             # 1-10, less is weaker
 
-        # repo.postsync.d patch framework
-        self.host_repo_postsync_patch_script = "/usr/libexec/gstage4/patch-repository"
-        self.host_repo_postsync_patch_source_dir = "/usr/libexec/gstage4/patch-repository.d"
+        # repo.postsync.d patch directory in host system
+        self.host_repo_postsync_patch_source_dir = None
 
         # distfiles directory in host system, will be bind mounted in target system
         self.host_distfiles_dir = None
@@ -115,6 +114,12 @@ class Settings:
             else:
                 return False
 
+        if obj.host_repo_postsync_patch_source_dir is not None and not os.path.isdir(obj.host_repo_postsync_patch_source_dir):
+            if raise_exception:
+                raise SettingsError("invalid value for key \"host_repo_postsync_patch_source_dir\"")
+            else:
+                return False
+
         if obj.host_distfiles_dir is not None and not os.path.isdir(obj.host_distfiles_dir):
             if raise_exception:
                 raise SettingsError("invalid value for key \"host_distfiles_dir\"")
@@ -162,7 +167,6 @@ class TargetSettings:
         self.install_mask = dict()                    # dict<package-wildcard, list<install-mask>>
         self.install_mask_files = dict()              # dict<file-name, dict<package-wildcard, list<install-mask>>>
 
-        self.repo_postsync_scripts = dict()           # dict<file-name, file-content>
         self.repo_postsync_patch_directories = []     # list<patch-directory>
 
         self.fetch_command = None                     # tuple(fetch-command, resume-command)
@@ -243,11 +247,8 @@ class TargetSettings:
                 raise SettingsError("invalid value for \"install_mask_files\"")
             __checkFilenames(obj.install_mask_files.keys(), "install_mask_files")
 
-            if obj.repo_postsync_scripts is None or not isinstance(obj.repo_postsync_scripts, dict):
-                raise SettingsError("invalid value for \"repo_postsync_scripts\"")
             if obj.repo_postsync_patch_directories is None or not isinstance(obj.repo_postsync_patch_directories, list):
                 raise SettingsError("invalid value for \"repo_postsync_patch_directories\"")
-            __checkFilenames(obj.repo_postsync_scripts.keys(), "repo_postsync_scripts")
 
             if obj.fetch_command is not None and (not isinstance(obj.fetch_command, tuple) or len(obj.fetch_command) != 2):
                 raise SettingsError("invalid value for \"fetch_command\"")

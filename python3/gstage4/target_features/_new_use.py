@@ -26,5 +26,5 @@ import os
 
 class AddSystemServiceUseFlag:
 
-    def update_target_settings(self, settings, target_settings):
-        target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "add-use-flag-system-service"))
+    def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("add-use-flag-system-service")

@@ -27,7 +27,6 @@ import tarfile
 import urllib.request
 from .. import ManualSyncRepository
 from .. import EmergeSyncRepository
-from .. import MountRepository
 from .._util import SqfsExtractor
 
 
@@ -111,37 +110,6 @@ class GentooSnapshot(ManualSyncRepository):
             SqfsExtractor.extract(self._path, datadir_hostpath)
         else:
             assert False
-
-
-class GentooSnapshotAsSquashfs(MountRepository):
-
-    def __init__(self, filepath):
-        assert filepath.endswith(".lzo.sqfs") or filepath.endswith(".xz.sqfs")
-        self._path = filepath
-
-    def get_name(self):
-        return _NAME
-
-    def get_datadir_path(self):
-        return _DATADIR_PATH
-
-    def get_mount_params(self):
-        return (self._path, "")
-
-
-class GentooFromHost(MountRepository):
-
-    def __init__(self, hostdir):
-        self._hostDir = hostdir
-
-    def get_name(self):
-        return _NAME
-
-    def get_datadir_path(self):
-        return _DATADIR_PATH
-
-    def get_mount_params(self):
-        return (self._hostDir, "bind")
 
 
 _NAME = "gentoo"

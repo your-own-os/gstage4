@@ -2,14 +2,8 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 
 import os
-import re
 import sys
-import glob
-import shutil
-import pathlib
-import asyncio
-import asyncio_pool
-import subprocess
+from gstage4._patcher import RepoPatcher
 
 
 def usage():
@@ -17,118 +11,18 @@ def usage():
     print("  %s <repository name> <sync uri> <location>" % (sys.argv[0]))
 
 
-def die(msg):
-    print(msg, file=sys.stderr)
-    sys.exit(1)
-
-
-class TempChdir:
-
-    def __init__(self, dirname):
-        self.olddir = os.getcwd()
-        os.chdir(dirname)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        os.chdir(self.olddir)
-
-
-def patchRepository(targetDir, patchDir, jobNumber=None):
-    # patch eclass files
-    eclassDir = os.path.join(patchDir, "eclass")
-    if os.path.exists(eclassDir):
-        dstDir = os.path.join(targetDir, "eclass")
-        execPatchScript(patchDir, eclassDir, dstDir)
-
-    # patch profile files
-    profilesDir = os.path.join(patchDir, "profiles")
-    if os.path.exists(profilesDir):
-        dstDir = os.path.join(targetDir, "profiles")
-        execPatchScript(patchDir, profilesDir, dstDir)
-
-    # patch packages
-    pendingDstDirList = []
-    for categoryDir in os.listdir(patchDir):
-        if categoryDir in ["README", "eclass", "profiles"]:
-            continue
-        fullCategoryDir = os.path.join(patchDir, categoryDir)
-        for ebuildDir in os.listdir(fullCategoryDir):
-            srcDir = os.path.join(fullCategoryDir, ebuildDir)
-            dstDir = os.path.join(targetDir, categoryDir, ebuildDir)
-            execPatchScript(patchDir, srcDir, dstDir)
-            if len(glob.glob(os.path.join(dstDir, "*.ebuild"))) == 0:
-                # all ebuild files are deleted, it means this package is removed
-                shutil.rmtree(dstDir)
-                if len(os.listdir(fullCategoryDir)) == 0:
-                    os.rmdir(fullCategoryDir)
-                continue
-            pendingDstDirList.append(dstDir)
-
-    return set(pendingDstDirList)
-
-
-def execPatchScript(patchDir, srcDir, dstDir):
-    patchTypeName = os.path.basename(patchDir)
-
-    for fullfn in glob.glob(os.path.join(srcDir, "*")):
-        if not os.path.isfile(fullfn):
-            continue
-        if not os.path.exists(dstDir):
-            print("Warning: patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchDir) + 1:]))
-            continue
-        out = None
-        with TempChdir(dstDir):
-            if fullfn.endswith(".py"):
-                out = subprocess.check_output(["python3", fullfn], text=True)
-            elif fullfn.endswith(".sh"):
-                out = subprocess.check_output(["sh", fullfn], text=True)
-            else:
-                assert False
-        if out == "outdated":
-            print("Warning: patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchDir) + 1:]))
-        elif out == "":
-            pass
-        else:
-            die("Error: patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, fullfn[len(patchDir) + 1:], out))
-
-
-async def doWork(pendingDstDirSet, jobNumber):
-    # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
-    if jobNumber is None:
-        pool = asyncio_pool.AioPool()
-    else:
-        pool = asyncio_pool.AioPool(size=jobNumber)
-    for dstDir in pendingDstDirSet:
-        pool.spawn_n(generateEbuildManifest(dstDir))
-    await pool.join()
-
-
-async def generateEbuildManifest(ebuildDir):
-    # operate on any ebuild file generates manifest for the whole ebuild directory
-    fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
-    args = ["ebuild", fn, "manifest"]
-    proc = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.DEVNULL)
-    retcode = await proc.wait()
-    if retcode != 0:
-        raise subprocess.CalledProcessError(retcode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
-
-
 if __name__ == "__main__":
-    jobNumber = 1
-
     if len(sys.argv) == 2 and sys.argv[1] == "--help":
         usage()
         sys.exit(0)
-    
+
     if len(sys.argv) < 4:
         usage()
         sys.exit(1)
 
     sourceDir = sys.argv[0] + ".d"
     targetDirRepoName = sys.argv[1]
-    syncUrl = sys.argv[2]
+    syncUrl = sys.argv[2]                   # not used, only to fulfill gentoo postsync.d script spec
     targetDir = sys.argv[3]
 
     patchDirList = []
@@ -139,14 +33,13 @@ if __name__ == "__main__":
 
     if len(patchDirList) > 0:
         print("Patching...")
-
-        # patch packages
-        pendingDstDirSet = set()
-        for patchDir in patchDirList:
-            pendingDstDirSet |= patchRepository(targetDir, patchDir, jobNumber)
-
-        # generate manifest for patched packages
-        asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.get_event_loop().run_until_complete(doWork(pendingDstDirSet, jobNumber))
-
+        patcher = RepoPatcher()
+        patcher.run(targetDir, patchDirList)
+        for x in patcher.warn_or_err_list:
+            if x.warn_or_err:
+                print("Warning: %s" % (x.msg))
+            else:
+                print("Error: %s" % (x.msg), file=sys.stderr)
+        if any([not x.warn_or_err for x in patcher.warn_or_err_list]):
+            sys.exit(1)
         print("Done.")

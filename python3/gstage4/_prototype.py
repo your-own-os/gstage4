@@ -67,14 +67,6 @@ class ManualSyncRepository(Repository):
         pass
 
 
-class MountRepository(Repository):
-
-    @abc.abstractmethod
-    def get_mount_params(self):
-        # returns (source, mount-options)
-        pass
-
-
 class EmergeSyncRepository(Repository):
 
     @abc.abstractmethod

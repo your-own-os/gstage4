@@ -28,7 +28,6 @@ import pathlib
 from ._util import Util
 from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
-from ._prototype import MountRepository
 from ._prototype import EmergeSyncRepository
 from ._prototype import ScriptInChroot
 from ._errors import SettingsError
@@ -36,6 +35,7 @@ from ._errors import BuildError
 from ._errors import CustomActionError
 from ._settings import Settings
 from ._settings import TargetSettings
+from ._patcher import RepoPatcher
 from ._runner import Runner
 from .scripts import ScriptFromBuffer
 from .scripts import ScriptInstallPackages
@@ -87,6 +87,8 @@ class Builder:
         self._ts = target_settings
         if self._ts.build_opts.ccache:
             assert self._s.host_ccache_dir is not None
+        if len(self._ts.repo_postsync_patch_directories) > 0:
+            assert self._s.host_repo_postsync_patch_source_dir is not None
 
         self._workDirObj = work_dir
 
@@ -142,19 +144,21 @@ class Builder:
     def action_create_gentoo_repository(self, repo):
         assert repo.get_name() == "gentoo"
 
-        # do work
+        # create repository
         if isinstance(repo, ManualSyncRepository):
-            _MyRepoUtil.createFromManuSyncRepo(repo, True, self._workDirObj.path)
+            myRepo = _MyRepoUtil.createFromManuSyncRepo(repo, True, self._workDirObj.path)
             repo.sync(os.path.join(self._workDirObj.path, repo.get_datadir_path()[1:]))
         elif isinstance(repo, EmergeSyncRepository):
             myRepo = _MyRepoUtil.createFromEmergeSyncRepo(repo, True, self._workDirObj.path)
             assert myRepo.get_sync_type() == "rsync"
             with _MyChrooter(self) as m:
                 m.script_exec(ScriptSync(), quiet=self._getQuiet())
-        elif isinstance(repo, MountRepository):
-            _MyRepoUtil.createFromMountRepo(repo, True, self._workDirObj.path)
         else:
             assert False
+
+        # patch using host patch-repository.d
+        if len(self._ts.repo_postsync_patch_directories) > 0:
+            myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories])
 
         self._actionStorage["repo"] = repo
 
@@ -187,15 +191,18 @@ class Builder:
 
     @Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
-        assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository, MountRepository) for x in overlay_list])
+        assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository) for x in overlay_list])
         assert not any([x.get_name() == "gentoo" for x in overlay_list])
         assert len([x.get_name() for x in overlay_list]) == len(set([x.get_name() for x in overlay_list]))        # no duplication
 
         overlayRecord = dict()
+
+        # create overlays
+        myRepoDict = dict()
         pkgSet = set()
         for overlay in overlay_list:
             if isinstance(overlay, ManualSyncRepository):
-                _MyRepoUtil.createFromManuSyncRepo(overlay, False, self._workDirObj.path)
+                myRepo = _MyRepoUtil.createFromManuSyncRepo(overlay, False, self._workDirObj.path)
             elif isinstance(overlay, EmergeSyncRepository):
                 myRepo = _MyRepoUtil.createFromEmergeSyncRepo(overlay, False, self._workDirObj.path)
                 syncType = myRepo.get_sync_type()
@@ -206,11 +213,11 @@ class Builder:
                 else:
                     assert False
                 overlayRecord[overlay.get_name()] = syncType
-            elif isinstance(overlay, MountRepository):
-                _MyRepoUtil.createFromMountRepo(overlay, False, self._workDirObj.path)
             else:
                 assert False
+            myRepoDict[overlay] = myRepoDict
 
+        # install sync tools + sync some overlays
         if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
             with _MyChrooter(self) as m:
                 installList = [x for x in pkgSet if not Util.portageIsPkgInstalled(self._workDirObj.path, x)]
@@ -219,9 +226,15 @@ class Builder:
                 if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
                     m.script_exec(ScriptSync(), quiet=self._getQuiet())
 
+        # sync other overlays
         for overlay in overlay_list:
             if isinstance(overlay, ManualSyncRepository):
                 overlay.sync(os.path.join(self._workDirObj.path, overlay.get_datadir_path()[1:]))
+
+        # patch using host patch-repository.d
+        if len(self._ts.repo_postsync_patch_directories) > 0:
+            for overlay in overlay_list:
+                myRepoDict[overlay].patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories])
 
         self._actionStorage["overlays"] = overlayRecord
 
@@ -536,24 +549,6 @@ class _MyRepoUtil:
         return myRepo
 
     @classmethod
-    def createFromMountRepo(cls, repo, repoOrOverlay, chrootDir):
-        assert isinstance(repo, MountRepository)
-
-        buf = ""
-        buf += "[%s]\n" % (repo.get_name())
-        buf += "auto-sync = no\n"
-        buf += "location = %s\n" % (repo.get_datadir_path())
-        if True:
-            src, mntOpts = repo.get_mount_params()
-            buf += "mount-params = \"%s\",\"%s\"\n" % (src, mntOpts)
-
-        myRepo = _MyRepo(chrootDir, cls._getReposConfFilename(repo, repoOrOverlay))
-        myRepo.write_repos_conf_file(buf)
-        os.makedirs(myRepo.datadir_hostpath, exist_ok=True)
-
-        return myRepo
-
-    @classmethod
     def createFromEmergeSyncRepo(cls, repo, repoOrOverlay, chrootDir):
         assert isinstance(repo, EmergeSyncRepository)
 
@@ -621,6 +616,15 @@ class _MyRepo:
         m = re.search(r'mount-params = "(.*)","(.*)"', pathlib.Path(self.repos_conf_file_hostpath).read_text(), re.M)
         return (m.group(1), m.group(2)) if m is not None else None
 
+    def patch(self, patchDirList):
+        patcher = RepoPatcher()
+        patcher.run(self.datadir_hostpath, patchDirList)
+        for x in patcher.warn_or_err_list:
+            if x.warn_or_err:
+                print("Warning: %s" % (x.msg))
+            else:
+                raise BuildError(x.msg)
+
 
 class _MyChrooter(Runner):
 
@@ -658,14 +662,6 @@ class _MyChrooter(Runner):
                 assert not Util.isMount(t.ccachedir_hostpath)
                 Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._p._s.host_ccache_dir, t.ccachedir_hostpath))
                 self._bindMountList.append(t.ccachedir_hostpath)
-
-            # mount points for MountRepository
-            for myRepo in _MyRepoUtil.scanReposConfDir(self._w.path):
-                mp = myRepo.get_mount_params()
-                if mp is not None:
-                    assert os.path.exists(myRepo.datadir_hostpath) and not Util.isMount(myRepo.datadir_hostpath)
-                    Util.shellCall("mount \"%s\" \"%s\" -o %s" % (mp[0], myRepo.datadir_hostpath, (mp[1] + ",ro") if mp[1] != "" else "ro"))
-                    self._bindMountList.append(myRepo.datadir_hostpath)
         except BaseException:
             self.unbind(remove_scripts=False)
             raise

@@ -30,7 +30,7 @@ class TailorSystemd:
         self._disableItems = disable_items
         self._removeItems = remove_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         assert "10-tailor-systemd" not in target_settings.pkg_mask_files
         assert "10-tailor-systemd" not in target_settings.install_mask_files
 
@@ -46,11 +46,11 @@ class TailorSystemd:
                 td[k] += v
 
         if "systemd-udevd-socket-activation" in disableItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "systemd-disable-systemd-udevd-socket-activation"))
+            target_settings.repo_postsync_patch_directories.append("systemd-disable-systemd-udevd-socket-activation")
             disableItems.remove("systemd-udevd-socket-activation")
 
         if "kmod-static-nodes" in disableItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "systemd-disable-kmod-static-nodes"))
+            target_settings.repo_postsync_patch_directories.append("systemd-disable-kmod-static-nodes")
             disableItems.remove("kmod-static-nodes")
 
         if "systemd-battery-check" in removeItems:
@@ -76,7 +76,7 @@ class TailorSystemd:
             removeItems.remove("systemd-boot")
 
         if "systemd-coredump" in removeItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "systemd-remove-coredump-user"))
+            target_settings.repo_postsync_patch_directories.append("systemd-remove-coredump-user")
             tm += [
                 "acct-user/systemd-coredump",
                 "acct-group/systemd-coredump",
@@ -178,7 +178,7 @@ class TailorSystemd:
             removeItems.remove("systemd-machined")
 
         if "systemd-networkd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "systemd-remove-network-user"))
+            target_settings.repo_postsync_patch_directories.append("systemd-remove-network-user")
             tm += [
                 "acct-user/systemd-network",
                 "acct-group/systemd-network",
@@ -221,7 +221,7 @@ class TailorSystemd:
             removeItems.remove("systemd-portabled")
 
         if "systemd-oomd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "systemd-remove-oom-user"))
+            target_settings.repo_postsync_patch_directories.append("systemd-remove-oom-user")
             tm += [
                 "acct-user/systemd-oom",
                 "acct-group/systemd-oom",
@@ -251,7 +251,7 @@ class TailorSystemd:
             removeItems.remove("systemd-pstore")
 
         if "systemd-resolvd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "systemd-remove-resolve-user"))
+            target_settings.repo_postsync_patch_directories.append("systemd-remove-resolve-user")
             tm += [
                 "acct-user/systemd-resolve",
                 "acct-group/systemd-resolve",
@@ -330,7 +330,7 @@ class TailorSystemd:
             removeItems.remove("systemd-timedated")
 
         if "systemd-timesyncd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "systemd-remove-timesync-user"))
+            target_settings.repo_postsync_patch_directories.append("systemd-remove-timesync-user")
             tm += [
                 "acct-user/systemd-timesync",
                 "acct-group/systemd-timesync",
@@ -549,11 +549,11 @@ class TailorAvahi:
     def __init__(self, disable_items=[]):
         self._disableItems = disable_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         disableItems = list(self._disableItems)
 
         if "auto-activation" in disableItems:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "avahi-disable-auto-activation"))
+            target_settings.repo_postsync_patch_directories.append("avahi-disable-auto-activation")
             disableItems.remove("auto-activation")
 
         assert len(disableItems) == 0
@@ -612,18 +612,18 @@ class TailorGit:
     def __init__(self, add_items=[]):
         self._addItems = add_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         items = list(self._addItems)
 
         bHttpConnectionTimeout = False
         if "http-connection-timeout-extension" in items:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "git-add-http-connection-timeout-extension"))
+            target_settings.repo_postsync_patch_directories.append("git-add-http-connection-timeout-extension")
             items.remove("http-connection-timeout-extension")
             bHttpConnectionTimeout = True
 
         if "robust-extension" in items:
             assert bHttpConnectionTimeout
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "git-add-robust-extension"))
+            target_settings.repo_postsync_patch_directories.append("git-add-robust-extension")
             items.remove("robust-extension")
 
         assert len(items) == 0
@@ -634,11 +634,11 @@ class TailorWget:
     def __init__(self, add_items=[]):
         self._addItems = add_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         items = list(self._addItems)
 
         if "robust-extension" in items:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "wget-add-robust-extension"))
+            target_settings.repo_postsync_patch_directories.append("wget-add-robust-extension")
             items.remove("robust-extension")
 
         assert len(items) == 0
@@ -649,11 +649,11 @@ class TailorRsync:
     def __init__(self, add_items=[]):
         self._addItems = add_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         items = list(self._addItems)
 
         if "robust-extension" in items:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "rsync-add-robust-extension"))
+            target_settings.repo_postsync_patch_directories.append("rsync-add-robust-extension")
             items.remove("robust-extension")
 
         assert len(items) == 0
@@ -664,7 +664,7 @@ class TailorLmSensors:
     def __init__(self, remove_items=[]):
         self._removeItems = remove_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         assert "10-tailor-lm-sensors" not in target_settings.install_mask_files
 
         items = list(self._removeItems)
@@ -695,14 +695,14 @@ class TailorQemu:
     def __init__(self, add_items=[]):
         self._addItems = add_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         assert "10-tailor-qemu" not in target_settings.pkg_use_files
         assert "10-tailor-qemu" not in target_settings.install_mask_files
 
         items = list(self._addItems)
 
         if "3dfx-patch" in items:
-            target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "qemu-add-3dfx-patch"))
+            target_settings.repo_postsync_patch_directories.append("qemu-add-3dfx-patch")
             target_settings.pkg_use_files["10-tailor-qemu"] = self._useFileContent.strip("\n") + "\n"
             target_settings.pkg_mask_files["10-tailor-qemu"] = self._maskFileContent.strip("\n") + "\n"
             items.remove("3dfx-patch")
@@ -724,7 +724,7 @@ class TailorPam:
     def __init__(self, remove_items=[]):
         self._removeItems = remove_items
 
-    def update_target_settings(self, settings, target_settings):
+    def update_target_settings(self, target_settings):
         assert "10-tailor-pam" not in target_settings.install_mask_files
 
         items = list(self._removeItems)

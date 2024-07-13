@@ -36,7 +36,6 @@ from ._settings import TargetSettings
 from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
 from ._prototype import EmergeSyncRepository
-from ._prototype import MountRepository
 from ._prototype import ScriptInChroot
 
 from ._workdir import WorkDir
@@ -53,3 +52,6 @@ from ._errors import SeedStageError
 from ._errors import WorkDirError
 from ._errors import BuildError
 from ._errors import CustomActionError
+
+REPO_POSTSYNC_PATCH_SCRIPT = "/usr/libexec/gstage4/patch-repository"
+REPO_POSTSYNC_PATCH_SOURCE_DIR = "/usr/libexec/gstage4/patch-repository.d"

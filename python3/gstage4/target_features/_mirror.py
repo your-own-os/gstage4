@@ -26,17 +26,17 @@ import os
 
 class UseGogMirror:
 
-    def update_target_settings(self, settings, target_settings):
-        target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "use-mirror-gog"))
+    def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("use-mirror-gog")
 
 
 class UseHbMirror:
 
-    def update_target_settings(self, settings, target_settings):
-        target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "use-mirror-hb"))
+    def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("use-mirror-hb")
 
 
 class UseHuggingFaceMirror:
 
-    def update_target_settings(self, settings, target_settings):
-        target_settings.repo_postsync_patch_directories.append(os.path.join(settings.host_repo_postsync_patch_source_dir, "use-mirror-huggingface"))
+    def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("use-mirror-huggingface")
