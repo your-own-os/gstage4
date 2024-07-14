@@ -188,6 +188,8 @@ class Builder:
         tw.write_package_license()
         tw.write_package_env()
         tw.write_use_mask()
+        # FIXME: should put files in patch-repository.d into config dir, so that target system can patch after every syncing
+        #        but not all repositories and overlays use "emerge --sync"
 
     @Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
@@ -215,7 +217,7 @@ class Builder:
                 overlayRecord[overlay.get_name()] = syncType
             else:
                 assert False
-            myRepoDict[overlay.get_name()] = myRepoDict
+            myRepoDict[overlay.get_name()] = myRepo
 
         # install sync tools + sync some overlays
         if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
@@ -630,7 +632,6 @@ class _MyRepo:
                     print("Warning: %s" % (x.msg))
                 else:
                     raise BuildError(x.msg)
-
 
 class _MyChrooter(Runner):
 
