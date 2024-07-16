@@ -194,12 +194,12 @@ class PlacingFilesScript(ScriptInChroot):
                     sbuf += "mkdir %s; chown %s:%s %s; chmod %o %s\n" % (target_dirpath, owner, group, target_dirpath, dmode, target_dirpath)
             elif info[0] == "s":
                 _, target_linkpath, owner, group, target, hostpath = info
-                if target is not None:
-                    assert hostpath is None
-                    sbuf += "ln -s %s %s; chown %s:%s %s\n" % (target, target_linkpath, owner, group, target_linkpath)
-                else:
+                if target is None:
                     assert hostpath is not None
-                    sbuf += "ln -s %s %s; chown %s:%s %s\n" % (os.readlink(hostpath), target_linkpath, owner, group, target_linkpath)
+                    target = os.readlink(hostpath)
+                else:
+                    assert hostpath is None
+                sbuf += "ln -s %s %s; chown %s:%s %s\n" % (target, target_linkpath, owner, group, target_linkpath)
             else:
                 assert False
 
