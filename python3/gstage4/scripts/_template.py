@@ -160,13 +160,15 @@ class PlacingFilesScript(ScriptInChroot):
         self._infoList.append(("s", target_linkpath, owner, group, None, hostpath))
 
     def fill_script_dir(self, script_dir_hostpath):
-        # establish data directory
         dataDir = os.path.join(script_dir_hostpath, "data")
         os.mkdir(dataDir)
+
+        sbuf = self._scriptContent
+        itemId = 1
         for info in self._infoList:
             if info[0] == "f":
-                t, target_filepath, owner, group, mode, buf, hostpath = info
-                fullfn = os.path.join(dataDir, target_filepath[1:])
+                _, target_filepath, owner, group, mode, buf, hostpath = info
+                fn, fullfn, itemId = self._fn(dataDir, itemId)
                 if buf is not None:
                     assert hostpath is None
                     if isinstance(buf, str):
@@ -182,25 +184,25 @@ class PlacingFilesScript(ScriptInChroot):
                     shutil.copy(hostpath, fullfn)
                 os.chown(fullfn, owner, group)
                 os.chmod(fullfn, mode)
+                sbuf += "mv %s %s\n" % (fn, target_filepath)
             elif info[0] == "d":
-                t, target_dirpath, owner, group, dmode, fmode, hostpath = info
-                fullfn = os.path.join(dataDir, target_dirpath[1:])
+                _, target_dirpath, owner, group, dmode, fmode, hostpath = info
+                fn, fullfn, itemId = self._fn(dataDir, itemId)
                 if hostpath is not None:
                     assert fmode is not None
                     self._copytree(hostpath, fullfn, owner, group, dmode, fmode)
+                    sbuf += "mv %s %s\n" % (fn, target_dirpath)
                 else:
                     assert fmode is None
-                    os.mkdir(fullfn)
-                    os.chown(fullfn, owner, group)
-                    os.chmod(fullfn, dmode)
+                    sbuf += "mkdir %s; chown %s:%s %s; chmod %o %s\n" % (target_dirpath, owner, group, target_dirpath, dmode, target_dirpath)
             elif info[0] == "s":
-                t, target_linkpath, owner, group, target, hostpath = info
-                fullfn = os.path.join(dataDir, target_linkpath[1:])
+                _, target_linkpath, owner, group, target, hostpath = info
                 if target is not None:
-                    os.symlink(target, fullfn)
+                    assert hostpath is None
+                    sbuf += "ln -s %s %s; chown %s:%s %s\n" % (target, target_linkpath, owner, group, target_linkpath)
                 else:
-                    os.symlink(os.readlink(hostpath), fullfn)
-                os.chown(fullfn, owner, group)
+                    assert hostpath is not None
+                    sbuf += "ln -s %s %s; chown %s:%s %s\n" % (os.readlink(hostpath), target_linkpath, owner, group, target_linkpath)
             else:
                 assert False
 
@@ -212,6 +214,11 @@ class PlacingFilesScript(ScriptInChroot):
 
     def get_script(self):
         return _SCRIPT_FILE_NAME
+
+    def _fn(self, dataDir, itemId):
+        fn = "item%d" % (itemId)
+        fullfn = os.path.join(dataDir, fn)
+        return (fn, fullfn, itemId + 1)
 
     def _copytree(self, src, dst, owner, group, dmode, fmode):
         os.mkdir(dst)
@@ -234,10 +241,8 @@ class PlacingFilesScript(ScriptInChroot):
 
 DATA_DIR=$(dirname $(realpath $0))/data
 
-# merge directories and files
+# copy directories and files
 cd $DATA_DIR
-find . -type d -exec mkdir -p /\{} \;
-find . -type f -exec mv -f \{} /\{} \;
 """
 
 

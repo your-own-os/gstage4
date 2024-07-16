@@ -540,10 +540,6 @@ class GettyAutoLogin:
 
     def get_custom_action(self):
         s = PlacingFilesScript()
-        s.append_dir("/etc")
-        s.append_dir("/etc/systemd")
-        s.append_dir("/etc/systemd/system")
-        s.append_dir("/etc/systemd/system/getty@.service.d")
         s.append_file("/etc/systemd/system/getty@.service.d/getty-autologin.conf",
                       self._fileContent.strip("\n") + "\n")  # remove all redundant carrage returns)
         return SimpleCustomAction(s, after=["init_confdir", "create_overlays", "update_world", "install_kernel", "enable_services"])
