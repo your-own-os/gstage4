@@ -108,6 +108,8 @@ class GitRetry:
         r'Timeout was reached',
         # http-timeout-extension
         r'Operation too slow',
+        # additional
+        r'OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 0',
     ]), re.IGNORECASE)
 
     def __init__(self, retry_count=None, delay=None, delay_factor=None):
