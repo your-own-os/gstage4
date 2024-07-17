@@ -170,8 +170,8 @@ class UseSystemd:
             ],
         }
 
-        # package sys-fs/udev-init-scripts only install files into /etc/init.d and /etc/conf.d, but we don't use these 2 directories, so we remove this dependency
-        target_settings.repo_postsync_patch_directories.append("systemd-remove-udev-init-scripts")
+        target_settings.repo_postsync_patch_directories.append("systemd-remove-sysvinit")               # we don't use sys-apps/sysvinit anymore
+        target_settings.repo_postsync_patch_directories.append("systemd-remove-udev-init-scripts")      # package sys-fs/udev-init-scripts only install files into /etc/init.d and /etc/conf.d, but we don't use these 2 directories, so we remove this dependency
 
     def update_world_set(self, world_set):
         world_set.add("sys-apps/systemd")
