@@ -107,6 +107,16 @@ net-misc/netifrc
 """
 
 
+class Avahi:
+
+    def update_world_set(self, world_set):
+        world_set.add("net-dns/avahi")
+
+    def update_service_list(self, service_list):
+        if "avahi-daemon" not in service_list:
+            service_list.append("avahi-daemon")
+
+
 class UseAllQemuTargets:
 
     def update_target_settings(self, target_settings):

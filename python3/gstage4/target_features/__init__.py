@@ -96,4 +96,5 @@ from ._application import MemTest
 from ._application import SshServer
 from ._application import Chrony
 from ._application import NetworkManager
+from ._application import Avahi
 from ._application import Kmscon
