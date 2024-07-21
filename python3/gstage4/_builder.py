@@ -45,6 +45,7 @@ from .scripts import ScriptUpdateWorld
 def Action(after=[], before=[], _custom_action_name=None, _custom_action=None):
     def decorator(func):
         def wrapper(self, *kargs, **kwargs):
+            self._ensureLastActionAndFinished()
             curActionIndex = self._getActionIndex(wrapper._action_func_name)
             if self._finished is not None:
                 if self._finished == "":
@@ -59,6 +60,7 @@ def Action(after=[], before=[], _custom_action_name=None, _custom_action=None):
             except BaseException as e:
                 # we don't know in which step the error happens
                 self._finished = str(e)
+                self._workDirObj._saveBuilderFinished(self._finished)
                 raise
             finally:
                 self._lastActionIndex = curActionIndex
@@ -110,12 +112,7 @@ class Builder:
             "overlays": {},                 # overlay information
         }
 
-        # self._lastActionIndex == -1 if no action has been executed
-        self._lastActionIndex = -1
-
-        # not finished:          self._finished is None
-        # successfully finished: self._finished == ""
-        # abnormally finished:   self._finished == error-message
+        self._lastActionIndex = None
         self._finished = None
 
     @property
@@ -393,9 +390,11 @@ class Builder:
             Util.forceDelete(t.binpkgdir_hostpath)
 
     def finish(self):
+        self._ensureLastActionAndFinished()
         assert self._finished is None
         assert self._lastActionIndex >= self._actionList.index(self.action_cleanup)
         self._finished = ""
+        self._workDirObj._saveBuilderFinished(self._finished)
 
     def has_action(self, action_name):
         for action in self._actionList:
@@ -429,7 +428,13 @@ class Builder:
         else:
             assert False
 
-        assert self._lastActionIndex < insert_before
+        if self._lastActionIndex is not None:
+            assert self._lastActionIndex < insert_before
+        else:
+            # two cases:
+            # 1. no action has been executed: can add custom action freely
+            # 2. history actions has not been loaded: will do check in self._ensureLastActionAndFinished() when next action is executed
+            pass
 
         # create new action and add it to self._actionList
         @Action(_custom_action_name=action_name, _custom_action=action)
@@ -444,16 +449,31 @@ class Builder:
         self._checkActions()
 
     def add_and_run_custom_action(self, action_name, action):
-        if self._lastActionIndex == -1:
-            self.add_custom_action(action_name, action, insert_before=self._actionList[0])
-        else:
-            self.add_custom_action(action_name, action, insert_after=self._actionList[self._lastActionIndex])
-        exec("self.action_%s()" % (action_name))
+        self.add_and_run_custom_actions({action_name: action})
+
+    def add_and_run_custom_actions(self, action_dict):
+        self._ensureLastActionAndFinished()
+
+        i = self._lastActionIndex
+        for action_name, action in action_dict.items():
+            if i == -1:
+                self.add_custom_action(action_name, action, insert_before=self._actionList[0])
+            else:
+                self.add_custom_action(action_name, action, insert_after=self._actionList[i])
+            i += 1
+
+        exec("self.action_%s()" % (list(action_dict.keys())[0]))
 
     def remove_action(self, action_name):
         idx = self._getActionIndex("action_" + action_name)
 
-        assert self._lastActionIndex < idx
+        if self._lastActionIndex is not None:
+            assert self._lastActionIndex < idx
+        else:
+            # two cases:
+            # 1. no action has been executed: can remove custom action freely
+            # 2. history actions has not been loaded: will do check in self._ensureLastActionAndFinished() when next action is executed
+            pass
 
         # removes action from self._actionList
         # FIXME: no way to remove action method
@@ -463,6 +483,7 @@ class Builder:
         self._checkActions()
 
     def get_progress(self):
+        self._ensureLastActionAndFinished()
         if self._finished is None:
             ret = (self._lastActionIndex + 1) * 100 // len(self._actionList)
             return min(ret, 99)
@@ -480,6 +501,23 @@ class Builder:
         for i, action in enumerate(self._actionList):
             assert all(["action_" + x not in actionFuncNameList[:i] for x in action._before])
             assert all(["action_" + x not in actionFuncNameList[i+1:] for x in action._after])
+
+    def _ensureLastActionAndFinished(self):
+        if self._lastActionIndex is not None:
+            return
+
+        historyActionFuncNameList = self._workDirObj._readBuilderHistoryActions()
+        actionFuncNameList = [x._action_func_name for x in self._actionList]
+        if not Util.listStartswith(actionFuncNameList, historyActionFuncNameList):
+            raise BuildError("invalid history actions")
+
+        # self._lastActionIndex == -1 if no action has been executed
+        self._lastActionIndex = len(historyActionFuncNameList) - 1
+
+        # not finished:          self._finished is None
+        # successfully finished: self._finished == ""
+        # abnormally finished:   self._finished == error-message
+        self._finished = self._workDirObj._readBuilderFinished()
 
     def _getQuiet(self):
         return (self._s.verbose_level == 0)
