@@ -85,8 +85,14 @@ class WorkDir:
         if self._lastActionIndex == -1:
             os.mkdir(fullfn)
         else:
-            os.rename(self._lastActionDirFullfn, fullfn)
-            os.mkdir(self._lastActionDirFullfn)
+            if self._rollback:
+                subprocess.check_call(["cp", "-r", self._lastActionDirFullfn, fullfn])
+            else:
+                os.rename(self._lastActionDirFullfn, fullfn)
+                os.mkdir(self._lastActionDirFullfn)
+
+        self._lastActionIndex = action_index
+        self._lastActionDirFullfn = fullfn
 
     def _readBuilderHistoryActions(self):
         ret = [x for x in os.listdir(self._path) if os.path.isdir(os.path.join(self._path, x))]
