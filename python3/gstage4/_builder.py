@@ -81,10 +81,12 @@ class Builder(ActionRunner):
             self.action_enable_services,
             self.action_cleanup,
         ]
+
         def x(self, action_name, action):
             with _MyChrooter(self) as m:
                 for s in action.custom_scripts:
                     m.script_exec(s, quiet=self._getQuiet())
+
         super().__init__(self._workDirObj._persistentStorage, actionList, x, BuildError)
 
     @property

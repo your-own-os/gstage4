@@ -22,6 +22,8 @@
 
 
 import os
+import re
+import pathlib
 from ._util import Util
 from ._util import ActionRunner
 
