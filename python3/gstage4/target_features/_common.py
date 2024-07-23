@@ -466,6 +466,19 @@ net-libs/libtorrent
 """
 
 
+class PreferPythonMagic:
+
+    def update_target_settings(self, target_settings):
+        assert "10-prefer-python-magic" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-prefer-python-magic"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# use dev-python/python-magic instead
+sys-apps/file       -python
+"""
+
+
 class PreferGnuAndGpl:
 
     def update_target_settings(self, target_settings):

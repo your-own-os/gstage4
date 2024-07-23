@@ -22,8 +22,6 @@
 
 
 import os
-import re
-import pathlib
 from ._util import Util
 from ._util import ActionRunner
 
@@ -33,7 +31,7 @@ class WorkDir:
     This class manipulates gstage4's working directory.
     """
 
-    def __init__(self, path, chroot_uid_map=None, chroot_gid_map=None):
+    def __init__(self, path, chroot_uid_map=None, chroot_gid_map=None, rollback=False):
         assert path is not None
 
         self._path = path
@@ -62,6 +60,21 @@ class WorkDir:
 
     def has_uid_gid_map(self):
         return self._uidMap is not None
+
+    def is_build_finished(self):
+        self._persistentStorage.isFinished()
+
+    def has_error(self):
+        actionName, _ = self._persistentStorage.getCurrentActionInfo()
+        if actionName is not None:
+            return True
+        return False
+
+    def get_error_message(self):
+        actionName, err = self._persistentStorage.getCurrentActionInfo()
+        if actionName is not None:
+            return "action %s failed (%s) for \"%s\"" % (actionName, err, self._path)
+        assert False
 
     # @property
     # def chroot_uid_map(self):
