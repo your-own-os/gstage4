@@ -22,7 +22,10 @@
 
 
 import os
+import re
+import pathlib
 from ._util import Util
+from ._util import ActionRunner
 
 
 class WorkDir:
@@ -50,6 +53,8 @@ class WorkDir:
             assert self._uidMap is not None
             assert chroot_gid_map[0] == os.getgid()
             self._gidMap = chroot_gid_map
+
+        self._persistentStorage = WorkDirPersisentStorage(self._path)
 
     @property
     def path(self):
@@ -88,3 +93,61 @@ class WorkDir:
 
     # def chroot_conv_uid_gid(self, uid, gid):
     #     return (self.chroot_conv_uid(uid), self.chroot_conv_gid(gid))
+
+
+class WorkDirPersisentStorage(ActionRunner.PersistStorage, ActionRunner.PersistStorageWithFinishedFlagFile):
+
+    def __init__(self, path):
+        super(ActionRunner.PersistStorageWithFinishedFlagFile, self).__init__(os.path.join(path, "builder-finished.flag"))
+
+        self._path = path
+        self._errFile = os.path.join(self._path, "error.save")
+        self._runFlag = False      # FIXME: should be changed to a lock
+
+    def getCurrentActionInfo(self):
+        oldDir, _, oldActionName = self._getLastActionDirIndexName()
+        if oldDir is not None:
+            if os.path.exists(self._errFile):
+                assert not self.__runFlag
+                return (oldActionName, pathlib.Path(self._errFile).read_text())
+            elif not self.__runFlag:
+                return (oldActionName, "crashed")
+            else:
+                return (oldActionName, None)     # action is running
+        else:
+            return (None, None)
+
+    def getHistoryActions(self):
+        ret = []
+        for fn in os.listdir(self.__path).sort():
+            m = re.fullmatch("[0-9]+-(.*)", fn)
+            ret.append(m.group(1))
+        return ret
+
+    def saveActionStart(self, actionName):
+        assert not os.path.exists(self._errFile)
+        oldDir, oldIndex, _ = self._getLastActionDirIndexName()
+        if oldDir is None:
+            os.mkdir("00-" + actionName)
+        else:
+            os.rename(oldDir, "%d-%s" % (oldIndex + 1, actionName))
+            os.mkdir(oldDir)
+        self._runFlag = True
+
+    def saveActionEnd(self, error=None):
+        assert not os.path.exists(self._errFile)
+        if error is not None:
+            with open(self._errFile, "w") as f:
+                f.write(error + "\n")
+        self._runFlag = False
+
+    def saveNewHistoryAction(self, actionName):
+        assert actionName == self._getLastActionDirIndexName()[2]
+
+    def _getLastActionDirIndexName(self):
+        fnList = os.listdir(self.__path).sort()
+        if len(fnList) == 0:
+            return (None, None, None)
+        else:
+            m = re.fullmatch("([0-9])+-(.*)", fnList[-1])
+            return (m.group(0), int(m.group(1)), m.group(2))

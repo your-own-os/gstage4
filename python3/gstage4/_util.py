@@ -23,8 +23,11 @@
 
 import os
 import re
+import abc
 import time
+import types
 import shutil
+import pathlib
 import subprocess
 import PySquashfsImage
 
@@ -138,6 +141,268 @@ class TempChdir:
 
     def __exit__(self, type, value, traceback):
         os.chdir(self.olddir)
+
+
+class ActionRunner:
+
+    class PersistStorage(abc.ABC):
+
+        @abc.abstractmethod
+        def isFinished(self):
+            pass
+
+        @abc.abstractmethod
+        def getCurrentActionInfo(self):
+            pass
+
+        @abc.abstractmethod
+        def getHistoryActions(self):
+            pass
+
+        @abc.abstractmethod
+        def saveActionStart(self, actionName):
+            pass
+
+        @abc.abstractmethod
+        def saveActionEnd(self, error=None):
+            pass
+
+        @abc.abstractmethod
+        def saveNewHistoryAction(self, actionName):
+            pass
+
+        @abc.abstractmethod
+        def saveFinished(self):
+            pass
+
+    class PersistStorageWithCurrentActionLockFile:
+
+        def __init__(self, path):
+            # contains current running action information
+            self.__runFile = path
+            self.__runFlag = False      # FIXME: should be changed to a lock
+
+        def getCurrentActionInfo(self):
+            try:
+                tlist = pathlib.Path(self.__runFile).read_text().rstrip("\n").split("\n")
+                if len(tlist) > 1:
+                    assert not self.__runFlag
+                    return (tlist[0], tlist[1])
+                elif not self.__runFlag:
+                    return (tlist[0], "crashed")
+                else:
+                    # action is running
+                    return (None, None)
+            except FileNotFoundError:
+                return (None, None)
+
+        def saveActionStart(self, actionName):
+            assert not os.path.exists(self.__runFile)
+            self.__runFlag = True
+            with open(self.__runFile, "w") as f:
+                f.write(actionName + "\n")
+
+        def saveActionEnd(self, error=None):
+            assert os.path.exists(self.__runFile)
+            if error is None:
+                os.unlink(self.__runFile)
+            else:
+                with open(self.__runFile, "a") as f:
+                    f.write(error + "\n")
+            self.__runFlag = False
+
+    class PersistStorageWithHistoryActionsSaveFile:
+
+        def __init__(self, path):
+            # contains all completed actions, does not contain current action
+            self.__actionFile = path
+
+        def getHistoryActions(self):
+            if not os.path.exists(self.__actionFile):
+                return []
+            else:
+                return pathlib.Path(self.__actionFile).read_text().rstrip("\n").split("\n")
+
+        def saveNewHistoryAction(self, actionName):
+            with open(self.__actionFile, "a") as f:
+                f.write(actionName + "\n")
+
+    class PersistStorageWithFinishedFlagFile:
+
+        def __init__(self, path):
+            self.__finishFile = path
+
+        def isFinished(self):
+            return os.path.exists(self.__finishFile)
+
+        def saveFinished(self):
+            assert not os.path.exists(self.__finishFile)
+            with open(self.__finishFile, "w") as f:
+                f.write("")
+
+    def Action(after=[], before=[], _custom_action_name=None, _custom_action=None):
+        def decorator(func):
+            def wrapper(self, *kargs, **kwargs):
+                curActionIndex = self._getActionIndex(wrapper._action_func_name)
+                if self._finished is not None:
+                    if self._finished == "":
+                        raise self._errClass("build already finished")
+                    else:
+                        raise self._errClass("build already failed, %s" % (self._finished))
+                if curActionIndex != self._lastActionIndex + 1:
+                    lastActionName = self._actionList[self._lastActionIndex]._action_func_name[len("action_"):] if self._lastActionIndex >= 0 else "None"
+                    raise self._errClass("action must be executed in order (last: %s, current: %s)" % (lastActionName, wrapper._action_func_name[len("action_"):]))
+                self._persistStorage.saveActionStart(wrapper._action_func_name[len("action_"):])
+                try:
+                    if wrapper._action is None:
+                        func(self, *kargs, **kwargs)
+                    else:
+                        func(self, wrapper._action_func_name[len("action_"):], wrapper._action, *kargs, **kwargs)
+                except BaseException as e:
+                    self._finished = str(e)
+                    self._persistStorage.saveActionEnd(self._finished)
+                    raise
+                else:
+                    self._lastActionIndex = curActionIndex
+                    self._persistStorage.saveActionEnd()
+                    self._persistStorage.saveNewHistoryAction(wrapper._action_func_name[len("action_"):])
+            wrapper._action_func_name = (func.__name__ if _custom_action_name is None else "action_" + _custom_action_name)
+            wrapper._action = _custom_action
+            wrapper._after = (after if _custom_action is None else _custom_action.get_after())
+            wrapper._before = (before if _custom_action is None else _custom_action.get_before())
+            return wrapper
+        return decorator
+
+    def __init__(self, persistStorage, actionList, customActionFunc, errClass):
+        self._persistStorage = persistStorage
+        self._actionList = actionList
+        self._endAction = actionList[-1]
+        self._customActionFunc = customActionFunc
+        self._errClass = errClass
+
+        # check self._actionList
+        self._assertActions()
+
+        # check history actions
+        historyActionFuncNameList = ["action_" + x for x in self._persistStorage.getHistoryActions()]
+        actionFuncNameList = [x._action_func_name for x in self._actionList]
+        if not Util.listStartswith(actionFuncNameList, historyActionFuncNameList):
+            raise self._errClass("invalid history actions")
+
+        # self._lastActionIndex == -1 if no action has been executed
+        self._lastActionIndex = len(historyActionFuncNameList) - 1
+
+        # not finished:          self._finished is None
+        # successfully finished: self._finished == ""
+        # abnormally finished:   self._finished == error-message
+        actionName, err = self._persistStorage.getCurrentActionInfo()
+        if actionName is not None:
+            self._finished = err
+        else:
+            self._finished = "" if self._persistStorage.isFinished() else None
+
+    def finish(self):
+        assert self._finished is None
+        assert self._lastActionIndex >= self._actionList.index(self._endAction)
+        self._finished = ""
+        self._persistStorage.saveFinished()
+
+    def add_custom_action(self, action_name, action, insert_after=None, insert_before=None):
+        self.add_custom_actions({action_name: action}, insert_after, insert_before)
+
+    def add_custom_actions(self, action_dict, insert_after=None, insert_before=None):
+        for action_name, action in action_dict.items():
+            assert re.fullmatch("[0-9a-z_]+", action_name) and "action_" + action_name not in dir(self)
+            assert action.check_object(action, raise_exception=False)
+
+        # convert action object or action name to action index
+        if insert_before is not None:
+            if insert_before.__class__.__name__ == "method":                        # FIXME
+                insert_before = self._actionList.index(insert_before)
+            else:
+                insert_before = self._getActionIndex("action_" + insert_before)
+        if insert_after is not None:
+            if insert_after.__class__.__name__ == "method":                         # FIXME
+                insert_after = self._actionList.index(insert_after)
+            else:
+                insert_after = self._getActionIndex("action_" + insert_after)
+
+        # convert to use insert_before only
+        if insert_before is not None and insert_after is None:
+            pass
+        elif insert_before is None and insert_after is not None:
+            insert_before = insert_after + 1
+        elif insert_before is None and insert_after is None:
+            insert_before = len(self._actionList)
+        else:
+            assert False
+
+        assert self._lastActionIndex < insert_before
+
+        # create new actions and add them to self._actionList
+        for action_name, action in action_dict.items():
+            newFunc = types.FunctionType(self._customActionFunc.__code__,
+                                         self._customActionFunc.__globals__,
+                                         name=self._customActionFunc.__name__,
+                                         argdefs=self._customActionFunc.__defaults__,
+                                         closure=self._customActionFunc.__closure__)
+            newFunc = self.Action(_custom_action_name=action_name, _custom_action=action)(newFunc)
+            exec("self.action_%s = newFunc.__get__(self)" % (action_name))
+            self._actionList.insert(insert_before, eval("self.action_%s" % (action_name)))
+            insert_before += 1
+
+        # do check
+        self._assertActions()
+
+    def has_action(self, action_name):
+        for action in self._actionList:
+            if action._action_func_name == "action_" + action_name:
+                return True
+        return False
+
+    def add_and_run_custom_action(self, action_name, action):
+        self.add_and_run_custom_actions({action_name: action})
+
+    def add_and_run_custom_actions(self, action_dict):
+        i = self._lastActionIndex
+        for action_name, action in action_dict.items():
+            if i == -1:
+                self.add_custom_action(action_name, action, insert_before=self._actionList[0])
+            else:
+                self.add_custom_action(action_name, action, insert_after=self._actionList[i])
+            i += 1
+
+        exec("self.action_%s()" % (list(action_dict.keys())[0]))
+
+    def remove_action(self, action_name):
+        idx = self._getActionIndex("action_" + action_name)
+        assert self._lastActionIndex < idx
+
+        # removes action from self._actionList
+        # FIXME: no way to remove action method
+        self._actionList.pop(idx)
+
+        # do check
+        self._assertActions()
+
+    def get_progress(self):
+        if self._finished is None:
+            ret = (self._lastActionIndex + 1) * 100 // len(self._actionList)
+            return min(ret, 99)
+        else:
+            return 100
+
+    def _getActionIndex(self, action_func_name):
+        for i, action in enumerate(self._actionList):
+            if action._action_func_name == action_func_name:
+                return i
+        assert False
+
+    def _assertActions(self):
+        actionFuncNameList = [x._action_func_name for x in self._actionList]
+        for i, action in enumerate(self._actionList):
+            assert all(["action_" + x not in actionFuncNameList[:i] for x in action._before])
+            assert all(["action_" + x not in actionFuncNameList[i+1:] for x in action._after])
 
 
 class SqfsExtractor:

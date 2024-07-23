@@ -26,6 +26,7 @@ import re
 import abc
 import pathlib
 from ._util import Util
+from ._util import ActionRunner
 from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
 from ._prototype import EmergeSyncRepository
@@ -42,35 +43,7 @@ from .scripts import ScriptInstallPackages
 from .scripts import ScriptUpdateWorld
 
 
-def Action(after=[], before=[], _custom_action_name=None, _custom_action=None):
-    def decorator(func):
-        def wrapper(self, *kargs, **kwargs):
-            curActionIndex = self._getActionIndex(wrapper._action_func_name)
-            if self._finished is not None:
-                if self._finished == "":
-                    raise BuildError("build already finished")
-                else:
-                    raise BuildError("build already failed, %s" % (self._finished))
-            if curActionIndex != self._lastActionIndex + 1:
-                lastActionFuncName = self._actionList[self._lastActionIndex]._action_func_name if self._lastActionIndex >= 0 else "None"
-                raise BuildError("action must be executed in order (last: %s, current: %s)" % (lastActionFuncName, func.__name__))
-            try:
-                func(self, *kargs, **kwargs)
-            except BaseException as e:
-                # we don't know in which step the error happens
-                self._finished = str(e)
-                raise
-            finally:
-                self._lastActionIndex = curActionIndex
-        wrapper._action_func_name = (func.__name__ if _custom_action_name is None else "action_" + _custom_action_name)
-        wrapper._action = _custom_action
-        wrapper._after = (after if _custom_action is None else _custom_action.after)
-        wrapper._before = (before if _custom_action is None else _custom_action.before)
-        return wrapper
-    return decorator
-
-
-class Builder:
+class Builder(ActionRunner):
     """
     This class does all of the chroot setup, copying of files, etc.
     It is the driver class for pretty much everything that gstage4 does.
@@ -92,7 +65,13 @@ class Builder:
 
         self._workDirObj = work_dir
 
-        self._actionList = [
+        self._actionStorage = {
+            "arch": None,                   # target arch
+            "repo": None,                   # gentoo repository information
+            "overlays": {},                 # overlay information
+        }
+
+        actionList = [
             self.action_unpack,
             self.action_create_gentoo_repository,
             self.action_init_confdir,
@@ -102,27 +81,17 @@ class Builder:
             self.action_enable_services,
             self.action_cleanup,
         ]
-        self._checkActions()
-
-        self._actionStorage = {
-            "arch": None,                   # target arch
-            "repo": None,                   # gentoo repository information
-            "overlays": {},                 # overlay information
-        }
-
-        # self._lastActionIndex == -1 if no action has been executed
-        self._lastActionIndex = -1
-
-        # not finished:          self._finished is None
-        # successfully finished: self._finished == ""
-        # abnormally finished:   self._finished == error-message
-        self._finished = None
+        def x(self, action_name, action):
+            with _MyChrooter(self) as m:
+                for s in action.custom_scripts:
+                    m.script_exec(s, quiet=self._getQuiet())
+        super().__init__(self._workDirObj._persistentStorage, actionList, x, BuildError)
 
     @property
     def verbose_level(self):
         return self._s.verbose_level
 
-    @Action()
+    @ActionRunner.Action()
     def action_unpack(self, seed_stage):
         assert isinstance(seed_stage, SeedStage)
         assert seed_stage.get_arch() == self._ts.arch
@@ -140,7 +109,7 @@ class Builder:
 
         self._actionStorage["arch"] = seed_stage.get_arch()
 
-    @Action(after=["unpack"])
+    @ActionRunner.Action(after=["unpack"])
     def action_create_gentoo_repository(self, repo):
         assert repo.get_name() == "gentoo"
 
@@ -162,7 +131,7 @@ class Builder:
 
         self._actionStorage["repo"] = repo
 
-    @Action(after=["create_gentoo_repository"])
+    @ActionRunner.Action(after=["create_gentoo_repository"])
     def action_init_confdir(self):
         tp = TargetConfDirParser(self._workDirObj.path)
         tw = TargetConfDirWriter(self._s, self._ts, self._workDirObj.path)
@@ -191,7 +160,7 @@ class Builder:
         # FIXME: should put files in patch-repository.d into config dir, so that target system can patch after every syncing
         #        but not all repositories and overlays use "emerge --sync"
 
-    @Action(after=["init_confdir"])
+    @ActionRunner.Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
         assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository) for x in overlay_list])
         assert not any([x.get_name() == "gentoo" for x in overlay_list])
@@ -240,7 +209,7 @@ class Builder:
 
         self._actionStorage["overlays"] = overlayRecord
 
-    @Action(after=["init_confdir", "create_overlays"])
+    @ActionRunner.Action(after=["init_confdir", "create_overlays"])
     def action_update_world(self, world_set):
         ts = self._ts
 
@@ -311,7 +280,7 @@ class Builder:
             # many packages change global USE flag when installing, such as python_targets_XXX, so it needs to be combined with updating world to solve conflicts
             m.script_exec(ScriptUpdateWorld(self._s.verbose_level), quiet=self._getQuiet())
 
-    @Action(after=["init_confdir", "update_world"])
+    @ActionRunner.Action(after=["init_confdir", "update_world"])
     def action_install_kernel(self):
         ts = self._ts
 
@@ -348,7 +317,7 @@ class Builder:
 
         assert False
 
-    @Action(after=["init_confdir", "update_world", "install_kernel"])
+    @ActionRunner.Action(after=["init_confdir", "update_world", "install_kernel"])
     def action_enable_services(self, service_list):
         if len(service_list) == 0:
             return
@@ -366,7 +335,7 @@ class Builder:
         else:
             assert False
 
-    @Action(after=["init_confdir", "update_world", "install_kernel", "enable_services"])
+    @ActionRunner.Action(after=["init_confdir", "update_world", "install_kernel", "enable_services"])
     def action_cleanup(self, degentoo=False):
         with _MyChrooter(self) as m:
             m.shell_call("", "eselect news read all")
@@ -391,95 +360,6 @@ class Builder:
             Util.forceDelete(t.logdir_hostpath)
             Util.forceDelete(t.distdir_hostpath)
             Util.forceDelete(t.binpkgdir_hostpath)
-
-    def finish(self):
-        assert self._finished is None
-        assert self._lastActionIndex >= self._actionList.index(self.action_cleanup)
-        self._finished = ""
-
-    def has_action(self, action_name):
-        for action in self._actionList:
-            if action._action_func_name == "action_" + action_name:
-                return True
-        return False
-
-    def add_custom_action(self, action_name, action, insert_after=None, insert_before=None):
-        assert re.fullmatch("[0-9a-z_]+", action_name) and "action_" + action_name not in dir(self)
-        assert CustomAction.check_object(action, raise_exception=False)
-
-        # convert action object or action name to action index
-        if insert_before is not None:
-            if insert_before.__class__.__name__ == "method":                        # FIXME
-                insert_before = self._actionList.index(insert_before)
-            else:
-                insert_before = self._getActionIndex("action_" + insert_before)
-        if insert_after is not None:
-            if insert_after.__class__.__name__ == "method":                         # FIXME
-                insert_after = self._actionList.index(insert_after)
-            else:
-                insert_after = self._getActionIndex("action_" + insert_after)
-
-        # convert to use insert_before only
-        if insert_before is not None and insert_after is None:
-            pass
-        elif insert_before is None and insert_after is not None:
-            insert_before = insert_after + 1
-        elif insert_before is None and insert_after is None:
-            insert_before = len(self._actionList)
-        else:
-            assert False
-
-        assert self._lastActionIndex < insert_before
-
-        # create new action and add it to self._actionList
-        @Action(_custom_action_name=action_name, _custom_action=action)
-        def x(self):
-            with _MyChrooter(self) as m:
-                for s in action.custom_scripts:
-                    m.script_exec(s, quiet=self._getQuiet())
-        exec("self.action_%s = x.__get__(self)" % (action_name))
-        self._actionList.insert(insert_before, eval("self.action_%s" % (action_name)))
-
-        # do check
-        self._checkActions()
-
-    def add_and_run_custom_action(self, action_name, action):
-        if self._lastActionIndex == -1:
-            self.add_custom_action(action_name, action, insert_before=self._actionList[0])
-        else:
-            self.add_custom_action(action_name, action, insert_after=self._actionList[self._lastActionIndex])
-        exec("self.action_%s()" % (action_name))
-
-    def remove_action(self, action_name):
-        idx = self._getActionIndex("action_" + action_name)
-
-        assert self._lastActionIndex < idx
-
-        # removes action from self._actionList
-        # FIXME: no way to remove action method
-        self._actionList.pop(idx)
-
-        # do check
-        self._checkActions()
-
-    def get_progress(self):
-        if self._finished is None:
-            ret = (self._lastActionIndex + 1) * 100 // len(self._actionList)
-            return min(ret, 99)
-        else:
-            return 100
-
-    def _getActionIndex(self, action_func_name):
-        for i, action in enumerate(self._actionList):
-            if action._action_func_name == action_func_name:
-                return i
-        assert False
-
-    def _checkActions(self):
-        actionFuncNameList = [x._action_func_name for x in self._actionList]
-        for i, action in enumerate(self._actionList):
-            assert all(["action_" + x not in actionFuncNameList[:i] for x in action._before])
-            assert all(["action_" + x not in actionFuncNameList[i+1:] for x in action._after])
 
     def _getQuiet(self):
         return (self._s.verbose_level == 0)
