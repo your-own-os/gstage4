@@ -83,9 +83,6 @@ class WorkDir:
     def path(self):
         return self._path
 
-    def has_uid_gid_map(self):
-        return self._uidMap is not None
-
     def has_error(self):
         assert not self._persistentStorage.isInUse()
         _, err = self._persistentStorage.initGetCurrentActionInfo()
@@ -95,6 +92,12 @@ class WorkDir:
         assert not self._persistentStorage.isInUse()
         actionName, err = self._persistentStorage.initGetCurrentActionInfo()
         return "action %s failed (%s) for \"%s\"" % (actionName, err, self._path)
+
+    def has_uid_gid_map(self):
+        return self._uidMap is not None
+
+    def get_arch(self):
+        return pathlib.Path(self._tsFile).read_text().rstrip("\n")
 
     def is_build_finished(self):
         self._persistentStorage.isFinished()
