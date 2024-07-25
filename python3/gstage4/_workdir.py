@@ -166,7 +166,7 @@ class WorkDirPersisentStorage(ActionRunner.PersistStorage):
         return (actionName, error)
 
     def getLastActionDirIndexName(self):
-        fnList = os.listdir(self._parent.path).sort()
+        fnList = sorted(os.listdir(self._parent.path))
         if len(fnList) == 0:
             return (None, None, None)
         else:
@@ -175,7 +175,9 @@ class WorkDirPersisentStorage(ActionRunner.PersistStorage):
 
     def getHistoryActionNames(self):
         ret = []
-        for fn in os.listdir(self._parent.path).sort():
+        print(self._parent)
+        print(self._parent.path)
+        for fn in sorted(os.listdir(self._parent.path)):
             m = re.fullmatch("[0-9]+-(.*)", fn)
             ret.append(m.group(1))
         return ret

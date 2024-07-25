@@ -34,6 +34,10 @@ import PySquashfsImage
 class Util:
 
     @staticmethod
+    def listStartswith(theList, subList):
+        return len(theList) >= len(subList) and theList[:len(subList)] == subList
+
+    @staticmethod
     def forceDelete(path):
         if os.path.islink(path):
             os.remove(path)
