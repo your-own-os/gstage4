@@ -99,8 +99,7 @@ class Builder(ActionRunner):
         assert seed_stage.get_arch() == self._ts.arch
 
         self._workDirObj._saveTargetSettings(self._ts)
-
-        curPath = self._workDirObj.getCurActionPath()
+        curPath = self._workDirObj.get_latest_action_dirpath()
 
         seed_stage.unpack(curPath)
 
@@ -119,7 +118,7 @@ class Builder(ActionRunner):
     def action_create_gentoo_repository(self, repo):
         assert repo.get_name() == "gentoo"
 
-        curPath = self._workDirObj.getCurActionPath()
+        curPath = self._workDirObj.get_latest_action_dirpath()
 
         # create repository
         if isinstance(repo, ManualSyncRepository):
@@ -141,7 +140,7 @@ class Builder(ActionRunner):
 
     @ActionRunner.Action(after=["create_gentoo_repository"])
     def action_init_confdir(self):
-        curPath = self._workDirObj.getCurActionPath()
+        curPath = self._workDirObj.get_latest_action_dirpath()
 
         tp = TargetConfDirParser(curPath)
         tw = TargetConfDirWriter(self._s, self._ts, curPath)
@@ -176,7 +175,7 @@ class Builder(ActionRunner):
         assert not any([x.get_name() == "gentoo" for x in overlay_list])
         assert len([x.get_name() for x in overlay_list]) == len(set([x.get_name() for x in overlay_list]))        # no duplication
 
-        curPath = self._workDirObj.getCurActionPath()
+        curPath = self._workDirObj.get_latest_action_dirpath()
         overlayRecord = dict()
 
         # create overlays
@@ -222,7 +221,7 @@ class Builder(ActionRunner):
 
     @ActionRunner.Action(after=["init_confdir", "create_overlays"])
     def action_update_world(self, world_set):
-        curPath = self._workDirObj.getCurActionPath()
+        curPath = self._workDirObj.get_latest_action_dirpath()
 
         def __worldNeeded(pkg):
             if pkg not in world_set:
@@ -293,7 +292,7 @@ class Builder(ActionRunner):
 
     @ActionRunner.Action(after=["init_confdir", "update_world"])
     def action_install_kernel(self):
-        curPath = self._workDirObj.getCurActionPath()
+        curPath = self._workDirObj.get_latest_action_dirpath()
 
         if self._ts.kernel_manager == "genkernel":
             t = TargetConfDirParser(curPath)
@@ -346,7 +345,7 @@ class Builder(ActionRunner):
 
     @ActionRunner.Action(after=["init_confdir", "update_world", "install_kernel", "enable_services"])
     def action_cleanup(self, degentoo=False):
-        curPath = self._workDirObj.getCurActionPath()
+        curPath = self._workDirObj.get_latest_action_dirpath()
 
         with _MyChrooter(self) as m:
             m.shell_call("", "eselect news read all")
@@ -534,47 +533,46 @@ class _MyRepo:
 class _MyChrooter(Runner):
 
     def __init__(self, parent):
-        self._p = parent
-        self._w = parent._workDirObj
-        super().__init__(self._w.getCurActionPath())
-        self._bindMountList = []
+        super().__init__(parent._workDirObj.get_latest_action_dirpath())
+        self._s = parent._s
+        self._extraBindMountList = []
 
     def bind(self):
         super().bind()
         try:
-            t = TargetFilesAndDirs(self._w.getCurActionPath())
+            t = TargetFilesAndDirs(self._dir)
 
             # log directory mount point
-            if self._p._s.log_dir is not None:
+            if self._s.log_dir is not None:
                 assert os.path.exists(t.logdir_hostpath) and not Util.isMount(t.logdir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._p._s.log_dir, t.logdir_hostpath))
-                self._bindMountList.append(t.logdir_hostpath)
+                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.log_dir, t.logdir_hostpath))
+                self._extraBindMountList.append(t.logdir_hostpath)
 
             # distdir mount point
-            if self._p._s.host_distfiles_dir is not None:
+            if self._s.host_distfiles_dir is not None:
                 assert os.path.exists(t.distdir_hostpath) and not Util.isMount(t.distdir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._p._s.host_distfiles_dir, t.distdir_hostpath))
-                self._bindMountList.append(t.distdir_hostpath)
+                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.host_distfiles_dir, t.distdir_hostpath))
+                self._extraBindMountList.append(t.distdir_hostpath)
 
             # pkgdir mount point
-            if self._p._s.host_packages_dir is not None:
+            if self._s.host_packages_dir is not None:
                 assert os.path.exists(t.binpkgdir_hostpath) and not Util.isMount(t.binpkgdir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._p._s.host_packages_dir, t.binpkgdir_hostpath))
-                self._bindMountList.append(t.binpkgdir_hostpath)
+                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.host_packages_dir, t.binpkgdir_hostpath))
+                self._extraBindMountList.append(t.binpkgdir_hostpath)
 
             # ccachedir mount point
-            if self._p._s.host_ccache_dir is not None and os.path.exists(t.ccachedir_hostpath):
+            if self._s.host_ccache_dir is not None and os.path.exists(t.ccachedir_hostpath):
                 assert not Util.isMount(t.ccachedir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._p._s.host_ccache_dir, t.ccachedir_hostpath))
-                self._bindMountList.append(t.ccachedir_hostpath)
+                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.host_ccache_dir, t.ccachedir_hostpath))
+                self._extraBindMountList.append(t.ccachedir_hostpath)
         except BaseException:
             self.unbind(remove_scripts=False)
             raise
 
     def unbind(self):
-        for fullfn in reversed(self._bindMountList):
+        for fullfn in reversed(self._extraBindMountList):
             Util.cmdCall("umount", "-l", fullfn)
-        self._bindMountList = []
+        self._extraBindMountList = []
         super().unbind()
 
 

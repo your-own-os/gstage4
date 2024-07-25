@@ -83,6 +83,10 @@ class WorkDir:
     def path(self):
         return self._path
 
+    def get_latest_action_dirpath(self):
+        # can return None
+        return self.getLastActionDirIndexName()[0]
+
     def has_error(self):
         assert not self._persistentStorage.isInUse()
         _, err = self._persistentStorage.initGetCurrentActionInfo()
@@ -101,9 +105,6 @@ class WorkDir:
 
     def is_build_finished(self):
         self._persistentStorage.isFinished()
-
-    def _getCurActionPath(self):
-        return self.getLastActionDirIndexName()[0]
 
     def _saveTargetSettings(self, ts):
         with open(self._tsFile, "w") as f:
