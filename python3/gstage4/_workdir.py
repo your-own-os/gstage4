@@ -166,20 +166,18 @@ class WorkDirPersisentStorage(ActionRunner.PersistStorage):
         return (actionName, error)
 
     def getLastActionDirIndexName(self):
-        fnList = sorted(os.listdir(self._parent.path))
-        if len(fnList) == 0:
-            return (None, None, None)
-        else:
-            m = re.fullmatch("([0-9])+-(.*)", fnList[-1])
-            return (m.group(0), int(m.group(1)), m.group(2))
+        for fn in reversed(sorted(os.listdir(self._parent.path))):
+            m = re.fullmatch("([0-9])+-(.*)", fn)
+            if m is not None:
+                return (m.group(0), int(m.group(1)), m.group(2))
+        return (None, None, None)
 
     def getHistoryActionNames(self):
         ret = []
-        print(self._parent)
-        print(self._parent.path)
         for fn in sorted(os.listdir(self._parent.path)):
             m = re.fullmatch("[0-9]+-(.*)", fn)
-            ret.append(m.group(1))
+            if m is not None:
+                ret.append(m.group(1))
         return ret
 
     def isFinished(self):
