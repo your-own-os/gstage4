@@ -55,11 +55,13 @@ class RepoPatcher:
                 ret.append(patchDir)
         return ret
 
-    def run(self, targetDir, patchDirList):
+    def patch(self, targetDir, patchDirList):
         pendingDstDirSet = set()
         for patchDir in patchDirList:
             pendingDstDirSet |= self._patchRepository(targetDir, patchDir)
+        return pendingDstDirSet
 
+    def generateManifest(self, pendingDstDirSet):
         # generate manifest for patched packages
         asyncio.set_event_loop(asyncio.new_event_loop())
         asyncio.get_event_loop().run_until_complete(self._doWork(pendingDstDirSet, self._jobNumber))

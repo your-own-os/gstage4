@@ -30,7 +30,8 @@ if __name__ == "__main__":
     patchDirList = patcher.filter_and_convert_patch_dir_list(patchDirList, targetDirRepoName)
     if len(patchDirList) > 0:
         print("Patching...")
-        patcher.run(targetDir, patchDirList)
+        pendingDstDirSet = patcher.patch(targetDir, patchDirList)
+        patcher.generateManifest(pendingDstDirSet)
         for x in patcher.warn_or_err_list:
             if x.warn_or_err:
                 print("Warning: %s" % (x.msg))
