@@ -24,6 +24,7 @@
 import os
 import re
 import abc
+import glob
 import pathlib
 from ._util import Util
 from ._util import ActionRunner
@@ -134,7 +135,12 @@ class Builder(ActionRunner):
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories])
+            pendingDstDirSet = myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories])
+            with _MyChrooter(self) as m:
+                for dstDir in pendingDstDirSet:
+                    ebuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
+                    fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
+                    m.shell_exec("ebuild %s manifest" % (fn))
 
         self._actionStorage["repo"] = repo
 
@@ -215,7 +221,14 @@ class Builder(ActionRunner):
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
             for overlay in overlay_list:
-                myRepoDict[overlay.get_name()].patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories])
+                myRepo = myRepoDict[overlay.get_name()]
+                patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
+                pendingDstDirSet = myRepo.patch(patchDirList)
+                with _MyChrooter(self) as m:
+                    for dstDir in pendingDstDirSet:
+                        ebuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
+                        fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
+                        m.shell_exec("ebuild %s manifest" % (fn))
 
         self._actionStorage["overlays"] = overlayRecord
 
@@ -523,13 +536,14 @@ class _MyRepo:
         patchDirList = patcher.filter_and_convert_patch_dir_list(patchDirList, self.get_repo_name())
         if len(patchDirList) > 0:
             pendingDstDirSet = patcher.patch(self.datadir_hostpath, patchDirList)
-            patcher.generateManifest(self.datadir_hostpath, pendingDstDirSet)
             for x in patcher.warn_or_err_list:
                 if x.warn_or_err:
                     print("Warning: %s" % (x.msg))
                 else:
                     raise BuildError(x.msg)
-
+            return pendingDstDirSet
+        else:
+            return set()
 
 class _MyChrooter(Runner):
 
