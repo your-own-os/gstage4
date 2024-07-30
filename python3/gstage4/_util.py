@@ -25,7 +25,6 @@ import os
 import re
 import abc
 import time
-import types
 import shutil
 import subprocess
 import PySquashfsImage
@@ -256,7 +255,7 @@ class ActionRunner:
         # not finished:          self._finished is None
         # successfully finished: self._finished == ""
         # abnormally finished:   self._finished == error-message
-        actionName, err = self._persistStorage.initGetCurrentActionInfo()
+        _, err = self._persistStorage.initGetCurrentActionInfo()
         if err is not None:
             self._finished = err
         else:
@@ -309,13 +308,9 @@ class ActionRunner:
 
         # create new actions and add them to self._actionList
         for action_name, action in action_dict.items():
-            newFunc = types.FunctionType(self._customActionFunc.__code__,
-                                         self._customActionFunc.__globals__,
-                                         name=self._customActionFunc.__name__,
-                                         argdefs=self._customActionFunc.__defaults__,
-                                         closure=self._customActionFunc.__closure__)
-            newFunc = self.Action(_custom_action_name=action_name, _custom_action=action)(newFunc)
-            exec("self.action_%s = newFunc.__get__(self)" % (action_name))
+            func = self.Action(_custom_action_name=action_name, _custom_action=action)(self._customActionFunc)
+            func = func.__get__(self)
+            exec("self.action_%s = func" % (action_name))
             self._actionList.insert(insert_before, eval("self.action_%s" % (action_name)))
             insert_before += 1
 
