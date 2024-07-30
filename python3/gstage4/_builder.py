@@ -24,7 +24,6 @@
 import os
 import re
 import abc
-import glob
 import pathlib
 from ._util import Util
 from ._util import ActionRunner
