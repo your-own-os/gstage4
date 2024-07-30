@@ -280,6 +280,8 @@ class ActionRunner:
         for action_name, action in action_dict.items():
             assert re.fullmatch("[0-9a-z_]+", action_name) and "action_" + action_name not in dir(self)
             assert isinstance(action, self.CustomAction)
+            assert all([re.fullmatch("[0-9a-z_]+", x) for x in action.get_after()])
+            assert all([re.fullmatch("[0-9a-z_]+", x) for x in action.get_before()])
 
         # convert action object or action name to action index
         if insert_before is not None:
