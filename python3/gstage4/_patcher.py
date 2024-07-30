@@ -61,23 +61,23 @@ class RepoPatcher:
             pendingDstDirSet |= self._patchRepository(targetDir, patchDir)
         return pendingDstDirSet
 
-    def generateManifest(self, pendingDstDirSet):
+    def generateManifest(self, targetDir, pendingDstDirSet):
         # generate manifest for patched packages
         asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.get_event_loop().run_until_complete(self._doWork(pendingDstDirSet, self._jobNumber))
+        asyncio.get_event_loop().run_until_complete(self._doWork(targetDir, pendingDstDirSet, self._jobNumber))
 
     def _patchRepository(self, targetDir, patchDir):
         # patch eclass files
         eclassDir = os.path.join(patchDir, "eclass")
         if os.path.exists(eclassDir):
-            dstDir = os.path.join(targetDir, "eclass")
-            self._execPatchScript(patchDir, eclassDir, dstDir)
+            dstFullDir = os.path.join(targetDir, "eclass")
+            self._execPatchScript(patchDir, eclassDir, dstFullDir)
 
         # patch profile files
         profilesDir = os.path.join(patchDir, "profiles")
         if os.path.exists(profilesDir):
-            dstDir = os.path.join(targetDir, "profiles")
-            self._execPatchScript(patchDir, profilesDir, dstDir)
+            dstFullDir = os.path.join(targetDir, "profiles")
+            self._execPatchScript(patchDir, profilesDir, dstFullDir)
 
         # patch packages
         pendingDstDirList = []
@@ -87,11 +87,12 @@ class RepoPatcher:
             fullCategoryDir = os.path.join(patchDir, categoryDir)
             for ebuildDir in os.listdir(fullCategoryDir):
                 srcDir = os.path.join(fullCategoryDir, ebuildDir)
-                dstDir = os.path.join(targetDir, categoryDir, ebuildDir)
-                self._execPatchScript(patchDir, srcDir, dstDir)
-                if len(glob.glob(os.path.join(dstDir, "*.ebuild"))) == 0:
+                dstDir = os.path.join(categoryDir, ebuildDir)
+                dstFullDir = os.path.join(targetDir, dstDir)
+                self._execPatchScript(patchDir, srcDir, dstFullDir)
+                if len(glob.glob(os.path.join(dstFullDir, "*.ebuild"))) == 0:
                     # all ebuild files are deleted, it means this package is removed
-                    shutil.rmtree(dstDir)
+                    shutil.rmtree(dstFullDir)
                     if len(os.listdir(fullCategoryDir)) == 0:
                         os.rmdir(fullCategoryDir)
                     continue
@@ -124,14 +125,15 @@ class RepoPatcher:
                 self._warnOrErrList.append(self.WarnOrErr((False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, fullfn[len(patchDir) + 1:], out))))
 
     @classmethod
-    async def _doWork(cls, pendingDstDirSet, jobNumber):
+    async def _doWork(cls, targetDir, pendingDstDirSet, jobNumber):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
         if jobNumber is None:
             pool = asyncio_pool.AioPool()
         else:
             pool = asyncio_pool.AioPool(size=jobNumber)
         for dstDir in pendingDstDirSet:
-            pool.spawn_n(cls._generateEbuildManifest(dstDir))
+            dstFullDir = os.path.join(targetDir, dstDir)
+            pool.spawn_n(cls._generateEbuildManifest(dstFullDir))
         await pool.join()
 
     @staticmethod

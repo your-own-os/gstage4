@@ -31,7 +31,7 @@ if __name__ == "__main__":
     if len(patchDirList) > 0:
         print("Patching...")
         pendingDstDirSet = patcher.patch(targetDir, patchDirList)
-        patcher.generateManifest(pendingDstDirSet)
+        patcher.generateManifest(targetDir, pendingDstDirSet)
         for x in patcher.warn_or_err_list:
             if x.warn_or_err:
                 print("Warning: %s" % (x.msg))
