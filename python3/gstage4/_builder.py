@@ -141,7 +141,7 @@ class Builder(ActionRunner):
                     hostEbuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
                     fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
                     chrootEbuildDir = os.path.join(myRepo.datadir_path, dstDir)
-                    m.shell_exec("ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)))
+                    m.shell_exec("", "ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)))
 
         self._actionStorage["repo"] = repo
 
@@ -231,7 +231,7 @@ class Builder(ActionRunner):
                         hostEbuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
                         fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
                         chrootEbuildDir = os.path.join(myRepo.datadir_path, dstDir)
-                        m.shell_exec("ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)))
+                        m.shell_exec("", "ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)))
 
         self._actionStorage["overlays"] = overlayRecord
 
