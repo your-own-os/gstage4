@@ -139,7 +139,7 @@ class Builder(ActionRunner):
             with _MyChrooter(self) as m:
                 # FIXME: it a bit hard to parallelize the following code
                 for dstDir in pendingDstDirSet:
-                    ebuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
+                    ebuildDir = os.path.join(myRepo.datadir_path, dstDir)
                     fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
                     m.shell_exec("ebuild %s manifest" % (fn))
 
@@ -228,7 +228,7 @@ class Builder(ActionRunner):
                 with _MyChrooter(self) as m:
                     # FIXME: it a bit hard to parallelize the following code
                     for dstDir in pendingDstDirSet:
-                        ebuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
+                        ebuildDir = os.path.join(myRepo.datadir_path, dstDir)
                         fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
                         m.shell_exec("ebuild %s manifest" % (fn))
 
