@@ -657,7 +657,7 @@ games-engines/scummvm                                                           
 class SupportAllTermType:
 
     def update_world_set(self, world_set):
-        world_set.add("x11-terms/ncurses")                  # FIXME: should ensure USE flag installs all terminfo
+        world_set.add("sys-libs/ncurses")                  # FIXME: should ensure USE flag installs all terminfo
         world_set.add("x11-terms/kitty-terminfo")
 
 
