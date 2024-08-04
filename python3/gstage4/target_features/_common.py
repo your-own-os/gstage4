@@ -805,7 +805,7 @@ www-client/chromium                                         pulseaudio          
 x11-libs/wxGTK                                              gstreamer                     # sound route 2
 
 # disable sound route 7
-media-sound/pipewire                                        -pipewire-alsa
+media-video/pipewire                                        -pipewire-alsa
 
 # keep pulseaudio minimal
 */*                                                         -pulseaudio         # note: */* USE flag has a lower priority than package specific USE flags above
