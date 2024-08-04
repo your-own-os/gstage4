@@ -188,7 +188,8 @@ class PlacingFilesScript(ScriptInChroot):
                 if hostpath is not None:
                     assert fmode is not None
                     self._copytree(hostpath, fullfn, owner, group, dmode, fmode)
-                    sbuf += "mv %s %s\n" % (fn, target_dirpath)
+                    # note: we don't support merge "fn" and "target_dirpath", not only it is complex but also needs to deal with different owner/group etc
+                    sbuf += "rm -rf %s; mv %s %s\n" % (target_dirpath, fn, target_dirpath)
                 else:
                     assert fmode is None
                     sbuf += "mkdir %s; chown %s:%s %s; chmod %o %s\n" % (target_dirpath, owner, group, target_dirpath, dmode, target_dirpath)
