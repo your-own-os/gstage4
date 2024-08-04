@@ -440,6 +440,51 @@ app-admin/gnome-keyring
 """
 
 
+class UseIbus:
+
+    def update_target_settings(self, target_settings, for_wayland, for_x11):
+        assert "10-ibus" not in target_settings.pkg_use_files
+        assert "10-ibus" not in target_settings.pkg_mask_files
+
+        assert for_wayland and not for_x11
+
+        target_settings.pkg_use_files["10-ibus"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-ibus"] = self._maskFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# no need to use functions other than wayland integration
+app-i18n/ibus                                                      -X -gtk2 -gtk3 -gtk4
+"""
+
+    _maskFileContent = """
+# we use app-i18n/ibus
+app-i18n/*fcitx*
+"""
+
+
+class UseFcitx:
+
+    def update_target_settings(self, target_settings, for_wayland, for_x11):
+        assert "10-fcitx" not in target_settings.pkg_use_files
+        assert "10-fcitx" not in target_settings.pkg_mask_files
+
+        assert for_wayland and not for_x11
+
+        target_settings.pkg_use_files["10-fcitx"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-fcitx"] = self._maskFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# no need to use functions other than wayland integration
+app-i18n/fcitx                                                     -X
+"""
+
+    _maskFileContent = """
+# we use app-i18n/fcitx
+app-i18n/ibus
+app-i18n/ibus-*
+"""
+
+
 class PreferWget2:
 
     def update_target_settings(self, target_settings):
