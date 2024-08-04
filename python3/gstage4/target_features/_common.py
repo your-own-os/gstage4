@@ -482,6 +482,9 @@ app-i18n/fcitx                                                     -X
 # we use app-i18n/fcitx
 app-i18n/ibus
 app-i18n/ibus-*
+
+# don't use old fcitx version anymore
+<app-i18n/fcitx-5.0.0
 """
 
 
