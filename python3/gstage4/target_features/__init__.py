@@ -38,6 +38,9 @@ from ._common import NotUseVT
 from ._common import UseGnomeKeyring
 from ._common import UseKeePassXc
 
+from ._common import UseIbus
+from ._common import UseFcitx
+
 from ._common import AcceptAllLicenses
 from ._common import NotUseDeprecatedPackagesAndFunctions
 from ._common import DesktopEnvironmentNeutral

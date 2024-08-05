@@ -440,6 +440,56 @@ app-admin/gnome-keyring
 """
 
 
+class UseIbus:
+
+    def update_target_settings(self, target_settings, for_wayland, for_x11):
+        assert "10-ibus" not in target_settings.pkg_use_files
+        assert "10-ibus" not in target_settings.pkg_mask_files
+
+        assert for_wayland and not for_x11
+
+        target_settings.pkg_use_files["10-ibus"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-ibus"] = self._maskFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# no need to use functions other than wayland integration
+app-i18n/ibus                                                      -X -gtk2 -gtk3 -gtk4
+"""
+
+    _maskFileContent = """
+# we use app-i18n/ibus
+app-i18n/*fcitx*
+"""
+
+
+class UseFcitx:
+
+    def update_target_settings(self, target_settings, for_wayland, for_x11):
+        assert "10-fcitx" not in target_settings.pkg_use_files
+        assert "10-fcitx" not in target_settings.pkg_mask_files
+
+        assert for_wayland and not for_x11
+
+        target_settings.pkg_use_files["10-fcitx"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-fcitx"] = self._maskFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# no need to use functions other than wayland integration?
+app-i18n/fcitx                                                     -X
+app-i18n/fcitx-qt                                                  -qt5 qt6
+app-i18n/fcitx-gtk                                                 -gtk2 gtk3 gtk4
+"""
+
+    _maskFileContent = """
+# we use app-i18n/fcitx
+app-i18n/ibus
+app-i18n/ibus-*
+
+# don't use old fcitx version anymore
+<app-i18n/fcitx-5.0.0
+"""
+
+
 class PreferWget2:
 
     def update_target_settings(self, target_settings):
@@ -807,7 +857,7 @@ www-client/chromium                                         pulseaudio          
 x11-libs/wxGTK                                              gstreamer                     # sound route 2
 
 # disable sound route 7
-media-sound/pipewire                                        -pipewire-alsa
+media-video/pipewire                                        -pipewire-alsa
 
 # keep pulseaudio minimal
 */*                                                         -pulseaudio         # note: */* USE flag has a lower priority than package specific USE flags above
