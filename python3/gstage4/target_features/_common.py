@@ -701,6 +701,7 @@ app-emulation/wine-staging                                                      
 dev-lang/fbc                                                                         opengl
 dev-qt/qtbase                                                                        opengl
 dev-qt/qtdeclarative                                                                 opengl
+dev-qt/qttools                                                                       opengl
 games-emulation/dosbox-staging                                                       opengl
 games-engines/scummvm                                                                opengl
 """
