@@ -7,10 +7,10 @@ import subprocess
 
 try:
     selfDir = os.path.dirname(os.path.realpath(__file__))
-    for fullfn in glob.glob(os.path.join(selfDir, "*.ebuild")):
+    for fullfn in glob.glob(os.path.join(selfDir, "files", "*.ebuild")):
         if os.path.exists(os.path.basename(fullfn)):
             raise ValueError()
         subprocess.check_call("cp %s ." % (fullfn))
-    subprocess.check_call("cp %s/files/* ./files" % (selfDir))
+    subprocess.check_call("cp %s/files/files/* ./files" % (selfDir))
 except ValueError:
     print("outdated")
