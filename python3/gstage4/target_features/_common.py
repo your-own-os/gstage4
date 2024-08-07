@@ -478,6 +478,7 @@ class UseFcitx:
 app-i18n/fcitx                                                     -X
 app-i18n/fcitx-qt                                                  -qt5 qt6
 app-i18n/fcitx-gtk                                                 -gtk2 gtk3 gtk4
+app-i18n/fcitx-chinese-addons                                      -qt5 qt6
 """
 
     _maskFileContent = """
