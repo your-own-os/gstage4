@@ -27,6 +27,7 @@ import abc
 import pathlib
 from ._util import Util
 from ._util import ActionRunner
+from ._util import DirListMount
 from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
 from ._prototype import EmergeSyncRepository
@@ -537,44 +538,43 @@ class _MyChrooter(Runner):
     def __init__(self, parent):
         super().__init__(parent._workDirObj.get_latest_action_dirpath())
         self._s = parent._s
-        self._extraBindMountList = []
+        self._extraMountObj = None
 
     def bind(self):
         super().bind()
         try:
             t = TargetFilesAndDirs(self._dir)
+            mountDirs = []
 
             # log directory mount point
             if self._s.log_dir is not None:
                 assert os.path.exists(t.logdir_hostpath) and not Util.isMount(t.logdir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.log_dir, t.logdir_hostpath))
-                self._extraBindMountList.append(t.logdir_hostpath)
+                mountDirs.append((t.logdir_hostpath, "--bind %s" % (self._s.log_dir, t.logdir_hostpath)))
 
             # distdir mount point
             if self._s.host_distfiles_dir is not None:
                 assert os.path.exists(t.distdir_hostpath) and not Util.isMount(t.distdir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.host_distfiles_dir, t.distdir_hostpath))
-                self._extraBindMountList.append(t.distdir_hostpath)
+                mountDirs.append((t.distdir_hostpath, "--bind %s" % (self._s.host_distfiles_dir, t.distdir_hostpath)))
 
             # pkgdir mount point
             if self._s.host_packages_dir is not None:
                 assert os.path.exists(t.binpkgdir_hostpath) and not Util.isMount(t.binpkgdir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.host_packages_dir, t.binpkgdir_hostpath))
-                self._extraBindMountList.append(t.binpkgdir_hostpath)
+                mountDirs.append((t.binpkgdir_hostpath, "--bind %s" % (self._s.host_packages_dir, t.binpkgdir_hostpath)))
 
             # ccachedir mount point
             if self._s.host_ccache_dir is not None and os.path.exists(t.ccachedir_hostpath):
                 assert not Util.isMount(t.ccachedir_hostpath)
-                Util.shellCall("mount --bind \"%s\" \"%s\"" % (self._s.host_ccache_dir, t.ccachedir_hostpath))
-                self._extraBindMountList.append(t.ccachedir_hostpath)
+                mountDirs.append((t.ccachedir_hostpath, "--bind %s" % (self._s.host_ccache_dir, t.ccachedir_hostpath)))
+
+            self._extraMountObj = DirListMount(mountDirs)
         except BaseException:
             self.unbind(remove_scripts=False)
             raise
 
     def unbind(self):
-        for fullfn in reversed(self._extraBindMountList):
-            Util.cmdCall("umount", "-l", fullfn)
-        self._extraBindMountList = []
+        if self._extraMountObj is not None:
+            self._extraMountObj.dispse()
+            self._extraMountObj = None
         super().unbind()
 
 

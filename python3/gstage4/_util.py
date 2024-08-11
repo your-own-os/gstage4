@@ -129,6 +129,14 @@ class Util:
         return ret.stdout.rstrip()
 
     @staticmethod
+    def cmdCallIgnoreResult(cmd, *kargs):
+        ret = subprocess.run([cmd] + list(kargs),
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             universal_newlines=True)
+        if ret.returncode > 128:
+            time.sleep(1.0)
+
+    @staticmethod
     def portageIsPkgInstalled(rootDir, pkg):
         dir = os.path.join(rootDir, "var", "db", "pkg", os.path.dirname(pkg))
         if os.path.exists(dir):
@@ -149,6 +157,33 @@ class TempChdir:
 
     def __exit__(self, type, value, traceback):
         os.chdir(self.olddir)
+
+
+class DirListMount:
+
+    def __init__(self, mountList):
+        self.okList = []
+        for item in mountList:      # mountList = [(directory, mount-commad-1, mount-command-2, ...)]
+            dir = item[0]
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+            for i in range(1, len(item)):
+                try:
+                    Util.shellCall("%s %s" % ("/bin/mount", item[i]))
+                    self.okList.insert(0, dir)
+                except subprocess.CalledProcessError:
+                    self.dispose()
+                    raise
+
+    def dispose(self):
+        for d in self.okList:
+            Util.cmdCallIgnoreResult("/bin/umount", "-l", d)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.dispose()
 
 
 class ActionRunner:
