@@ -26,11 +26,20 @@ import re
 import abc
 import time
 import shutil
+import platform
 import subprocess
 import PySquashfsImage
 
 
 class Util:
+
+    @staticmethod
+    def getCpuArch():
+        ret = platform.machine()
+        if ret == "x86_64":
+            return "amd64"
+        else:
+            return ret
 
     @staticmethod
     def listStartswith(theList, subList):

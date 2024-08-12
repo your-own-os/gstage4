@@ -107,7 +107,7 @@ class Runner:
 
     def shell_call(self, env, cmd):
         assert self.is_binded()
-        assert self._arch == platform.machine()
+        assert self._arch == Util.getCpuArch()
 
         # FIXME
         env = "LANG=C.utf8 PATH=/bin:/usr/bin:/sbin:/usr/sbin " + env
@@ -117,7 +117,7 @@ class Runner:
 
     def shell_exec(self, env, cmd, quiet=False):
         assert self.is_binded()
-        assert self._arch == platform.machine()
+        assert self._arch == Util.getCpuArch()
 
         # FIXME
         env = "LANG=C.utf8 PATH=/bin:/usr/bin:/sbin:/usr/sbin " + env
