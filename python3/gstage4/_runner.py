@@ -25,6 +25,7 @@ import os
 import platform
 import subprocess
 from ._util import Util
+from ._util import DirListMount
 
 
 class Runner:
@@ -42,59 +43,83 @@ class Runner:
         self.unbind()
 
     def is_binded(self):
-        return len(self._mountList) > 0
+        if len(self._mountList) > 0:
+            assert self.is_binded()
+            return True
+        else:
+            return False
 
     def bind(self):
-        assert len(self._mountList) == 0
+        assert not self.is_binded()
 
         try:
+            # mount layer 1 directories
+            if True:
+                procDir = os.path.join(self._dir, "proc")
+                sysDir = os.path.join(self._dir, "sys")
+                devDir = os.path.join(self._dir, "dev")
+                runDir = os.path.join(self._dir, "run")
+                tmpDir = os.path.join(self._dir, "tmp")
+
+                assert os.path.exists(procDir) and not Util.isMount(procDir)
+                assert os.path.exists(sysDir) and not Util.isMount(sysDir)
+                assert os.path.exists(devDir) and not Util.isMount(devDir)
+                assert os.path.exists(runDir) and not Util.isMount(runDir)
+                assert os.path.exists(tmpDir) and not Util.isMount(tmpDir)
+
+                mountDirs = [
+                    (procDir, "-t proc -o nosuid,noexec,nodev proc %s" % (procDir)),
+                    (sysDir, "--rbind /sys %s" % (sysDir), "--make-rslave %s" % (sysDir)),
+                    (devDir, "--rbind /dev %s" % (devDir), "--make-rslave %s" % (devDir)),
+                    (runDir, "--bind /run %s" % (runDir)),
+                    (tmpDir, "-t tmpfs -o mode=1777,strictatime,nodev,nosuid tmpfs %s" % (tmpDir)),
+                ]
+                # if os.path.exists("/sys/firmware/efi/efivars"):
+                #     mountList += [
+                #         ("/mnt/gentoo/sys/firmware/efi/efivars", "-t efivarfs -o nosuid,noexec,nodev /mnt/gentoo/sys/firmware/efi/efivars"),
+                #     ]
+
+                self._mountList.append(DirListMount(mountDirs))
+
+            # mount layer 2 directories
+            if True:
+                runDevDir = os.path.join(self._dir, "run", "udev")
+                mountDirs = [
+                    (runDevDir, "--rbind /run/udev %s" % (runDevDir), "--make-rslave %s" % (runDevDir)),
+                ]
+                self._mountList.append(DirListMount(mountDirs))
+
             # copy resolv.conf
             # FIMXE: can not adapt the network cfg of host system change
-            subprocess.check_call(["cp", "-L", "/etc/resolv.conf", os.path.join(self._dir, "etc")])
-
-            # mount /proc
-            fullfn = os.path.join(self._dir, "proc")
-            assert os.path.exists(fullfn) and not Util.isMount(fullfn)
-            subprocess.check_call(["mount", "-t", "proc", "proc", fullfn])
-            self._mountList.append(fullfn)
-
-            # mount /sys
-            fullfn = os.path.join(self._dir, "sys")
-            assert os.path.exists(fullfn) and not Util.isMount(fullfn)
-            subprocess.check_call(["mount", "--rbind", "/sys", fullfn])
-            subprocess.check_call(["mount", "--make-rslave", fullfn])
-            self._mountList.append(fullfn)
-
-            # mount /dev
-            fullfn = os.path.join(self._dir, "dev")
-            assert os.path.exists(fullfn) and not Util.isMount(fullfn)
-            subprocess.check_call(["mount", "--rbind", "/dev", fullfn])
-            subprocess.check_call(["mount", "--make-rslave", fullfn])
-            self._mountList.append(fullfn)
-
-            # FIXME: mount /run
-            pass
-
-            # mount /tmp
-            fullfn = os.path.join(self._dir, "tmp")
-            assert os.path.exists(fullfn) and not Util.isMount(fullfn)
-            subprocess.check_call(["mount", "-t", "tmpfs", "tmpfs", fullfn])
-            self._mountList.append(fullfn)
+            targetFullfn = os.path.join(self._dir, "etc", "resolv.conf")
+            if os.path.exists(targetFullfn):
+                os.rename(targetFullfn, targetFullfn + ".bak")
+            subprocess.check_call(["cp", "-L", "/etc/resolv.conf", targetFullfn])
         except BaseException:
-            self._unbind(False)
+            self.unbind(remove_scripts=False)
             raise
 
     def unbind(self, remove_scripts=True):
-        assert len(self._mountList) > 0
-        self._unbind(bool(remove_scripts))
+        if remove_scripts:
+            for i in range(0, len(self._scriptDirList)):
+                Util.forceDelete(self._scriptDirList.pop())
+
+        targetFullfn = os.path.join(self._dir, "etc", "resolv.conf")
+        if os.path.exists(targetFullfn + ".bak"):
+            os.rename(targetFullfn + ".bak", targetFullfn)
+        else:
+            Util.forceDelete(targetFullfn)
+
+        for i in range(0, len(self._mountList)):
+            self._mountList.pop().dispose()
 
     def interactive_shell(self):
-        assert len(self._mountList) > 0
+        assert self.is_binded()
         subprocess.check_call(["chroot", self._dir])
 
     def shell_call(self, env, cmd):
         # "CLEAN_DELAY=0 emerge -C sys-fs/eudev" -> "CLEAN_DELAY=0 chroot emerge -C sys-fs/eudev"
-        assert len(self._mountList) > 0
+        assert self.is_binded()
 
         # FIXME
         env = "LANG=C.utf8 PATH=/bin:/usr/bin:/sbin:/usr/sbin " + env
@@ -103,7 +128,7 @@ class Runner:
         return subprocess.check_output("%s chroot \"%s\" %s" % (env, self._dir, cmd), shell=True, stderr=subprocess.STDOUT, universal_newlines=True)
 
     def shell_exec(self, env, cmd, quiet=False):
-        assert len(self._mountList) > 0
+        assert self.is_binded()
 
         # FIXME
         env = "LANG=C.utf8 PATH=/bin:/usr/bin:/sbin:/usr/sbin " + env
@@ -115,7 +140,7 @@ class Runner:
             subprocess.check_call("%s chroot \"%s\" %s" % (env, self._dir, cmd), shell=True)
 
     def script_exec(self, scriptObj, quiet=False):
-        assert len(self._mountList) > 0
+        assert self.is_binded()
 
         path = os.path.join("/var", "tmp", "script_%d" % (len(self._scriptDirList)))
         hostPath = os.path.join(self._dir, path[1:])
@@ -126,21 +151,6 @@ class Runner:
 
         scriptObj.fill_script_dir(hostPath)
         self.shell_exec("", "sh -c \"cd %s ; ./%s\"" % (path, scriptObj.get_script()), quiet)
-
-    def _unbind(self, remove_scripts):
-        assert isinstance(remove_scripts, bool)
-
-        for fullfn in reversed(self._mountList):
-            if os.path.exists(fullfn) and Util.isMount(fullfn):
-                subprocess.check_call(["umount", "-l", fullfn])
-        self._mountList = []
-
-        Util.forceDelete(os.path.join(self._dir, "etc", "resolv.conf"))
-
-        if remove_scripts:
-            for hostPath in reversed(self._scriptDirList):
-                Util.forceDelete(hostPath)
-        self._scriptDirList = []
 
     def _detectArch(self):
         # FIXME: use profile function of pkgwh to get arch from CHOST

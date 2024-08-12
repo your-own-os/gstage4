@@ -478,6 +478,7 @@ class UseFcitx:
 app-i18n/fcitx                                                     -X
 app-i18n/fcitx-qt                                                  -qt5 qt6
 app-i18n/fcitx-gtk                                                 -gtk2 gtk3 gtk4
+app-i18n/fcitx-chinese-addons                                      -qt5 qt6
 """
 
     _maskFileContent = """
@@ -887,7 +888,7 @@ media-sound/jack-audio-connection-kit
 # don't redirect alsa to sound servers
 media-plugins/alsa-plugins
 media-sound/alsa-tools
-#media-sound/alsa-utils                                                                                                    # FIXME
+media-sound/alsa-utils
 
 # packages only support sound route 6, 7, 8
 media-sound/audacity                                        # sound route 7
