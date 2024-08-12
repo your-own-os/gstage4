@@ -32,7 +32,7 @@ class Runner:
 
     def __init__(self, chroot_dir_path):
         self._dir = chroot_dir_path
-        self._mountList = []
+        self._mountObj = None
         self._scriptDirList = []
 
     def __enter__(self):
@@ -43,11 +43,7 @@ class Runner:
         self.unbind()
 
     def is_binded(self):
-        if len(self._mountList) > 0:
-            assert self.is_binded()
-            return True
-        else:
-            return False
+        return self._mountObj is not None
 
     def bind(self):
         assert not self.is_binded()
@@ -59,6 +55,7 @@ class Runner:
                 sysDir = os.path.join(self._dir, "sys")
                 devDir = os.path.join(self._dir, "dev")
                 runDir = os.path.join(self._dir, "run")
+                runDevDir = os.path.join(self._dir, "run", "udev")
                 tmpDir = os.path.join(self._dir, "tmp")
 
                 assert os.path.exists(procDir) and not Util.isMount(procDir)
@@ -71,7 +68,8 @@ class Runner:
                     (procDir, "-t proc -o nosuid,noexec,nodev proc %s" % (procDir)),
                     (sysDir, "--rbind /sys %s" % (sysDir), "--make-rslave %s" % (sysDir)),
                     (devDir, "--rbind /dev %s" % (devDir), "--make-rslave %s" % (devDir)),
-                    (runDir, "--bind /run %s" % (runDir)),
+                    (runDir, "-t tmpfs tmpfs %s" % (runDir)),
+                    (runDevDir, "--rbind /run/udev %s" % (runDevDir), "--make-rslave %s" % (runDevDir)),
                     (tmpDir, "-t tmpfs -o mode=1777,strictatime,nodev,nosuid tmpfs %s" % (tmpDir)),
                 ]
                 # if os.path.exists("/sys/firmware/efi/efivars"):
@@ -79,15 +77,7 @@ class Runner:
                 #         ("/mnt/gentoo/sys/firmware/efi/efivars", "-t efivarfs -o nosuid,noexec,nodev /mnt/gentoo/sys/firmware/efi/efivars"),
                 #     ]
 
-                self._mountList.append(DirListMount(mountDirs))
-
-            # mount layer 2 directories
-            if True:
-                runDevDir = os.path.join(self._dir, "run", "udev")
-                mountDirs = [
-                    (runDevDir, "--rbind /run/udev %s" % (runDevDir), "--make-rslave %s" % (runDevDir)),
-                ]
-                self._mountList.append(DirListMount(mountDirs))
+                self._mountObj = DirListMount(mountDirs)
 
             # copy resolv.conf
             # FIMXE: can not adapt the network cfg of host system change
@@ -110,8 +100,9 @@ class Runner:
         else:
             Util.forceDelete(targetFullfn)
 
-        for i in range(0, len(self._mountList)):
-            self._mountList.pop().dispose()
+        if self._mountObj is not None:
+            self._mountObj.dispose()
+            self._mountObj = None
 
     def interactive_shell(self):
         assert self.is_binded()
