@@ -573,7 +573,7 @@ class _MyChrooter(Runner):
 
     def unbind(self, remove_scripts=True):
         if self._extraMountObj is not None:
-            self._extraMountObj.dispse()
+            self._extraMountObj.dispose()
             self._extraMountObj = None
         super().unbind(remove_scripts)
 
