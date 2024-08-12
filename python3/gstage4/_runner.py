@@ -68,9 +68,9 @@ class Runner:
                     (procDir, "-t proc -o nosuid,noexec,nodev proc %s" % (procDir)),
                     (sysDir, "--rbind /sys %s" % (sysDir), "--make-rslave %s" % (sysDir)),
                     (devDir, "--rbind /dev %s" % (devDir), "--make-rslave %s" % (devDir)),
-                    (runDir, "-t tmpfs tmpfs %s" % (runDir)),
+                    (runDir, "-t tmpfs -o nosuid,nodev,mode=755,size=32m tmpfs %s" % (runDir)),
                     (runDevDir, "--rbind /run/udev %s" % (runDevDir), "--make-rslave %s" % (runDevDir)),
-                    (tmpDir, "-t tmpfs -o mode=1777,strictatime,nodev,nosuid tmpfs %s" % (tmpDir)),
+                    (tmpDir, "-t tmpfs -o nosuid,nodev,strictatime,mode=1777 tmpfs %s" % (tmpDir)),
                 ]
                 # if os.path.exists("/sys/firmware/efi/efivars"):
                 #     mountList += [
