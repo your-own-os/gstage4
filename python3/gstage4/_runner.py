@@ -22,7 +22,6 @@
 
 
 import os
-import platform
 import subprocess
 from ._util import Util
 from ._util import DirListMount

@@ -549,33 +549,33 @@ class _MyChrooter(Runner):
             # log directory mount point
             if self._s.log_dir is not None:
                 assert os.path.exists(t.logdir_hostpath) and not Util.isMount(t.logdir_hostpath)
-                mountDirs.append((t.logdir_hostpath, "--bind %s" % (self._s.log_dir, t.logdir_hostpath)))
+                mountDirs.append((t.logdir_hostpath, "--bind %s %s" % (self._s.log_dir, t.logdir_hostpath)))
 
             # distdir mount point
             if self._s.host_distfiles_dir is not None:
                 assert os.path.exists(t.distdir_hostpath) and not Util.isMount(t.distdir_hostpath)
-                mountDirs.append((t.distdir_hostpath, "--bind %s" % (self._s.host_distfiles_dir, t.distdir_hostpath)))
+                mountDirs.append((t.distdir_hostpath, "--bind %s %s" % (self._s.host_distfiles_dir, t.distdir_hostpath)))
 
             # pkgdir mount point
             if self._s.host_packages_dir is not None:
                 assert os.path.exists(t.binpkgdir_hostpath) and not Util.isMount(t.binpkgdir_hostpath)
-                mountDirs.append((t.binpkgdir_hostpath, "--bind %s" % (self._s.host_packages_dir, t.binpkgdir_hostpath)))
+                mountDirs.append((t.binpkgdir_hostpath, "--bind %s %s" % (self._s.host_packages_dir, t.binpkgdir_hostpath)))
 
             # ccachedir mount point
             if self._s.host_ccache_dir is not None and os.path.exists(t.ccachedir_hostpath):
                 assert not Util.isMount(t.ccachedir_hostpath)
-                mountDirs.append((t.ccachedir_hostpath, "--bind %s" % (self._s.host_ccache_dir, t.ccachedir_hostpath)))
+                mountDirs.append((t.ccachedir_hostpath, "--bind %s %s" % (self._s.host_ccache_dir, t.ccachedir_hostpath)))
 
             self._extraMountObj = DirListMount(mountDirs)
         except BaseException:
             self.unbind(remove_scripts=False)
             raise
 
-    def unbind(self):
+    def unbind(self, remove_scripts=True):
         if self._extraMountObj is not None:
             self._extraMountObj.dispse()
             self._extraMountObj = None
-        super().unbind()
+        super().unbind(remove_scripts)
 
 
 class TargetFilesAndDirs:
