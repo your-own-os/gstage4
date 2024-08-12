@@ -104,10 +104,6 @@ class Runner:
             self._mountObj.dispose()
             self._mountObj = None
 
-    def interactive_shell(self):
-        assert self.is_binded()
-        subprocess.check_call(["chroot", self._dir])
-
     def shell_call(self, env, cmd):
         # "CLEAN_DELAY=0 emerge -C sys-fs/eudev" -> "CLEAN_DELAY=0 chroot emerge -C sys-fs/eudev"
         assert self.is_binded()
