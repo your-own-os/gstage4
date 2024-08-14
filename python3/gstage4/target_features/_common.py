@@ -881,7 +881,6 @@ media-sound/apulse
 media-plugins/gst-plugins-v4l2
 
 # use pipewire, instead of jack
-virtual/jack
 media-sound/jack2
 media-sound/jack-audio-connection-kit
 
