@@ -879,7 +879,7 @@ media-sound/pulseaudio                                          -*
 media-sound/bluez-alsa
 
 # use pipewire instead of pulseaudio (media-sound/pulseaudio is still needed, see package.use)
-media-plugins/gst-plugins-pulse
+#media-plugins/gst-plugins-pulse                           # pipewiresrc is not very useable
 media-sound/apulse
 
 # use pipewire, only limited package can access camera directly
