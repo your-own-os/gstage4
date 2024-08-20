@@ -84,7 +84,8 @@ class Runner:
             targetFullfn = os.path.join(self._dir, "etc", "resolv.conf")
             if os.path.exists(targetFullfn):
                 os.rename(targetFullfn, targetFullfn + ".bak")
-            subprocess.check_call(["cp", "-L", "/etc/resolv.conf", targetFullfn])
+            if os.path.exists("/etc/resolv.conf"):
+                subprocess.check_call(["cp", "-L", "/etc/resolv.conf", targetFullfn])
         except BaseException:
             self.unbind(remove_scripts=False)
             raise
