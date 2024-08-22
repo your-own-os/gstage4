@@ -10,53 +10,66 @@ _fileContent = """
 EAPI=8
 
 CRATES="
-	async-trait@0.1.60
-	autocfg@1.1.0
-	bitflags@1.3.2
-	bytes@1.3.0
+	addr2line@0.21.0
+	adler@1.0.2
+	async-trait@0.1.80
+	backtrace@0.3.71
+	bitflags@2.5.0
+	bytes@1.6.0
+	cc@1.0.95
 	cfg-if@1.0.0
 	enquote@1.1.0
 	getopts@0.2.21
-	itoa@1.0.5
-	libc@0.2.139
-	log@0.4.17
-	memchr@2.5.0
-	memoffset@0.7.1
-	mio@0.8.5
-	nix@0.26.1
+	gimli@0.28.1
+	itoa@1.0.11
+	libc@0.2.153
+	memchr@2.7.2
+	miniz_oxide@0.7.2
+	mio@0.8.11
+	nix@0.27.1
+	object@0.32.2
 	pam-sys@0.5.6
-	pin-project-lite@0.2.9
-	pin-utils@0.1.0
-	proc-macro2@1.0.49
-	quote@1.0.23
+	pin-project-lite@0.2.14
+	proc-macro2@1.0.81
+	quote@1.0.36
 	rpassword@5.0.1
-	ryu@1.0.12
-	serde@1.0.152
-	serde_derive@1.0.152
-	serde_json@1.0.91
-	signal-hook-registry@1.4.0
-	socket2@0.4.7
-	static_assertions@1.1.0
-	syn@1.0.107
-	thiserror-impl@1.0.38
-	thiserror@1.0.38
-	tokio-macros@1.8.2
-	tokio@1.24.0
-	unicode-ident@1.0.6
-	unicode-width@0.1.10
-	users@0.11.0
+	rustc-demangle@0.1.23
+	ryu@1.0.17
+	serde@1.0.198
+	serde_derive@1.0.198
+	serde_json@1.0.116
+	signal-hook-registry@1.4.1
+	socket2@0.5.6
+	syn@2.0.60
+	thiserror-impl@1.0.58
+	thiserror@1.0.58
+	tokio-macros@2.2.0
+	tokio@1.37.0
+	unicode-ident@1.0.12
+	unicode-width@0.1.11
 	wasi@0.11.0+wasi-snapshot-preview1
 	winapi-i686-pc-windows-gnu@0.4.0
 	winapi-x86_64-pc-windows-gnu@0.4.0
 	winapi@0.3.9
-	windows-sys@0.42.0
-	windows_aarch64_gnullvm@0.42.0
-	windows_aarch64_msvc@0.42.0
-	windows_i686_gnu@0.42.0
-	windows_i686_msvc@0.42.0
-	windows_x86_64_gnu@0.42.0
-	windows_x86_64_gnullvm@0.42.0
-	windows_x86_64_msvc@0.42.0
+	windows-sys@0.48.0
+	windows-sys@0.52.0
+	windows-targets@0.48.5
+	windows-targets@0.52.5
+	windows_aarch64_gnullvm@0.48.5
+	windows_aarch64_gnullvm@0.52.5
+	windows_aarch64_msvc@0.48.5
+	windows_aarch64_msvc@0.52.5
+	windows_i686_gnu@0.48.5
+	windows_i686_gnu@0.52.5
+	windows_i686_gnullvm@0.52.5
+	windows_i686_msvc@0.48.5
+	windows_i686_msvc@0.52.5
+	windows_x86_64_gnu@0.48.5
+	windows_x86_64_gnu@0.52.5
+	windows_x86_64_gnullvm@0.48.5
+	windows_x86_64_gnullvm@0.52.5
+	windows_x86_64_msvc@0.48.5
+	windows_x86_64_msvc@0.52.5
 "
 
 inherit cargo optfeature pam systemd git-r3
