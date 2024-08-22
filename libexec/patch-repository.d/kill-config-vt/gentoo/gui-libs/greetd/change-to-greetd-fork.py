@@ -92,7 +92,6 @@ src_unpack() {
 src_compile() {
 	cargo_src_compile
 	if use man; then
-		scdoc < ./man/agreety-1.scd > ./agreety.1 || die
 		scdoc < ./man/greetd-1.scd > ./greetd.1 || die
 		scdoc < ./man/greetd-5.scd > ./greetd.5 || die
 		scdoc < ./man/greetd-ipc-7.scd > ./greetd-ipc.7 || die
@@ -100,7 +99,7 @@ src_compile() {
 }
 
 src_install() {
-	dobin "$(cargo_target_dir)"/{agreety,fakegreet,greetd}
+	dobin "$(cargo_target_dir)"/greetd
 
 	insinto /etc/greetd
 	doins config.toml
@@ -108,7 +107,7 @@ src_install() {
 	systemd_dounit greetd.service
 
 	if use man; then
-		doman agreety.1 greetd.1 greetd.5 greetd-ipc.7
+		doman greetd.1 greetd.5 greetd-ipc.7
 	fi
 
 	newpamd - greetd <<-EOF
