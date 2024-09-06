@@ -107,8 +107,13 @@ export CONFIG_PROTECT="-* .x"
 """
 
     _scriptContentSecondHalfVerboseLv0 = """
-emerge --color=y -uDN --with-bdeps=y @world > /var/log/portage/run-update-world.log 2>&1 || exit 1
+emerge --color=y -uDN --with-bdeps=y @world > /var/log/portage/run-update-world.log 2>&1
+ret=$?
+
+# updating dev-lang/perl may cause some packages fail to emerge, so we check and report perl-cleaner error first
 perl-cleaner --pretend --all >/dev/null 2>&1 || die "perl cleaning is needed, your seed stage is too old"
+
+test $ret -eq 0 || exit 1
 """
 
     _scriptContentSecondHalfVerboseLv1 = """
