@@ -45,7 +45,7 @@ class Util:
                 continue
 
             # en_US.UTF-8 -> UTF-8
-            m = re.fullmatch(r'.*\.(.*)')
+            m = re.fullmatch(r'.*\.(.*)', v)
             if m is None:
                 return None
 
