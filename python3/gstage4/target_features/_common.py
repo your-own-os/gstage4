@@ -43,11 +43,10 @@ class UsePortage:
 
 class UseGenkernel:
 
-    def __init__(self, kernel_sources_pkg_atom="sys-kernel/gentoo-sources", kernel_config=None, check_kernel_config_version=False):
+    def __init__(self, kernel_config=None, check_kernel_config_version=False):
         if kernel_config is None:
             assert not check_kernel_config_version
 
-        self._kernelPkg = kernel_sources_pkg_atom
         self._kernelCfg = kernel_config
         self._checkVer = check_kernel_config_version
 
@@ -59,21 +58,19 @@ class UseGenkernel:
         }
 
     def update_world_set(self, world_set):
+        world_set.add("sys-kernel/gentoo-sources")
         world_set.add("sys-kernel/genkernel")
         world_set.add("sys-devel/bc")           # kernel build script needs it
-        world_set.add(self._kernelPkg)
 
 
 class UseDistKernel:
-
-    def __init__(self, kernel_pkg_atom="sys-kernel/gentoo-kernel-bin"):
-        self._kernelPkg = kernel_pkg_atom
 
     def update_target_settings(self, target_settings):
         target_settings.kernel_manager = "dist-kernel"
 
     def update_world_set(self, world_set):
-        world_set.add(self._kernelPkg)
+        world_set.add("sys-kernel/gentoo-kernel")
+        world_set.add("sys-kernel/dracut")
 
 
 class UseBbki:
