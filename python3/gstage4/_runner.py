@@ -104,6 +104,15 @@ class Runner:
             self._mountObj.dispose()
             self._mountObj = None
 
+    def shell(self, env):
+        assert self.is_binded()
+        assert Util.isArchCompatible(self._arch, Util.getCpuArch())
+
+        # FIXME
+        env = "LANG=C.utf8 PATH=/bin:/usr/bin:/sbin:/usr/sbin " + env
+
+        subprocess.check_call("%s chroot \"%s\" sh" % (env, self._dir), shell=True)
+
     def shell_call(self, env, cmd):
         assert self.is_binded()
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
@@ -112,7 +121,7 @@ class Runner:
         env = "LANG=C.utf8 PATH=/bin:/usr/bin:/sbin:/usr/sbin " + env
 
         # "CLEAN_DELAY=0 emerge -C sys-fs/eudev" -> "CLEAN_DELAY=0 chroot emerge -C sys-fs/eudev"
-        return subprocess.check_output("%s chroot \"%s\" %s" % (env, self._dir, cmd), shell=True, stderr=subprocess.STDOUT, universal_newlines=True)
+        return subprocess.check_output("%s chroot \"%s\" sh -c \"%s\"" % (env, self._dir, cmd), shell=True, stderr=subprocess.STDOUT, text=True)
 
     def shell_exec(self, env, cmd, quiet=False):
         assert self.is_binded()
@@ -122,9 +131,9 @@ class Runner:
         env = "LANG=C.utf8 PATH=/bin:/usr/bin:/sbin:/usr/sbin " + env
 
         if quiet:
-            subprocess.check_call("%s chroot \"%s\" %s" % (env, self._dir, cmd), shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.check_call("%s chroot \"%s\" sh -c \"%s\"" % (env, self._dir, cmd), shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
-            subprocess.check_call("%s chroot \"%s\" %s" % (env, self._dir, cmd), shell=True)
+            subprocess.check_call("%s chroot \"%s\" sh -c \"%s\"" % (env, self._dir, cmd), shell=True)
 
     def script_exec(self, scriptObj, quiet=False):
         assert self.is_binded()
@@ -137,4 +146,4 @@ class Runner:
         self._scriptDirList.append(hostPath)
 
         scriptObj.fill_script_dir(hostPath)
-        self.shell_exec("", "sh -c \"cd %s ; ./%s\"" % (path, scriptObj.get_script()), quiet)
+        self.shell_exec("", "cd %s ; ./%s" % (path, scriptObj.get_script()), quiet)

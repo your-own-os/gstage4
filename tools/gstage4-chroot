@@ -32,4 +32,4 @@ if __name__ == '__main__':
 
     wdir = gstage4.WorkDir(sys.argv[1])
     with gstage4.Runner(wdir.get_arch(), wdir.get_latest_action_dirpath()) as c:
-        c.shell_exec("", "sh")
+        c.shell("")

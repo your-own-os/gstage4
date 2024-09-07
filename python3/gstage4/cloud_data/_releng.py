@@ -144,4 +144,3 @@ class Releng:
                     ret[key] = m.group(1)
                     break
         return ret
-

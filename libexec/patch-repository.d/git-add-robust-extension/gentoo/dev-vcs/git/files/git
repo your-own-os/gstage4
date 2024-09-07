@@ -148,7 +148,7 @@ class GitRetry:
         proc = subprocess.Popen(
             args,
             stderr=subprocess.PIPE,
-            universal_newlines=True,
+            text=True,
             env=Util.mergeDict(os.environ, GitHttpConnectionTimeoutExtension.additional_environ()),
         )
         stderr_tee = TeeThread(proc.stderr, sys.stderr, 'stderr')
