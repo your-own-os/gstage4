@@ -26,6 +26,7 @@ import shlex
 import subprocess
 from ._util import Util
 from ._util import DirListMount
+from .scripts import ScriptInChroot
 
 
 class Runner:
@@ -111,39 +112,26 @@ class Runner:
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
         assert isinstance(env, str)
 
-        # env should be set in /bin/sh process, not in chroot process itself
-        # this affects nothing, but it should be like this
-        cmdList = ["chroot", self._dir]
-        if env != "":
-            cmdList += shlex.split("/bin/env %s" % (env))
-        cmdList += shlex.split(self._shellCmd)
-
-        subprocess.check_call(cmdList)
+        self._shellExec(env, None, False, False)
 
     def shell_call(self, env, cmd):
         assert self.is_binded()
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
-        assert isinstance(env, str)
+        assert isinstance(env, str) and isinstance(cmd, str)
 
-        cmdList = ["chroot", self._dir]
-        if env != "":
-            cmdList += shlex.split("/bin/env %s" % (env))
-        cmdList += shlex.split(self._shellCmd)
-        cmdList += ["-c", cmd]
-
-        return subprocess.check_output(cmdList, stderr=subprocess.STDOUT, text=True)
+        self._shellExec(env, cmd, False, True)
 
     def shell_exec(self, env, cmd, quiet=False):
         assert self.is_binded()
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
-        assert isinstance(env, str)
+        assert isinstance(env, str) and isinstance(cmd, str)
 
-        self._shellExec(env, cmd, quiet)
+        self._shellExec(env, cmd, quiet, False)
 
     def script_exec(self, env, script_obj, quiet=False):
         assert self.is_binded()
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
-        assert isinstance(env, str)
+        assert isinstance(env, str) and isinstance(script_obj, ScriptInChroot)
 
         path = os.path.join("/var", "tmp", "script_%d" % (len(self._scriptDirList)))
         hostPath = os.path.join(self._dir, path[1:])
@@ -153,16 +141,35 @@ class Runner:
         os.makedirs(hostPath, mode=0o755)
         script_obj.fill_script_dir(hostPath)
 
-        self._shellExec(env, "cd %s ; ./%s" % (path, script_obj.get_script()), quiet)
+        cmd = "cd %s ; ./%s" % (path, script_obj.get_script())
+        self._shellExec(env, cmd, quiet, False)
 
-    def _shellExec(self, env, cmd, quiet):
+    def _shellExec(self, env, cmd, bQuiet, bNeedOutput):
+        # env should be set in /bin/sh process, not in chroot process itself
+        # this affects nothing, but it should be like this
         cmdList = ["chroot", self._dir]
         if env != "":
             cmdList += shlex.split("/bin/env %s" % (env))
         cmdList += shlex.split(self._shellCmd)
-        cmdList += ["-c", cmd]
+        if cmd is not None:
+            cmdList += ["-c", cmd]
 
-        if quiet:
-            subprocess.check_call(cmdList, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # we must use an empty environment except some specific environment variables
+        # we think the following environment variables are deprecated (is it true?):
+        #   LANGUAGE
+        #   LC_*
+        envDict = {}
+        for k, v in os.environ.items():
+            if k in ["TERM", "LANG"]:
+                envDict[k] = v
+
+        # do work
+        if bNeedOutput:
+            assert not bQuiet
+            return subprocess.check_output(cmdList, stderr=subprocess.STDOUT, text=True, env=envDict)
         else:
-            subprocess.check_call(cmdList)
+            if bQuiet:
+                subprocess.check_call(cmdList, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=envDict)
+            else:
+                subprocess.check_call(cmdList, env=envDict)
+            return None
