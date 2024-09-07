@@ -27,8 +27,8 @@ import pathlib
 import subprocess
 from ._util import Util
 from ._util import DirListMount
+from ._prototype import ScriptInChroot
 from ._errors import WorkDirError
-from .scripts import ScriptInChroot
 from .scripts import ScriptFromBuffer
 
 
