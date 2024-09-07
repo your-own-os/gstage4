@@ -109,6 +109,7 @@ class Runner:
     def shell(self, env):
         assert self.is_binded()
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
+        assert isinstance(env, str)
 
         # env should be set in /bin/sh process, not in chroot process itself
         # this affects nothing, but it should be like this
@@ -122,6 +123,7 @@ class Runner:
     def shell_call(self, env, cmd):
         assert self.is_binded()
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
+        assert isinstance(env, str)
 
         cmdList = ["chroot", self._dir]
         if env != "":
@@ -134,7 +136,26 @@ class Runner:
     def shell_exec(self, env, cmd, quiet=False):
         assert self.is_binded()
         assert Util.isArchCompatible(self._arch, Util.getCpuArch())
+        assert isinstance(env, str)
 
+        self._shellExec(env, cmd, quiet)
+
+    def script_exec(self, env, script_obj, quiet=False):
+        assert self.is_binded()
+        assert Util.isArchCompatible(self._arch, Util.getCpuArch())
+        assert isinstance(env, str)
+
+        path = os.path.join("/var", "tmp", "script_%d" % (len(self._scriptDirList)))
+        hostPath = os.path.join(self._dir, path[1:])
+        self._scriptDirList.append(hostPath)
+
+        assert not os.path.exists(hostPath)
+        os.makedirs(hostPath, mode=0o755)
+        script_obj.fill_script_dir(hostPath)
+
+        self._shellExec(env, "cd %s ; ./%s" % (path, script_obj.get_script()), quiet)
+
+    def _shellExec(self, env, cmd, quiet):
         cmdList = ["chroot", self._dir]
         if env != "":
             cmdList += shlex.split("/bin/env %s" % (env))
@@ -145,16 +166,3 @@ class Runner:
             subprocess.check_call(cmdList, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
             subprocess.check_call(cmdList)
-
-    def script_exec(self, env, script_obj, quiet=False):
-        assert self.is_binded()
-
-        path = os.path.join("/var", "tmp", "script_%d" % (len(self._scriptDirList)))
-        hostPath = os.path.join(self._dir, path[1:])
-
-        assert not os.path.exists(hostPath)
-        os.makedirs(hostPath, mode=0o755)
-        self._scriptDirList.append(hostPath)
-
-        script_obj.fill_script_dir(hostPath)
-        self.shell_exec(env, "cd %s ; ./%s" % (path, script_obj.get_script()), quiet)
