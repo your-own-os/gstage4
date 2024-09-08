@@ -217,7 +217,7 @@ class ScriptChrootInit(ScriptFromBuffer):
         buf += self._scriptTemplateExec.replace("@@cmd@@", cmd)
         super().__init__(buf)
 
-    _scriptTemplate = r"""
+    _scriptTemplate = """
 #!/bin/sh
 
 die() {
@@ -226,7 +226,7 @@ die() {
 }
 """
 
-    _scriptTemplateCheckTermType = r"""
+    _scriptTemplateCheckTermType = """
 if [ -n "$TERM" ]; then
     if [ "$TERM" != "@@termType@@" ]; then
         die "stage4 uses another terminal type"
@@ -252,6 +252,6 @@ for var in "LANG $(env | grep -oP '^LC_\w+')"; do
 done
 """
 
-    _scriptTemplateExec = r"""
+    _scriptTemplateExec = """
 @@cmd@@
 """
