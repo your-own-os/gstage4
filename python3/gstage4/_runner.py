@@ -54,7 +54,12 @@ class Runner:
         assert not self.is_binded()
 
         try:
-            # mount layer 1 directories
+            # clear tmp files (we should simulate the boot process)
+            Util.removeDirContentExclude(os.path.join(self._dir, "run"), [])
+            Util.removeDirContentExclude(os.path.join(self._dir, "tmp"), [])
+            Util.removeDirContentExclude(os.path.join(self._dir, "var", "tmp"), [])
+
+            # mount directories
             procDir = os.path.join(self._dir, "proc")
             sysDir = os.path.join(self._dir, "sys")
             devDir = os.path.join(self._dir, "dev")
