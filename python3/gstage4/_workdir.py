@@ -61,7 +61,10 @@ class WorkDir:
         self._persistentStorage = WorkDirPersisentStorage(self)
 
         if not os.path.exists(self._path):
-            os.mkdir(self._path, mode=self._MODE)
+            if reset:
+                os.mkdir(self._path, mode=self._MODE)
+            else:
+                raise WorkDirError("\"%s\" does not exist" % (self._path))
         else:
             # work directory can be a directory or directory symlink
             # so here we use os.stat() instead of os.lstat()
