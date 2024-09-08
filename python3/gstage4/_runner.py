@@ -255,8 +255,9 @@ get_encoding() {
 for var in LANG $(env | grep -oP '^LC_\w+'); do
     value=$(printenv $var)
     if [ -n "$value" ] ; then
+        enc=$(get_encoding $value)
         shopt -s nocasematch
-        if [[ "$(get_encoding $value)" != "@@langEnc@@" ]]; then
+        if [[ "$enc" != "@@languageEncoding@@" ]]; then
             die "stage4 uses another language encoding ($var=$value)"
         fi
         shopt -u nocasematch
