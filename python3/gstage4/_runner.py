@@ -197,7 +197,7 @@ class Runner:
             Util.copyTermInfoFile(termType, "/", self._dir)
         return termType
 
-    def _cleanupTermInfo(self, termType):
+    def _cleanupTermInfo(self):
         # FIXME: should remove terminfo file in /etc
         pass
 
