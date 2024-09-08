@@ -154,7 +154,7 @@ class Runner:
         if langEnc is None:
             raise OSError("environment variables LANG and LC_* have invalid values")
 
-        scriptObj = ScriptChrootInit(langEnc, cmd)
+        scriptObj = ScriptChrootInit(os.environ.get("TERM", None), langEnc, cmd)
         scriptDir, scriptName = self._addScript(scriptObj)
 
         cmdList = ["chroot", self._dir]
@@ -172,7 +172,10 @@ class Runner:
         envDict = {}
         for k, v in os.environ.items():
             if k == "TERM":
-                envDict[k] = self._processTermInfo(v)
+                if not bQuiet:
+                    envDict[k] = self._processTermInfo(v)
+                else:
+                    envDict[k] = "dumb"
                 continue
 
         # do work
@@ -201,33 +204,54 @@ class Runner:
 
 class ScriptChrootInit(ScriptFromBuffer):
 
-    def __init__(self, langEnc, cmd):
+    def __init__(self, termType, languageEncoding, cmd):
         if cmd is None:
             cmd = "exec sh"
         else:
             cmd = "exec sh -c \"%s\"" % (cmd)
 
         buf = self._scriptTemplate
-        buf = buf.replace("@@langEnc@@", langEnc)
-        buf = buf.replace("@@cmd@@", cmd)
+        if termType is not None:
+            buf += self._scriptTemplateCheckTermType.replace("@@termType@@", termType)
+        buf += self._scriptTemplateCheckLanguageEncoding.replace("@@langEnc@@", languageEncoding)
+        buf += self._scriptTemplateExec.replace("@@cmd@@", cmd)
         super().__init__(buf)
 
     _scriptTemplate = r"""
 #!/bin/sh
+
+die() {
+    echo -n "$1" > ./error.log
+    exit 1
+}
+"""
+
+    _scriptTemplateCheckTermType = r"""
+if [ -n "$TERM" ]; then
+    if [ "$TERM" != "@@termType@@" ]; then
+        die "stage4 uses another terminal type"
+    fi
+fi
+"""
+
+    _scriptTemplateCheckLanguageEncoding = r"""
+if [ -z "$LANG" ]; then
+    die "stage4 does not define LANG environment variable"
+fi
 
 get_encoding() {
     if [[ "$1" =~ \.([^ ]*) ]]; then
         echo "${BASH_REMATCH[1]}"
     fi
 }
-
 for var in "LANG $(env | grep -oP '^LC_\w+')"; do
-    var=$(printenv $var)
-    if [ -n "$var" ] && [ "$(get_encoding $var)" != "@@langEnc@@" ]; then
-        echo -n "stage4 uses different language encoding" > ./error.log
-        exit 1
+    value=$(printenv $var)
+    if [ -n "$value" ] && [ "$(get_encoding $value)" != "@@langEnc@@" ]; then
+        die "stage4 uses another language encoding in environment variable \"$var\""
     fi
 done
+"""
 
+    _scriptTemplateExec = r"""
 @@cmd@@
 """
