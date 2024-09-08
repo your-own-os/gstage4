@@ -244,7 +244,7 @@ fi
 
     _scriptTemplateCheckLanguageEncoding = r"""
 if [ -z "$LANG" ]; then
-    die "stage4 does not define LANG environment variable"
+    die "stage4 does not have LANG environment variable"
 fi
 
 get_encoding() {
@@ -266,7 +266,7 @@ done
 """
 
     _scriptTemplateShell = """
-userinfo=$(grep "^[^:]*:[^:]*:$uid:" /etc/passwd | cut -d: -f1,7)
+userinfo=$(grep "^[^:]*:[^:]*:$(id -u):" /etc/passwd | cut -d: -f1,7)
 usershell=$(echo "$userinfo" | cut -d: -f2)
 if [ -z "$usershell" ] ; then
     username=$(echo "$userinfo" | cut -d: -f1)
