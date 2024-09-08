@@ -236,7 +236,7 @@ die() {
 
     _scriptTemplateCheckTermType = """
 if [ -n "$TERM" ]; then
-    if [ "$TERM" != "@@termType@@" ]; then
+    if [ "$TERM" != "@@termType@@" ] ; then
         die "stage4 uses another terminal type (TERM=$TERM)"
     fi
 fi
@@ -248,14 +248,18 @@ if [ -z "$LANG" ]; then
 fi
 
 get_encoding() {
-    if [[ "$1" =~ \.([^ ]*) ]]; then
+    if [[ "$1" =~ \.([^ ]*) ]] ; then
         echo "${BASH_REMATCH[1]}"
     fi
 }
 for var in LANG $(env | grep -oP '^LC_\w+'); do
     value=$(printenv $var)
-    if [ -n "$value" ] && [ "$(get_encoding $value)" != "@@langEnc@@" ]; then
-        die "stage4 uses another language encoding ($var=$value)"
+    if [ -n "$value" ] ; then
+        shopt -s nocasematch
+        if [ "$(get_encoding $value)" != "@@langEnc@@" ]; then
+            die "stage4 uses another language encoding ($var=$value)"
+        fi
+        shopt -u nocasematch
     fi
 done
 """
@@ -263,7 +267,7 @@ done
     _scriptTemplateShell = """
 userinfo=$(grep "^[^:]*:[^:]*:$uid:" /etc/passwd | cut -d: -f1,7)
 usershell=$(echo "$userinfo" | cut -d: -f2)
-if [ -z "$usershell" ]; then
+if [ -z "$usershell" ] ; then
     username=$(echo "$userinfo" | cut -d: -f1)
     die "stage4 has no shell for user \"$username\""
 fi
