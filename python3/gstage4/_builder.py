@@ -338,9 +338,10 @@ class Builder(ActionRunner):
                 with _MyChrooter(self) as m:
                     cmd = "dracut"
                     cmd += " %s" % (self._ts.kernel_manager_distkernel["dracut_args"])
+                    cmd += " --quiet"
                     cmd += " --force"
-                    cmd += ' --kver=${$(equery -Cq f sys-kernel/gentoo-kernel-bin | grep "/usr/src/linux-" -m1)##"/usr/src/linux-"}'
-                    m.shell_call("", cmd)
+                    cmd += " --kver=$(equery -Cq f sys-kernel/gentoo-kernel-bin | grep '/usr/src/linux-' -m1 | sed 's|/usr/src/linux-||')"
+                    m.shell_exec("", cmd)
             return
 
         if self._ts.kernel_manager == "fake":
