@@ -284,6 +284,7 @@ net-misc/networkmanager         iwd gnutls -nss -wext
 
 # select between qt4, qt5 and qt6
 */*                             -qt4 -qt5 qt6
+www-clients/chromium            qt5 qt6         # qt6 depends on qt5
 """
 
     _maskFileContent = """
