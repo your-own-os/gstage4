@@ -736,9 +736,7 @@ class TailorPam:
         if "pam_limits" in items:
             _updateDict(td, {
                 "sys-libs/pam": [
-                    "*pam_limits.so",
-                    "/etc/security/limits.conf",
-                    "/etc/security/limits.d",
+                    "*limits*",
                 ],
             })
             items.remove("pam_limits")
