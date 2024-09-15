@@ -153,16 +153,17 @@ class DisableZeroConf:
     def __init__(self, strict=True):
         self._strict = strict
 
+    def get_packages(self):
+        return [
+            "net-dns/avahi"
+        ]
+
     def update_target_settings(self, target_settings):
         assert "10-zeroconf" not in target_settings.pkg_use_files
         assert "10-zeroconf" not in target_settings.pkg_mask_files
 
         if self._strict:
-            target_settings.pkg_mask_files["10-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
-
-    _maskFileContent = """
-net-dns/avahi
-"""
+            target_settings.pkg_mask_files["10-zeroconf"] = "\n".join(self.get_packages()) + "\n"
 
 
 class EnableBluetooth:
@@ -193,16 +194,17 @@ class DisableBluetooth:
     def __init__(self, strict=True):
         self._strict = strict
 
+    def get_packages(self):
+        return [
+            "net-wireless/bluez"
+        ]
+
     def update_target_settings(self, target_settings):
         assert "10-bluetooth" not in target_settings.pkg_use_files
         assert "10-bluetooth" not in target_settings.pkg_mask_files
 
         if self._strict:
-            target_settings.pkg_mask_files["10-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
-
-    _maskFileContent = """
-net-wireless/bluez
-"""
+            target_settings.pkg_mask_files["10-bluetooth"] = "\n".join(self.get_packages()) + "\n"
 
 
 class EnablePrinting:
@@ -233,16 +235,17 @@ class DisablePrinting:
     def __init__(self, strict=True):
         self._strict = strict
 
+    def get_packages(self):
+        return [
+            "net-print/cups"
+        ]
+
     def update_target_settings(self, target_settings):
         assert "10-printing" not in target_settings.pkg_use_files
         assert "10-printing" not in target_settings.pkg_mask_files
 
         if self._strict:
-            target_settings.pkg_mask_files["10-printing"] = self._maskFileContent.strip("\n") + "\n"
-
-    _maskFileContent = """
-net-print/cups
-"""
+            target_settings.pkg_mask_files["10-printing"] = "\n".join(self.get_packages()) + "\n"
 
 
 class UseAllQemuTargets:
