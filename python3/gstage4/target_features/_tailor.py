@@ -36,12 +36,6 @@ class TailorSystemd:
         td = {}
         tm = []
 
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
         if "systemd-udevd-socket-activation" in disableItems:
             target_settings.repo_postsync_patch_directories.append("systemd-disable-systemd-udevd-socket-activation")
             disableItems.remove("systemd-udevd-socket-activation")
@@ -51,7 +45,7 @@ class TailorSystemd:
             disableItems.remove("kmod-static-nodes")
 
         if "systemd-battery-check" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*battery-check*",
                 ],
@@ -59,7 +53,7 @@ class TailorSystemd:
             removeItems.remove("systemd-battery-check")
 
         if "systemd-boot" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*bootctl*",
                     "*/systemd-boot.7.bz2",
@@ -78,7 +72,7 @@ class TailorSystemd:
                 "acct-user/systemd-coredump",
                 "acct-group/systemd-coredump",
             ]
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*coredump*",
                 ],
@@ -89,7 +83,7 @@ class TailorSystemd:
             removeItems.remove("systemd-coredump")
 
         if "systemd-dissect" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*systemd-dissect*",
                     "*mount.ddi*",
@@ -101,7 +95,7 @@ class TailorSystemd:
             removeItems.remove("systemd-dissect")
 
         if "systemd-firstboot" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*firstboot*",
                 ],
@@ -118,7 +112,7 @@ class TailorSystemd:
             tm += [
                 "acct-group/systemd-hostname",
             ]
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*hostname1*",
                     "*hostnamed*",
@@ -136,7 +130,7 @@ class TailorSystemd:
             removeItems.remove("systemd-hostnamed")
 
         if "systemd-kexec" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*kexec*",
                 ],
@@ -144,7 +138,7 @@ class TailorSystemd:
             removeItems.remove("systemd-kexec")
 
         if "systemd-localed" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*locale1*",
                     "*localed*",
@@ -158,7 +152,7 @@ class TailorSystemd:
             removeItems.remove("systemd-localed")
 
         if "systemd-machined" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*machine*",
                     "*nspawn*",
@@ -180,7 +174,7 @@ class TailorSystemd:
                 "acct-user/systemd-network",
                 "acct-group/systemd-network",
             ]
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*network*",
                     "/usr/lib/systemd/network*",
@@ -205,7 +199,7 @@ class TailorSystemd:
             removeItems.remove("systemd-networkd")
 
         if "systemd-portabled" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*portable*",
                     "/usr/lib/systemd/portable",
@@ -223,7 +217,7 @@ class TailorSystemd:
                 "acct-user/systemd-oom",
                 "acct-group/systemd-oom",
             ]
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*oom1*",
                     "*oomd*",
@@ -237,7 +231,7 @@ class TailorSystemd:
             removeItems.remove("systemd-oomd")
 
         if "systemd-pstore" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*pstore*",
                 ],
@@ -253,7 +247,7 @@ class TailorSystemd:
                 "acct-user/systemd-resolve",
                 "acct-group/systemd-resolve",
             ]
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*resolv*",
                 ],
@@ -271,7 +265,7 @@ class TailorSystemd:
             removeItems.remove("systemd-resolvd")
 
         if "systemd-storagetm" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*storagetm*",
                     "*storage-target-mode.target",
@@ -280,7 +274,7 @@ class TailorSystemd:
             removeItems.remove("systemd-storagetm")
 
         if "systemd-sysext" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*sysext*",
                     "*confext*",
@@ -292,7 +286,7 @@ class TailorSystemd:
             removeItems.remove("systemd-sysext")
 
         if "systemd-sysupdate" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*sysupdate*",
                 ],
@@ -300,7 +294,7 @@ class TailorSystemd:
             removeItems.remove("systemd-sysupdate")
 
         if "systemd-sysusers" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*sysusers*",
                 ],
@@ -311,7 +305,7 @@ class TailorSystemd:
             removeItems.remove("systemd-sysusers")
 
         if "systemd-timedated" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*timedate*",
                     "/usr/lib/systemd/ntp-units.d*",
@@ -332,7 +326,7 @@ class TailorSystemd:
                 "acct-user/systemd-timesync",
                 "acct-group/systemd-timesync",
             ]
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*timesync*",
                     "*ntp*",
@@ -344,7 +338,7 @@ class TailorSystemd:
             removeItems.remove("systemd-timesyncd")
 
         if "systemd-update" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*system-update*",
                     "*systemd-update-helper*",
@@ -357,7 +351,7 @@ class TailorSystemd:
             removeItems.remove("systemd-update")
 
         if "systemd-userdbd" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*userdb*",
                 ],
@@ -368,7 +362,7 @@ class TailorSystemd:
             removeItems.remove("systemd-userdbd")
 
         if "fstab" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*fstab*",
                 ],
@@ -379,7 +373,7 @@ class TailorSystemd:
             removeItems.remove("fstab")
 
         if "fs-operations" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*repart*",
                     "/usr/lib/systemd/repart",
@@ -395,7 +389,7 @@ class TailorSystemd:
             removeItems.remove("fs-operations")
 
         if "ldconfig.service" in removeItems:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/systemd": [
                     "*ldconfig*",
                 ],
@@ -420,14 +414,8 @@ class TailorBaselayout:
         items = list(self._items)
         td = {}
 
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
         if "/etc/shells" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/baselayout": [
                     "/etc/shells",
                 ],
@@ -450,14 +438,8 @@ class TailorShadow:
         items = list(self._items)
         td = {}
 
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
         if "logoutd" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/shadow": [
                     "*logoutd*",
                 ],
@@ -465,7 +447,7 @@ class TailorShadow:
             items.remove("logoutd")
 
         if "chfn" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/shadow": [
                     "*chfn*",
                 ],
@@ -473,7 +455,7 @@ class TailorShadow:
             items.remove("chfn")
 
         if "chsh" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/shadow": [
                     "*chsh*",
                 ],
@@ -484,7 +466,7 @@ class TailorShadow:
             items.remove("chsh")
 
         if "expiry" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/shadow": [
                     "*expiry*",
                 ],
@@ -492,7 +474,7 @@ class TailorShadow:
             items.remove("expiry")
 
         if "groupmems" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/shadow": [
                     "*groupmems*",
                 ],
@@ -500,7 +482,7 @@ class TailorShadow:
             items.remove("groupmems")
 
         if "old-group-operations" in items:         # group operations are old, no one use them in a modern distribution
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/shadow": [
                     "gpasswd*",
                     "*newgrp*",
@@ -510,7 +492,7 @@ class TailorShadow:
             items.remove("old-group-operations")
 
         if "user-and-group-operations-for-admin" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/shadow": [
                     "*chage*",
                     "*chpasswd*",
@@ -567,16 +549,10 @@ class TailorEselect:
         items = list(self._removeItems)
         td = {}
 
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
         def _simpleRemoveModule(outerName):
             name = outerName.replace("-module", "")
             if outerName in items:
-                _updateDict({
+                _updateDict(td, {
                     "app-admin/eselect": [
                         "*%s*" % (name),
                     ],
@@ -667,14 +643,8 @@ class TailorLmSensors:
         items = list(self._removeItems)
         td = {}
 
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
         if "fancontrol" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/lm-sensors": [
                     "*fancontrol*",
                     "*pwmconfig*",
@@ -727,14 +697,8 @@ class TailorPam:
         items = list(self._removeItems)
         td = {}
 
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
         if "pam_access" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*pam_access*",
                     "*access.conf*",
@@ -743,7 +707,7 @@ class TailorPam:
             items.remove("pam_access")
 
         if "pam_env" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*pam_env.so",
                     "/etc/security/pam_env.conf",
@@ -753,7 +717,7 @@ class TailorPam:
         # FIXME: "/etc/environments"?
 
         if "pam_faillock" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*faillock*",
                 ],
@@ -761,7 +725,7 @@ class TailorPam:
             items.remove("pam_faillock")
 
         if "pam_group" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*pam_group.so",
                     "/etc/security/group.conf",
@@ -770,7 +734,7 @@ class TailorPam:
             items.remove("pam_group")
 
         if "pam_limits" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*pam_limits.so",
                     "/etc/security/limits.conf",
@@ -780,7 +744,7 @@ class TailorPam:
             items.remove("pam_limits")
 
         if "pam_namespace" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*namespace*",
                 ],
@@ -788,7 +752,7 @@ class TailorPam:
             items.remove("pam_namespace")
 
         if "pam_pwhistory" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*pwhistory*",
                 ],
@@ -796,7 +760,7 @@ class TailorPam:
             items.remove("pam_pwhistory")
 
         if "pam_time" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*pam_time.*",
                     "*time.conf*",
@@ -805,7 +769,7 @@ class TailorPam:
             items.remove("pam_time")
 
         if "pam_xauth" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-libs/pam": [
                     "*xauth*",
                 ],
@@ -830,14 +794,8 @@ class TailorUtilLinux:
         items = list(self._removeItems)
         td = {}
 
-        def _updateDict(src):
-            for k, v in src.items():
-                if k not in td:
-                    td[k] = []
-                td[k] += v
-
         if "runuser" in items:
-            _updateDict({
+            _updateDict(td, {
                 "sys-apps/util-linux": [
                     "*runuser*",
                 ],
@@ -847,3 +805,10 @@ class TailorUtilLinux:
         assert len(items) == 0
         if len(td) > 0:
             target_settings.install_mask_files["10-tailor-util-linux"] = td
+
+
+def _updateDict(td, src):
+    for k, v in src.items():
+        if k not in td:
+            td[k] = []
+        td[k] += v
