@@ -4,6 +4,8 @@
 import glob
 import pathlib
 
+# blacklight device should be exported to /dev and has uaccess tag
+# it needs work in the kernel
 try:
     # what to insert (with blank line in the beginning and the end)
     buf2 = r"""
