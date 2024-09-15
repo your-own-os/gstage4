@@ -131,7 +131,14 @@ net-misc/netifrc
 """
 
 
-class Avahi:
+class EnableZeroConf:
+
+    def __init__(self, service):
+        assert service == "avahi"
+
+    def update_target_settings(self, target_settings):
+        assert "10-zeroconf" not in target_settings.pkg_use_files
+        assert "10-zeroconf" not in target_settings.pkg_mask_files
 
     def update_world_set(self, world_set):
         world_set.add("net-dns/avahi")
@@ -141,6 +148,19 @@ class Avahi:
             service_list.append("avahi-daemon")
 
 
+class DisableZeroConf:
+
+    def update_target_settings(self, target_settings):
+        assert "10-zeroconf" not in target_settings.pkg_use_files
+        assert "10-zeroconf" not in target_settings.pkg_mask_files
+
+        target_settings.pkg_mask_files["10-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+net-dns/avahi
+"""
+
+
 class EnableBluetooth:
 
     def __init__(self, service):
@@ -148,6 +168,7 @@ class EnableBluetooth:
 
     def update_target_settings(self, target_settings):
         assert "10-bluetooth" not in target_settings.pkg_use_files
+        assert "10-bluetooth" not in target_settings.pkg_mask_files
 
         target_settings.pkg_use_files["10-bluetooth"] = self._useFileContent.strip("\n") + "\n"
 
@@ -166,6 +187,7 @@ class EnableBluetooth:
 class DisableBluetooth:
 
     def update_target_settings(self, target_settings):
+        assert "10-bluetooth" not in target_settings.pkg_use_files
         assert "10-bluetooth" not in target_settings.pkg_mask_files
 
         target_settings.pkg_mask_files["10-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
@@ -182,6 +204,7 @@ class EnablePrinting:
 
     def update_target_settings(self, target_settings):
         assert "10-printing" not in target_settings.pkg_use_files
+        assert "10-printing" not in target_settings.pkg_mask_files
 
         target_settings.pkg_use_files["10-printing"] = self._useFileContent.strip("\n") + "\n"
 
@@ -200,6 +223,7 @@ class EnablePrinting:
 class DisablePrinting:
 
     def update_target_settings(self, target_settings):
+        assert "10-printing" not in target_settings.pkg_use_files
         assert "10-printing" not in target_settings.pkg_mask_files
 
         target_settings.pkg_mask_files["10-printing"] = self._maskFileContent.strip("\n") + "\n"
