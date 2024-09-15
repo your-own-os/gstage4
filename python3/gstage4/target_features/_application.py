@@ -141,12 +141,15 @@ class Avahi:
             service_list.append("avahi-daemon")
 
 
-class Bluez:
+class EnableBluetooth:
+
+    def __init__(self, service):
+        assert service == "bluez"
 
     def update_target_settings(self, target_settings):
-        assert "10-bluez" not in target_settings.pkg_use_files
+        assert "10-bluetooth" not in target_settings.pkg_use_files
 
-        target_settings.pkg_use_files["10-bluez"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_use_files["10-bluetooth"] = self._useFileContent.strip("\n") + "\n"
 
     def update_world_set(self, world_set):
         world_set.add("net-wireless/bluez")
@@ -160,12 +163,27 @@ class Bluez:
 """
 
 
-class Cups:
+class DisableBluetooth:
 
     def update_target_settings(self, target_settings):
-        assert "10-cups" not in target_settings.pkg_use_files
+        assert "10-bluetooth" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_use_files["10-cups"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+net-wireless/bluez
+"""
+
+
+class EnablePrinting:
+
+    def __init__(self, service):
+        assert service == "cups"
+
+    def update_target_settings(self, target_settings):
+        assert "10-printing" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-printing"] = self._useFileContent.strip("\n") + "\n"
 
     def update_world_set(self, world_set):
         world_set.add("net-print/cups")
@@ -176,6 +194,18 @@ class Cups:
 
     _useFileContent = """
 */*     cups
+"""
+
+
+class DisablePrinting:
+
+    def update_target_settings(self, target_settings):
+        assert "10-printing" not in target_settings.pkg_mask_files
+
+        target_settings.pkg_mask_files["10-printing"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+net-print/cups
 """
 
 

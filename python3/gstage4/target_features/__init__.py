@@ -104,9 +104,13 @@ from ._application import SshServer
 from ._application import Chrony
 from ._application import NetworkManager
 from ._application import Avahi
-from ._application import Bluez
-from ._application import Cups
 from ._application import Kmscon
+
+from ._application import EnableBluetooth
+from ._application import DisableBluetooth
+
+from ._application import EnablePrinting
+from ._application import DisablePrinting
 
 
 __all__ = [
@@ -176,7 +180,9 @@ __all__ = [
     "Chrony",
     "NetworkManager",
     "Avahi",
-    "Bluez",
-    "Cups",
     "Kmscon",
+    "EnableBluetooth",
+    "DisableBluetooth",
+    "EnablePrinting",
+    "DisablePrinting",
 ]
