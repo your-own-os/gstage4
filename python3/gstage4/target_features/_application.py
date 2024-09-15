@@ -150,11 +150,15 @@ class EnableZeroConf:
 
 class DisableZeroConf:
 
+    def __init__(self, strict=True):
+        self._strict = strict
+
     def update_target_settings(self, target_settings):
         assert "10-zeroconf" not in target_settings.pkg_use_files
         assert "10-zeroconf" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
+        if self._strict:
+            target_settings.pkg_mask_files["10-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
 
     _maskFileContent = """
 net-dns/avahi
@@ -186,11 +190,15 @@ class EnableBluetooth:
 
 class DisableBluetooth:
 
+    def __init__(self, strict=True):
+        self._strict = strict
+
     def update_target_settings(self, target_settings):
         assert "10-bluetooth" not in target_settings.pkg_use_files
         assert "10-bluetooth" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
+        if self._strict:
+            target_settings.pkg_mask_files["10-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
 
     _maskFileContent = """
 net-wireless/bluez
@@ -222,11 +230,15 @@ class EnablePrinting:
 
 class DisablePrinting:
 
+    def __init__(self, strict=True):
+        self._strict = strict
+
     def update_target_settings(self, target_settings):
         assert "10-printing" not in target_settings.pkg_use_files
         assert "10-printing" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-printing"] = self._maskFileContent.strip("\n") + "\n"
+        if self._strict:
+            target_settings.pkg_mask_files["10-printing"] = self._maskFileContent.strip("\n") + "\n"
 
     _maskFileContent = """
 net-print/cups
