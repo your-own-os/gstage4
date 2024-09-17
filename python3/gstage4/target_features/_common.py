@@ -273,7 +273,7 @@ class NotUseDeprecatedPackagesAndFunctions:
 */*                             -fbdev
 
 # "nss" is deprecated by "gnutls", "wext" is deprecated
-# "wpa_supplicant" is deprecated by "iwd", but "iwd" needs "wifi", so we can not specify it here
+# net-wireless/wpa_supplicant is deprecated by net-wireless/iwd, but "iwd" needs "wifi", so we can not specify it here
 net-misc/networkmanager         gnutls -nss -wext
 
 # don't use python2.x

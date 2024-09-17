@@ -105,7 +105,7 @@ class NetworkManager:
         world_set.add("net-misc/networkmanager")
         if self._wifi:
             # net-misc/networkmanager has already pulls in net-wireless/iwd
-            # but we think explicily install it is good
+            # but we think explicily add it into @world is good
             world_set.add("net-wireless/iwd")
 
     def update_service_list(self, service_list):
@@ -185,7 +185,8 @@ class EnableBluetooth:
             service_list.append("bluetooth")
 
     _useFileContent = """
-*/*     bluetooth
+*/*                         bluetooth
+net-misc/networkmanager     -bluetooth          # what bluetooth in networkmanager is for?
 """
 
 
