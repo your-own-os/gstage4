@@ -257,9 +257,19 @@ class NotUseDeprecatedPackagesAndFunctions:
     def update_target_settings(self, target_settings):
         assert "10-no-deprecated" not in target_settings.pkg_use_files
         assert "10-no-deprecated" not in target_settings.pkg_mask_files
+        assert "10-no-deprecated" not in target_settings.install_mask_files
 
         target_settings.pkg_use_files["10-no-deprecated"] = self._useFileContent.strip("\n") + "\n"
+
         target_settings.pkg_mask_files["10-no-deprecated"] = self._maskFileContent.strip("\n") + "\n"
+
+        target_settings.install_mask_files["10-no-deprecated"] = {
+            "sys-apps/baselayout": [
+                "/etc/mtab",
+                "/var/lock",
+                "/var/run",
+            ],
+        }
 
     _useFileContent = """
 # disable deprecated functions
