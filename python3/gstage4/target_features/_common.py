@@ -266,8 +266,7 @@ class NotUseDeprecatedPackagesAndFunctions:
         target_settings.install_mask_files["10-no-deprecated"] = {
             "sys-apps/baselayout": [
                 "/etc/mtab",
-                "/var/lock",
-                "/var/run",
+                "/var",                 # so that /var/lock, /var/run won't be installed
             ],
         }
 
