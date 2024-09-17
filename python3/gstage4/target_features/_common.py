@@ -268,6 +268,9 @@ class NotUseDeprecatedPackagesAndFunctions:
                 "/etc/mtab",
                 "/var",                 # so that /var/lock, /var/run won't be installed
             ],
+            "net-mail/mailbase": [
+                "/var",                 # so that /var/mail won't be installed
+            ],
         }
 
     _useFileContent = """
