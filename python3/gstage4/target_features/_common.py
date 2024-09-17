@@ -266,12 +266,14 @@ class NotUseDeprecatedPackagesAndFunctions:
         target_settings.install_mask_files["10-no-deprecated"] = {
             "sys-apps/baselayout": [
                 "/etc/mtab",
-                "/var",                 # so that /var/lock, /var/run won't be installed
             ],
             "net-mail/mailbase": [
                 "/var",                 # so that /var/mail won't be installed
             ],
         }
+
+        # some files can not be removed by INSTALL_MASK
+        target_settings.repo_postsync_patch_directories.append("baselayout-remove-deprecated-var-files")
 
     _useFileContent = """
 # disable deprecated functions
