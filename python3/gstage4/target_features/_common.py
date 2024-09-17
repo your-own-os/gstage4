@@ -272,8 +272,9 @@ class NotUseDeprecatedPackagesAndFunctions:
 # framebuffer device is deprecated by DRM
 */*                             -fbdev
 
-# "wpa_supplicant" is deprecated by "iwd", "nss" is deprecated by "gnutls", "wext" is deprecated
-net-misc/networkmanager         iwd gnutls -nss -wext
+# "nss" is deprecated by "gnutls", "wext" is deprecated
+# "wpa_supplicant" is deprecated by "iwd", but "iwd" needs "wifi", so we can not specify it here
+net-misc/networkmanager         gnutls -nss -wext
 
 # don't use python2.x
 */*                             -python_targets_python2_7
