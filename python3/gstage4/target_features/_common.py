@@ -683,7 +683,8 @@ class SupportAllDocumentFormat:
 
     _useFileContent = """
 # document formats
-*/*                 djvu xps
+*/*                         djvu xps
+app-office/libreoffice      pdfimport
 """
 
 
