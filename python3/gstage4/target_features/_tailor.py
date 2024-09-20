@@ -52,6 +52,14 @@ class TailorSystemd:
             })
             removeItems.remove("systemd-battery-check")
 
+        if "systemd-backlight" in removeItems:
+            _updateDict(td, {
+                "sys-apps/systemd": [
+                    "*backlight*",
+                ],
+            })
+            removeItems.remove("systemd-backlight")
+
         if "systemd-boot" in removeItems:
             _updateDict(td, {
                 "sys-apps/systemd": [
