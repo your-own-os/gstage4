@@ -8,7 +8,10 @@ try:
     # what to insert (with blank line in the beginning and the end)
     buf2 = """
 # remove /var/lock and /var/run
-rm -rf "${ED}/var"
+# rm -rf "${ED}/var"
+
+# remove /var/lock
+rm -f "${ED}/var/lock"
 """
     buf2 = buf2.replace("\n", "\n\t")
     buf2 += "\n"
