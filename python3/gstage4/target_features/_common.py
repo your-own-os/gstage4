@@ -189,7 +189,7 @@ class UseSystemd:
     _useFileContent = """
 # system component should use systemd
 sys-apps/util-linux                                                  systemd          # I'm not sure, but I think it'd better to enable it
-sys-libs/glibc                                                       systemd          # I'm not sure, but I think it'd better to enable it
+sys-libs/glibc                                                       systemd          # so that systemd drop-in user/group can be used
 sys-apps/dbus                                                        systemd          # I'm not sure, but I think it'd better to enable it
 sys-auth/seatd                                                       systemd          # so that libseat can communicate with systemd
 
