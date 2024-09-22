@@ -719,7 +719,7 @@ class SupportAllGraphicsApi:
 
     _useFileContent = """
 # graphics api
-*/*                                                                                  egl eglfs gles gles2 gles3 opengl vaapi vulkan zink
+*/*                                                           egl eglfs gles gles2 gles3 opengl vaapi vulkan zink
 """
 
     _waylandUseFileContent = """
