@@ -706,26 +706,25 @@ class SupportAllCompressFormat:
 
 class SupportAllGraphicsApi:
 
+    def __init__(self, prefer_wayland=False):
+        self._preferWayland = prefer_wayland
+
     def update_target_settings(self, target_settings):
         assert "10-graphics-api" not in target_settings.pkg_use_files
 
-        target_settings.pkg_use_files["10-graphics-api"] = self._useFileContent.strip("\n") + "\n"
+        ret = self._useFileContent
+        if self._preferWayland:
+            ret += self._waylandUseFileContent
+        target_settings.pkg_use_files["10-graphics-api"] = ret.strip("\n") + "\n"
 
     _useFileContent = """
 # graphics api
 */*                                                                                  egl eglfs gles gles2 gles3 opengl vaapi vulkan zink
+"""
 
-# we prefer gles, so we disable opengl when it conflicts with gles
-# */*                                                                                  -opengl
-# app-emulation/qemu                                                                   opengl
-# app-emulation/wine-vanilla                                                           opengl
-# app-emulation/wine-staging                                                           opengl
-# dev-lang/fbc                                                                         opengl
-# dev-qt/qtbase                                                                        opengl
-# dev-qt/qtdeclarative                                                                 opengl
-# dev-qt/qttools                                                                       opengl
-# games-emulation/dosbox-staging                                                       opengl
-# games-engines/scummvm                                                                opengl
+    _waylandUseFileContent = """
+# we disable opengl when it conflicts with gles or wayland
+media-video/mpv                                               -opengl
 """
 
 
