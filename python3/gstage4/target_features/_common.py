@@ -795,8 +795,6 @@ class PreferWayland:
         }
 
         target_settings.repo_postsync_patch_directories.append("use-wayland")
-        # if not self._xwayland:
-        #     target_settings.repo_postsync_patch_directories.append("remove-x11")
 
     _useFileContent = """
 # we use wayland
