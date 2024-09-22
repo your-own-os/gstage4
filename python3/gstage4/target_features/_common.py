@@ -277,30 +277,33 @@ class NotUseDeprecatedPackagesAndFunctions:
 
     _useFileContent = """
 # disable deprecated functions
-*/*                             -deprecated
-*/*                             -fallback
+*/*                                                                                                                         -deprecated
+*/*                                                                                                                         -fallback
 
 # media-libs/libquvi depends on dev-lang/lua[deprecated]
-*/*                             -quvi
+*/*                                                                                                                         -quvi
 
 # framebuffer device is deprecated by DRM
-*/*                             -fbdev
+*/*                                                                                                                         -fbdev
+
+# don't use python2.x
+*/*                                                                                                                         -python_targets_python2_7
+*/*                                                                                                                         -python_single_target_python2_7
+
+# select between gtk2, gtk3 and gtk4
+*/*                                                                                                                         -gtk2 gtk3 gtk4
+
+# select between qt4, qt5 and qt6
+*/*                                                                                                                         -qt4 -qt5 qt6
+www-client/chromium                                                                                                         qt5 qt6         # qt6 depends on qt5
+
+# some packages are strange, they can't enable gtk and qt simutaneously
+media-libs/opencv                                                                                                           -gtk3 qt6
 
 # "nss" is deprecated by "gnutls", "wext" is deprecated
 # nobody uses modem anymore
 # net-wireless/wpa_supplicant is deprecated by net-wireless/iwd, but "iwd" needs "wifi", so we can not specify it here
-net-misc/networkmanager         gnutls -nss -wext -modemmanager
-
-# don't use python2.x
-*/*                             -python_targets_python2_7
-*/*                             -python_single_target_python2_7
-
-# select between gtk2, gtk3 and gtk4
-*/*                             -gtk2 gtk3 gtk4
-
-# select between qt4, qt5 and qt6
-*/*                             -qt4 -qt5 qt6
-www-client/chromium             qt5 qt6         # qt6 depends on qt5
+net-misc/networkmanager                                                                                                     gnutls -nss -wext -modemmanager
 """
 
     _maskFileContent = """
@@ -770,32 +773,37 @@ class RemoveDoc:
 
 class PreferWayland:
 
-    def __init__(self, xwayland=True):
-        self._xwayland = xwayland
-
     def update_target_settings(self, target_settings):
         assert "10-prefer-wayland" not in target_settings.pkg_use_files
         assert "10-prefer-wayland" not in target_settings.pkg_mask_files
+        assert "10-prefer-wayland" not in target_settings.install_mask_files
 
-        buf = self._useFileContent.strip("\n") + "\n"
-        if self._xwayland:
-            buf += self._xwaylandContent.strip("\n") + "\n"
-        target_settings.pkg_use_files["10-prefer-wayland"] = buf
+        target_settings.pkg_use_files["10-prefer-wayland"] = self._useFileContent.strip("\n") + "\n"
 
         target_settings.pkg_mask_files["10-prefer-wayland"] = self._maskFileContent.strip("\n") + "\n"
 
+        target_settings.install_mask_files["10-prefer-wayland"] = {
+            "sys-apps/systemd": [
+                "/etc/X11",
+            ],
+            "sys-apps/dbus": [
+                "/etc/X11",
+            ],
+            "x11-libs/xapp": [
+                "/etc/X11",
+            ],
+        }
+
         target_settings.repo_postsync_patch_directories.append("use-wayland")
-        if not self._xwayland:
-            target_settings.repo_postsync_patch_directories.append("remove-x11")
+        # if not self._xwayland:
+        #     target_settings.repo_postsync_patch_directories.append("remove-x11")
 
     _useFileContent = """
 # we use wayland
 */*                                           wayland
 */*                                           -X
 */*                                           INPUT_DEVICES: -* libinput
-"""
 
-    _xwaylandContent = """
 # of course, we also use X when we have to
 app-emulation/wine-vanilla                    X                               # wine has no wayland support, it has to use Xwayland
 dev-util/electron                             X -wayland                      # electron wayland support needs ozone which is broken now
@@ -808,10 +816,17 @@ x11-base/xorg-server						  -suid -udev -xorg
 """
 
     _maskFileContent = """
+# we use wayland
+x11-apps/xinit
+#x11-base/xorg-server               # we still needs xvfb
+
 # vdpau is from NVIDIA (it does not support pure wayland yet), use vaapi is enough
 x11-libs/libvdpau
 x11-libs/libva-vdpau-driver
 x11-misc/vdpauinfo
+
+# the folllowing packages won't support wayland in future
+x11-libs/motif
 """
 
 
