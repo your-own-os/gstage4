@@ -713,19 +713,19 @@ class SupportAllGraphicsApi:
 
     _useFileContent = """
 # graphics api
-*/*                                                                                  egl eglfs gles gles2 gles3 vaapi vulkan zink
+*/*                                                                                  egl eglfs gles gles2 gles3 opengl vaapi vulkan zink
 
-# we prefer gles, but we also enable opengl when it doesn't conflict with gles
-*/*                                                                                  -opengl
-app-emulation/qemu                                                                   opengl
-app-emulation/wine-vanilla                                                           opengl
-app-emulation/wine-staging                                                           opengl
-dev-lang/fbc                                                                         opengl
-dev-qt/qtbase                                                                        opengl
-dev-qt/qtdeclarative                                                                 opengl
-dev-qt/qttools                                                                       opengl
-games-emulation/dosbox-staging                                                       opengl
-games-engines/scummvm                                                                opengl
+# we prefer gles, so we disable opengl when it conflicts with gles
+# */*                                                                                  -opengl
+# app-emulation/qemu                                                                   opengl
+# app-emulation/wine-vanilla                                                           opengl
+# app-emulation/wine-staging                                                           opengl
+# dev-lang/fbc                                                                         opengl
+# dev-qt/qtbase                                                                        opengl
+# dev-qt/qtdeclarative                                                                 opengl
+# dev-qt/qttools                                                                       opengl
+# games-emulation/dosbox-staging                                                       opengl
+# games-engines/scummvm                                                                opengl
 """
 
 
