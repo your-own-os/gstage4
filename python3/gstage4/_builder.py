@@ -862,10 +862,10 @@ class TargetConfDirWriter:
                 else:
                     myf.write('%s="${COMMON_FLAGS}"\n' % (flags))
             else:
-                if isinstance(value, list):
+                if self._ts.build_opts.common_flags is None:
                     myf.write('%s="%s"\n' % (flags, ' '.join(value)))
                 else:
-                    myf.write('%s="%s"\n' % (flags, value))
+                    myf.write('%s="${COMMON_FLAGS} %s"\n' % (flags, ' '.join(value)))
 
         # modify and write out make.conf (in chroot)
         makepath = os.path.join(self._dir, "make.conf")

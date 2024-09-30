@@ -287,13 +287,13 @@ class TargetSettingsBuildOpts:
     def __init__(self, name):
         self.name = name
 
-        self.common_flags = []
-        self.cflags = []
-        self.cxxflags = []
-        self.fcflags = []
-        self.fflags = []
-        self.ldflags = []
-        self.asflags = []
+        self.common_flags = None      # can be None or like ["-O2", "-pipe"], None means using default value in profile
+        self.cflags = None            # same as above
+        self.cxxflags = None          # same as above
+        self.fcflags = None           # same as above
+        self.fflags = None            # same as above
+        self.ldflags = None           # same as above
+        self.asflags = None           # same as above
 
         self.ccache = None
 
@@ -313,37 +313,37 @@ class TargetSettingsBuildOpts:
             else:
                 return False
 
-        if obj.cflags is None or not isinstance(obj.cflags, list):
+        if obj.cflags is not None and not isinstance(obj.cflags, list):
             if raise_exception:
                 raise SettingsError("invalid value for \"cflags\" of %s" % (obj.name))
             else:
                 return False
 
-        if obj.cxxflags is None or not isinstance(obj.cxxflags, list):
+        if obj.cxxflags is not None and not isinstance(obj.cxxflags, list):
             if raise_exception:
                 raise SettingsError("invalid value for \"cxxflags\" of %s" % (obj.name))
             else:
                 return False
 
-        if obj.fcflags is None or not isinstance(obj.fcflags, list):
+        if obj.fcflags is not None and not isinstance(obj.fcflags, list):
             if raise_exception:
                 raise SettingsError("invalid value for \"fcflags\" of %s" % (obj.name))
             else:
                 return False
 
-        if obj.fflags is None or not isinstance(obj.fflags, list):
+        if obj.fflags is not None and not isinstance(obj.fflags, list):
             if raise_exception:
                 raise SettingsError("invalid value for \"fflags\" of %s" % (obj.name))
             else:
                 return False
 
-        if obj.ldflags is None or not isinstance(obj.ldflags, list):
+        if obj.ldflags is not None and not isinstance(obj.ldflags, list):
             if raise_exception:
                 raise SettingsError("invalid value for \"ldflags\" of %s" % (obj.name))
             else:
                 return False
 
-        if obj.asflags is None or not isinstance(obj.asflags, list):
+        if obj.asflags is not None and not isinstance(obj.asflags, list):
             if raise_exception:
                 raise SettingsError("invalid value for \"asflags\" of %s" % (obj.name))
             else:
