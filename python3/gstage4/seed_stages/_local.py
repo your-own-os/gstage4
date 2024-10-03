@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 
-from ..seed_stages import SeedStage
+from .._prototype import SeedStage
 
 
 class Localhost(SeedStage):
