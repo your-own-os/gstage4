@@ -21,9 +21,9 @@
 # THE SOFTWARE.
 
 
-from ..custom_actions import SimpleCustomAction
 from ..scripts import OneLinerScript
 from ..scripts import PlacingFilesScript
+from ..custom_actions import SimpleCustomAction
 
 
 class FixBugs:

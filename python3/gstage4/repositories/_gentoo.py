@@ -25,9 +25,9 @@ import os
 import mrget
 import tarfile
 import urllib.request
-from .. import ManualSyncRepository
-from .. import EmergeSyncRepository
 from .._util import SqfsExtractor
+from .._errors import ManualSyncRepository
+from .._errors import EmergeSyncRepository
 
 
 class CloudGentoo(EmergeSyncRepository):

@@ -27,7 +27,7 @@ import mrget
 import tarfile
 import pathlib
 import urllib.request
-from .. import SeedStage
+from ..seed_stages import SeedStage
 
 
 class CloudGentooStage3Archive(SeedStage):

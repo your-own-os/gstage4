@@ -24,7 +24,7 @@
 import lxml.etree
 import urllib.request
 from datetime import datetime
-from .. import UpstreamError
+from .._errors import UpstreamError
 
 
 class OverlayDb:

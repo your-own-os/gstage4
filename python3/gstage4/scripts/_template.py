@@ -23,8 +23,8 @@
 
 import os
 import shutil
-from .. import ScriptInChroot
 from .._util import Util
+from ..scripts import ScriptInChroot
 
 
 class ScriptFromHostFile(ScriptInChroot):

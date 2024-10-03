@@ -22,7 +22,7 @@
 
 
 import crypt
-from .. import CustomAction
+from .._errors import CustomAction
 from ..scripts import OneLinerScript
 from ..scripts import ScriptInstallPackages
 
