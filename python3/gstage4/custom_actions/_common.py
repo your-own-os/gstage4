@@ -22,9 +22,9 @@
 
 
 import crypt
-from .._errors import CustomAction
 from ..scripts import OneLinerScript
 from ..scripts import ScriptInstallPackages
+from ..custom_actions import CustomAction
 
 
 class SimpleCustomAction(CustomAction):                         # FIXME: should be renamed to UserDefinedAction
