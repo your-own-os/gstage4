@@ -24,7 +24,7 @@
 import os
 import shutil
 from .._util import Util
-from ..scripts import ScriptInChroot
+from ._common import ScriptInChroot
 
 
 class ScriptFromHostFile(ScriptInChroot):
