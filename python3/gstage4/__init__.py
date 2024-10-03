@@ -76,4 +76,11 @@ __all__ = [
     "CustomActionError",
     "REPO_POSTSYNC_PATCH_SCRIPT",
     "REPO_POSTSYNC_PATCH_SOURCE_DIR",
+] + [
+    "cloud_data",
+    "custom_actions",
+    "repositories",
+    "scripts",
+    "seed_stages",
+    "target_features",
 ]
