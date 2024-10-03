@@ -30,6 +30,13 @@ __version__ = '0.0.1'
 __author__ = 'Fpemud <fpemud@sina.com>'
 
 
+from . import cloud_data
+from . import custom_actions
+from . import repositories
+from . import scripts
+from . import seed_stages
+from . import target_features
+
 from ._settings import Settings
 from ._settings import TargetSettings
 
@@ -56,7 +63,14 @@ from ._errors import CustomActionError
 REPO_POSTSYNC_PATCH_SCRIPT = "/usr/libexec/gstage4/patch-repository"
 REPO_POSTSYNC_PATCH_SOURCE_DIR = "/usr/libexec/gstage4/patch-repository.d"
 
+
 __all__ = [
+    "cloud_data",
+    "custom_actions",
+    "repositories",
+    "scripts",
+    "seed_stages",
+    "target_features",
     "Settings",
     "TargetSettings",
     "SeedStage",
@@ -76,11 +90,4 @@ __all__ = [
     "CustomActionError",
     "REPO_POSTSYNC_PATCH_SCRIPT",
     "REPO_POSTSYNC_PATCH_SOURCE_DIR",
-] + [
-    "cloud_data",
-    "custom_actions",
-    "repositories",
-    "scripts",
-    "seed_stages",
-    "target_features",
 ]
