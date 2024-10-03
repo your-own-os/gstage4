@@ -22,8 +22,8 @@
 
 
 from .._errors import SettingsError
+from .._prototype import EmergeSyncRepository
 from ..cloud_data import OverlayDb
-from ..repositories import EmergeSyncRepository
 
 
 class OverlayFromHostLayman(EmergeSyncRepository):
