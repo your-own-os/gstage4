@@ -287,8 +287,8 @@ class TargetSettingsBuildOpts:
     def __init__(self, name):
         self.name = name
 
-        self.common_flags = None      # can be None or like ["-O2", "-pipe"], None means using default value in profile
-        self.cflags = None            # same as above
+        self.common_flags = None      # can be None or like ["-O2", "-pipe"], None means no common flags
+        self.cflags = None            # same as above, None means using default value in profile
         self.cxxflags = None          # same as above
         self.fcflags = None           # same as above
         self.fflags = None            # same as above
@@ -307,7 +307,7 @@ class TargetSettingsBuildOpts:
             else:
                 return False
 
-        if obj.common_flags is None or not isinstance(obj.common_flags, list):
+        if obj.common_flags is not None and not isinstance(obj.common_flags, list):
             if raise_exception:
                 raise SettingsError("invalid value for \"common_flags\" of %s" % (obj.name))
             else:
