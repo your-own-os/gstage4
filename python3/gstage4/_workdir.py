@@ -167,7 +167,7 @@ class WorkDirPersisentStorage(ActionRunner.PersistStorage):
 
     def getLastActionDirIndexName(self):
         for fn in reversed(sorted(os.listdir(self._parent.path))):
-            m = re.fullmatch("([0-9])+-(.*)", fn)
+            m = re.fullmatch("([0-9]+)-(.*)", fn)
             if m is not None:
                 return (m.group(0), int(m.group(1)), m.group(2))
         return (None, None, None)
