@@ -21,6 +21,9 @@
 # THE SOFTWARE.
 
 
+from ..scripts import OneLinerScript
+
+
 class MemTest:
 
     def update_target_settings(self, target_settings):
@@ -142,10 +145,14 @@ class EnableZeroConf:
 
     def update_world_set(self, world_set):
         world_set.add("net-dns/avahi")
+        world_set.add("sys-auth/nss-mdns")
 
     def update_service_list(self, service_list):
         if "avahi-daemon" not in service_list:
             service_list.append("avahi-daemon")
+
+    def get_custom_scripts(self):
+        return [OneLinerScript("sed -iE '/^hosts:/ { /mdns_minimal( +.*)? +dns/! s/dns/mdns_minimal &/ }' /etc/nsswitch.conf")]
 
 
 class DisableZeroConf:
@@ -155,7 +162,8 @@ class DisableZeroConf:
 
     def get_packages(self):
         return [
-            "net-dns/avahi"
+            "net-dns/avahi",
+            "sys-auth/nss-mdns",
         ]
 
     def update_target_settings(self, target_settings):
