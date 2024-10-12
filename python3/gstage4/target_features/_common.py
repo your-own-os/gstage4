@@ -58,9 +58,16 @@ class UseGenkernel:
         }
 
     def update_world_set(self, world_set):
-        world_set.add("sys-kernel/gentoo-sources")
-        world_set.add("sys-kernel/genkernel")
-        world_set.add("sys-devel/bc")           # kernel build script needs it
+        for pkg in self._getPackages():
+            world_set.add(pkg)
+
+    @staticmethod
+    def _getPackages(self):
+        return [
+            "sys-kernel/gentoo-sources",
+            "sys-kernel/genkernel",
+            "sys-devel/bc",           # kernel build script needs it
+        ]
 
 
 class UseDistKernel:
@@ -75,9 +82,28 @@ class UseDistKernel:
         }
 
     def update_world_set(self, world_set):
-        world_set.add("sys-kernel/gentoo-kernel-bin")
-        world_set.add("sys-kernel/dracut")
-        world_set.add("app-portage/gentoolkit")
+        for pkg in self._getPackages():
+            world_set.add(pkg)
+
+    @staticmethod
+    def _getPackages(self, dracutArgs):
+        ret = [
+            "sys-kernel/gentoo-kernel-bin",
+            "sys-kernel/dracut",
+            "app-portage/gentoolkit",
+        ]
+
+        if dracutArgs is not None and " -a dmsquash-live " in dracutArgs:
+            # FIXME: what package it needs?
+            pass
+
+        if dracutArgs is not None and " -a mdraid " in dracutArgs:
+            # FIXME: is this enough? dracut sucks that there's no doc describes it
+            ret += [
+                "sys-fs/mdadm",
+            ]
+
+        return ret
 
 
 class UseBbki:

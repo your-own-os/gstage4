@@ -42,6 +42,8 @@ from ._runner import Runner
 from .scripts import ScriptFromBuffer
 from .scripts import ScriptInstallPackages
 from .scripts import ScriptUpdateWorld
+from .target_features._common import UseGenkernel
+from .target_features._common import UseDistKernel
 
 
 class Builder(ActionRunner):
@@ -254,19 +256,11 @@ class Builder(ActionRunner):
             if self._ts.kernel_manager == "none":
                 pass
             elif self._ts.kernel_manager == "genkernel":
-                __worldNeeded("sys-kernel/gentoo-sources")
-                __worldNeeded("sys-kernel/genkernel")
-                __worldNeeded("sys-devel/bc")                   # kernel build script needs it
+                for pkg in UseGenkernel._getPackages():
+                    __worldNeeded(pkg)
             elif self._ts.kernel_manager == "distkernel":
-                __worldNeeded("sys-kernel/gentoo-kernel-bin")
-                __worldNeeded("sys-kernel/dracut")
-                __worldNeeded("app-portage/gentoolkit")         # dracut operation needs it
-                if Util.robustIn(" -a dmsquash-live ", self._ts.kernel_manager_distkernel["dracut_args"]):
-                    # FIXME: what package it needs?
-                    pass
-                if Util.robustIn(" -a mdraid ", self._ts.kernel_manager_distkernel["dracut_args"]):
-                    # FIXME: is this enough? dracut sucks that there's no doc describes it
-                    __worldNeeded("sys-fs/mdadm")
+                for pkg in UseDistKernel._getPackages():
+                    __worldNeeded(pkg)
             elif self._ts.kernel_manager == "fake":
                 pass
             else:
