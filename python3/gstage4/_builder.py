@@ -42,8 +42,8 @@ from ._runner import Runner
 from .scripts import ScriptFromBuffer
 from .scripts import ScriptInstallPackages
 from .scripts import ScriptUpdateWorld
-from .target_features._common import UseGenkernel
-from .target_features._common import UseDistKernel
+from .target_features._kernel import UseGenkernel
+from .target_features._kernel import UseDistKernel
 
 
 class Builder(ActionRunner):
