@@ -94,7 +94,7 @@ class UseDistKernel:
         ]
 
         if dracutArgs is not None and " -a dmsquash-live " in dracutArgs:
-            # FIXME: what package it needs?
+            # FIXME: what package does it need?
             pass
 
         if dracutArgs is not None and " -a mdraid " in dracutArgs:
