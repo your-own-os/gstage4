@@ -297,14 +297,15 @@ class TargetSettings:
                 "app-portage/gentoolkit",
             ]
 
-            if kwargs["dracutArgs"] is not None and " -a dmsquash-live " in kwargs["dracutArgs"]:
+            if kwargs["dracutArgs"] is not None and re.search(r"\B-a dmsquash-live\b", kwargs["dracutArgs"]) is not None:
                 # FIXME: what package does it need?
                 pass
 
-            if kwargs["dracutArgs"] is not None and " -a mdraid " in kwargs["dracutArgs"]:
-                ret += [
-                    "sys-fs/mdadm",
-                ]
+            if kwargs["dracutArgs"] is not None and re.search(r"\B-a mdraid\b", kwargs["dracutArgs"]) is not None:
+                ret.append("sys-fs/mdadm")
+
+            if kwargs["dracutArgs"] is not None and re.search(r"\B-I busybox\b", kwargs["dracutArgs"]) is not None:
+                ret.append("sys-apps/busybox")
 
             return ret
 
