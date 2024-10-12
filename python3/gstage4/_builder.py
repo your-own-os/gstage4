@@ -42,8 +42,6 @@ from ._runner import Runner
 from .scripts import ScriptFromBuffer
 from .scripts import ScriptInstallPackages
 from .scripts import ScriptUpdateWorld
-from .target_features._kernel import UseGenkernel
-from .target_features._kernel import UseDistKernel
 
 
 class Builder(ActionRunner):
@@ -256,10 +254,10 @@ class Builder(ActionRunner):
             if self._ts.kernel_manager == "none":
                 pass
             elif self._ts.kernel_manager == "genkernel":
-                for pkg in UseGenkernel._getPackages():
+                for pkg in TargetSettings._getPackagesForKernelManager("genkernel"):
                     __worldNeeded(pkg)
             elif self._ts.kernel_manager == "distkernel":
-                for pkg in UseDistKernel._getPackages(self._ts.kernel_manager_distkernel["dracut_args"]):
+                for pkg in TargetSettings._getPackagesForKernelManager("distkernel", dracutArgs=self._ts.kernel_manager_distkernel["dracut_args"]):
                     __worldNeeded(pkg)
             elif self._ts.kernel_manager == "fake":
                 pass

@@ -281,6 +281,36 @@ class TargetSettings:
             else:
                 return False
 
+    @staticmethod
+    def _getPackagesForKernelManager(kernel_manager, **kwargs):
+        if kernel_manager == "genkernel":
+            return [
+                "sys-kernel/gentoo-sources",
+                "sys-kernel/genkernel",
+                "sys-devel/bc",           # kernel build script needs it
+            ]
+
+        if kernel_manager == "distkernel":
+            ret = [
+                "sys-kernel/gentoo-kernel-bin",
+                "sys-kernel/dracut",
+                "app-portage/gentoolkit",
+            ]
+
+            if kwargs["dracutArgs"] is not None and " -a dmsquash-live " in kwargs["dracutArgs"]:
+                # FIXME: what package does it need?
+                pass
+
+            if kwargs["dracutArgs"] is not None and " -a mdraid " in kwargs["dracutArgs"]:
+                # FIXME: is this enough? dracut sucks that there's no doc describes it
+                ret += [
+                    "sys-fs/mdadm",
+                ]
+
+            return ret
+
+        assert False
+
 
 class TargetSettingsBuildOpts:
 
