@@ -259,7 +259,7 @@ class Builder(ActionRunner):
                 for pkg in UseGenkernel._getPackages():
                     __worldNeeded(pkg)
             elif self._ts.kernel_manager == "distkernel":
-                for pkg in UseDistKernel._getPackages():
+                for pkg in UseDistKernel._getPackages(self._ts.kernel_manager_distkernel["dracut_args"]):
                     __worldNeeded(pkg)
             elif self._ts.kernel_manager == "fake":
                 pass

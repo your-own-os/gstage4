@@ -62,7 +62,7 @@ class UseGenkernel:
             world_set.add(pkg)
 
     @staticmethod
-    def _getPackages(self):
+    def _getPackages():
         return [
             "sys-kernel/gentoo-sources",
             "sys-kernel/genkernel",
@@ -82,11 +82,11 @@ class UseDistKernel:
         }
 
     def update_world_set(self, world_set):
-        for pkg in self._getPackages():
+        for pkg in self._getPackages(self._dracutArgs):
             world_set.add(pkg)
 
     @staticmethod
-    def _getPackages(self, dracutArgs):
+    def _getPackages(dracutArgs):
         ret = [
             "sys-kernel/gentoo-kernel-bin",
             "sys-kernel/dracut",
