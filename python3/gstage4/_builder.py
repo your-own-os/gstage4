@@ -261,6 +261,12 @@ class Builder(ActionRunner):
                 __worldNeeded("sys-kernel/gentoo-kernel-bin")
                 __worldNeeded("sys-kernel/dracut")
                 __worldNeeded("app-portage/gentoolkit")         # dracut operation needs it
+                if Util.robustIn(" -a dmsquash-live ", self._ts.kernel_manager_distkernel["dracut_args"]):
+                    # FIXME: what package it needs?
+                    pass
+                if Util.robustIn(" -a mdraid ", self._ts.kernel_manager_distkernel["dracut_args"]):
+                    # FIXME: is this enough? dracut sucks that there's no doc describes it
+                    __worldNeeded("sys-fs/mdadm")
             elif self._ts.kernel_manager == "fake":
                 pass
             else:

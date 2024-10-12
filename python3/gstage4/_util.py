@@ -34,6 +34,10 @@ import PySquashfsImage
 class Util:
 
     @staticmethod
+    def robustIn(element, container):
+        return container is not None and element in container
+
+    @staticmethod
     def getLangEncoding():
         ret = None
 
