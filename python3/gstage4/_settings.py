@@ -302,7 +302,6 @@ class TargetSettings:
                 pass
 
             if kwargs["dracutArgs"] is not None and " -a mdraid " in kwargs["dracutArgs"]:
-                # FIXME: is this enough? dracut sucks that there's no doc describes it
                 ret += [
                     "sys-fs/mdadm",
                 ]
