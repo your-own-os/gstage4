@@ -24,10 +24,10 @@ from ._common import FixBugs
 
 from ._common import UsePortage
 
-from ._common import UseGenkernel
-from ._common import UseDistKernel
-from ._common import UseBbki
-from ._common import UseFakeKernel
+from ._kernel import UseGenkernel
+from ._kernel import UseDistKernel
+from ._kernel import UseBbki
+from ._kernel import UseFakeKernel
 
 from ._common import UseOpenrc
 from ._common import UseSystemd
