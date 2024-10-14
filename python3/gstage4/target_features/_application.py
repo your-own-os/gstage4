@@ -162,23 +162,18 @@ class UseZeroConf:
         return OneLinerScript("sed -iE '/^hosts:/ { /mdns_minimal( +.*)? +dns/! s/dns/mdns_minimal &/ }' /etc/nsswitch.conf")
 
 
-class DisableZeroConf:
-
-    def __init__(self, strict=True):
-        self._strict = strict
-
-    def get_packages(self):
-        return [
-            "net-dns/avahi",
-            "sys-auth/nss-mdns",
-        ]
+class DenyZeroConf:
 
     def update_target_settings(self, target_settings):
         assert "10-zeroconf" not in target_settings.pkg_use_files
         assert "10-zeroconf" not in target_settings.pkg_mask_files
 
-        if self._strict:
-            target_settings.pkg_mask_files["10-zeroconf"] = "\n".join(self.get_packages()) + "\n"
+        target_settings.pkg_mask_files["10-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+net-dns/avahi
+sys-auth/nss-mdns
+"""
 
 
 class UseBluetooth:
@@ -211,22 +206,17 @@ net-misc/networkmanager     -bluetooth          # what bluetooth in networkmanag
 """
 
 
-class DisableBluetooth:
-
-    def __init__(self, strict=True):
-        self._strict = strict
-
-    def get_packages(self):
-        return [
-            "net-wireless/bluez"
-        ]
+class DenyBluetooth:
 
     def update_target_settings(self, target_settings):
         assert "10-bluetooth" not in target_settings.pkg_use_files
         assert "10-bluetooth" not in target_settings.pkg_mask_files
 
-        if self._strict:
-            target_settings.pkg_mask_files["10-bluetooth"] = "\n".join(self.get_packages()) + "\n"
+        target_settings.pkg_mask_files["10-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+net-wireless/bluez
+"""
 
 
 class UsePrinting:
@@ -258,22 +248,17 @@ class UsePrinting:
 """
 
 
-class DisablePrinting:
-
-    def __init__(self, strict=True):
-        self._strict = strict
-
-    def get_packages(self):
-        return [
-            "net-print/cups"
-        ]
+class DenyPrinting:
 
     def update_target_settings(self, target_settings):
         assert "10-printing" not in target_settings.pkg_use_files
         assert "10-printing" not in target_settings.pkg_mask_files
 
-        if self._strict:
-            target_settings.pkg_mask_files["10-printing"] = "\n".join(self.get_packages()) + "\n"
+        target_settings.pkg_mask_files["10-printing"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+net-print/cups
+"""
 
 
 class UseAllQemuTargets:
