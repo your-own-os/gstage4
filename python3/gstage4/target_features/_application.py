@@ -136,6 +136,13 @@ net-misc/netifrc
 
 class EnableZeroConf:
 
+    @staticmethod
+    def get_all_related_packages():
+        return [
+            "net-dns/avahi",
+            "sys-auth/nss-mdns",
+        ]
+
     def __init__(self, service):
         assert service == "avahi"
 
@@ -175,6 +182,12 @@ class DisableZeroConf:
 
 
 class EnableBluetooth:
+
+    @staticmethod
+    def get_all_related_packages():
+        return [
+            "net-wireless/bluez"
+        ]
 
     def __init__(self, service):
         assert service == "bluez"
@@ -217,6 +230,12 @@ class DisableBluetooth:
 
 
 class EnablePrinting:
+
+    @staticmethod
+    def get_all_related_packages():
+        return [
+            "net-print/cups"
+        ]
 
     def __init__(self, service):
         assert service == "cups"
