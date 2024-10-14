@@ -134,7 +134,7 @@ net-misc/netifrc
 """
 
 
-class EnableZeroConf:
+class UseZeroConf:
 
     @staticmethod
     def get_all_related_packages():
@@ -181,7 +181,7 @@ class DisableZeroConf:
             target_settings.pkg_mask_files["10-zeroconf"] = "\n".join(self.get_packages()) + "\n"
 
 
-class EnableBluetooth:
+class UseBluetooth:
 
     @staticmethod
     def get_all_related_packages():
@@ -229,7 +229,7 @@ class DisableBluetooth:
             target_settings.pkg_mask_files["10-bluetooth"] = "\n".join(self.get_packages()) + "\n"
 
 
-class EnablePrinting:
+class UsePrinting:
 
     @staticmethod
     def get_all_related_packages():

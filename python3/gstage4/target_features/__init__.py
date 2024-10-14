@@ -105,13 +105,13 @@ from ._application import Chrony
 from ._application import NetworkManager
 from ._application import Kmscon
 
-from ._application import EnableZeroConf
+from ._application import UseZeroConf
 from ._application import DisableZeroConf
 
-from ._application import EnableBluetooth
+from ._application import UseBluetooth
 from ._application import DisableBluetooth
 
-from ._application import EnablePrinting
+from ._application import UsePrinting
 from ._application import DisablePrinting
 
 
@@ -182,10 +182,10 @@ __all__ = [
     "Chrony",
     "NetworkManager",
     "Kmscon",
-    "EnableZeroConf",
+    "UseZeroConf",
     "DisableZeroConf",
-    "EnableBluetooth",
+    "UseBluetooth",
     "DisableBluetooth",
-    "EnablePrinting",
+    "UsePrinting",
     "DisablePrinting",
 ]
