@@ -162,13 +162,13 @@ class UseZeroConf:
         return OneLinerScript("sed -iE '/^hosts:/ { /mdns_minimal( +.*)? +dns/! s/dns/mdns_minimal &/ }' /etc/nsswitch.conf")
 
 
-class DenyZeroConf:
+class NotUseZeroConf:
 
     def update_target_settings(self, target_settings):
-        assert "10-zeroconf" not in target_settings.pkg_use_files
-        assert "10-zeroconf" not in target_settings.pkg_mask_files
+        assert "10-no-zeroconf" not in target_settings.pkg_use_files
+        assert "10-no-zeroconf" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-no-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
 
     _maskFileContent = """
 net-dns/avahi
@@ -188,10 +188,10 @@ class UseBluetooth:
         assert service == "bluez"
 
     def update_target_settings(self, target_settings):
-        assert "10-bluetooth" not in target_settings.pkg_use_files
-        assert "10-bluetooth" not in target_settings.pkg_mask_files
+        assert "10-no-bluetooth" not in target_settings.pkg_use_files
+        assert "10-no-bluetooth" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_use_files["10-bluetooth"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_use_files["10-no-bluetooth"] = self._useFileContent.strip("\n") + "\n"
 
     def update_world_set(self, world_set):
         world_set.add("net-wireless/bluez")
@@ -206,13 +206,13 @@ net-misc/networkmanager     -bluetooth          # what bluetooth in networkmanag
 """
 
 
-class DenyBluetooth:
+class NotUseBluetooth:
 
     def update_target_settings(self, target_settings):
-        assert "10-bluetooth" not in target_settings.pkg_use_files
-        assert "10-bluetooth" not in target_settings.pkg_mask_files
+        assert "10-no-bluetooth" not in target_settings.pkg_use_files
+        assert "10-no-bluetooth" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-no-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
 
     _maskFileContent = """
 net-wireless/bluez
@@ -231,10 +231,10 @@ class UsePrinting:
         assert service == "cups"
 
     def update_target_settings(self, target_settings):
-        assert "10-printing" not in target_settings.pkg_use_files
-        assert "10-printing" not in target_settings.pkg_mask_files
+        assert "10-no-printing" not in target_settings.pkg_use_files
+        assert "10-no-printing" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_use_files["10-printing"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_use_files["10-no-printing"] = self._useFileContent.strip("\n") + "\n"
 
     def update_world_set(self, world_set):
         world_set.add("net-print/cups")
@@ -248,13 +248,13 @@ class UsePrinting:
 """
 
 
-class DenyPrinting:
+class NotUsePrinting:
 
     def update_target_settings(self, target_settings):
-        assert "10-printing" not in target_settings.pkg_use_files
-        assert "10-printing" not in target_settings.pkg_mask_files
+        assert "10-no-printing" not in target_settings.pkg_use_files
+        assert "10-no-printing" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-printing"] = self._maskFileContent.strip("\n") + "\n"
+        target_settings.pkg_mask_files["10-no-printing"] = self._maskFileContent.strip("\n") + "\n"
 
     _maskFileContent = """
 net-print/cups
