@@ -151,8 +151,8 @@ class EnableZeroConf:
         if "avahi-daemon" not in service_list:
             service_list.append("avahi-daemon")
 
-    def get_custom_scripts(self):
-        return [OneLinerScript("sed -iE '/^hosts:/ { /mdns_minimal( +.*)? +dns/! s/dns/mdns_minimal &/ }' /etc/nsswitch.conf")]
+    def get_modify_nsswitch_script(self):
+        return OneLinerScript("sed -iE '/^hosts:/ { /mdns_minimal( +.*)? +dns/! s/dns/mdns_minimal &/ }' /etc/nsswitch.conf")
 
 
 class DisableZeroConf:
