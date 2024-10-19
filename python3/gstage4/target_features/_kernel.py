@@ -51,14 +51,23 @@ class UseDistKernel:
         self._dracutArgs = dracut_args
 
     def update_target_settings(self, target_settings):
+        assert "10-dist-kernel" not in target_settings.pkg_accept_keywords_files
+
         target_settings.kernel_manager = "distkernel"
         target_settings.kernel_manager_distkernel = {
             "dracut_args": self._dracutArgs,
         }
 
+        target_settings.pkg_accept_keywords_files["10-dist-kernel"] = self._acceptKeywordsFileContent.strip("\n") + "\n"
+
     def update_world_set(self, world_set):
         for pkg in TargetSettings._getPackagesForKernelManager("distkernel", dracutArgs=self._dracutArgs):
             world_set.add(pkg)
+
+    _acceptKeywordsFileContent = """
+# dist-kernel must use >=app-misc/livecd-tools-2.10
+app-misc/livecd-tools ~x86 ~amd64
+"""
 
 
 class UseBbki:
