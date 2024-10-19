@@ -304,6 +304,9 @@ class TargetSettings:
             if kwargs["dracutArgs"] is not None and re.search(r"\B-a mdraid\b", kwargs["dracutArgs"]) is not None:
                 ret.append("sys-fs/mdadm")
 
+            if kwargs["dracutArgs"] is not None and re.search(r"\B-i /lib/keymaps /lib/keymaps\b", kwargs["dracutArgs"]) is not None:
+                ret.append("app-misc/livecd-tools")
+
             if kwargs["dracutArgs"] is not None and re.search(r"\B-I busybox\b", kwargs["dracutArgs"]) is not None:
                 ret.append("sys-apps/busybox")
 
