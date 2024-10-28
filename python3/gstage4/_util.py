@@ -99,6 +99,16 @@ class Util:
         return len(theList) >= len(subList) and theList[:len(subList)] == subList
 
     @staticmethod
+    def listSparseContain(theList, subList):
+        idx = -1
+        for x in subList:
+            idx2 = theList.index(x)
+            if idx2 <= idx:
+                return False
+            idx = idx2
+        return True
+
+    @staticmethod
     def forceDelete(path):
         if os.path.islink(path):
             os.remove(path)
@@ -340,14 +350,16 @@ class ActionRunner:
         # check self._actionList
         self._assertActions()
 
-        # check history actions
-        historyActionFuncNameList = ["action_" + x for x in self._persistStorage.getHistoryActionNames()]
-        actionFuncNameList = [x._action_func_name for x in self._actionList]
-        if not Util.listStartswith(actionFuncNameList, historyActionFuncNameList):
-            raise self._errClass("invalid history actions")
-
         # self._lastActionIndex == -1 if no action has been executed
-        self._lastActionIndex = len(historyActionFuncNameList) - 1
+        self._lastActionIndex = -1
+        if len(self._persistStorage.getHistoryActionNames()) > 0:
+            actionFuncNameList = [x._action_func_name for x in self._actionList]
+            historyActionFuncNameList = ["action_" + x for x in self._persistStorage.getHistoryActionNames()]
+            self._lastActionIndex = actionFuncNameList.index(historyActionFuncNameList[-1])
+            if self._lastActionIndex == -1:
+                raise self._errClass("invalid history actions")
+            if not Util.listSparseContain(historyActionFuncNameList[:-1], actionFuncNameList[:self._lastActionIndex]):
+                raise self._errClass("invalid history actions")
 
         # not finished:          self._finished is None
         # successfully finished: self._finished == ""
