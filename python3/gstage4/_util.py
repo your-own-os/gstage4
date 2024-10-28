@@ -434,17 +434,6 @@ class ActionRunner:
 
         exec("self.action_%s()" % (list(action_dict.keys())[0]))
 
-    def remove_action(self, action_name):
-        idx = self._getActionIndex("action_" + action_name)
-        assert self._lastActionIndex < idx
-
-        # removes action from self._actionList
-        # FIXME: no way to remove action method
-        self._actionList.pop(idx)
-
-        # do check
-        self._assertActions()
-
     def get_progress(self):
         if self._finished is None:
             ret = (self._lastActionIndex + 1) * 100 // len(self._actionList)

@@ -311,9 +311,11 @@ class Builder(ActionRunner):
 
     @ActionRunner.Action(after=["init_confdir", "update_world"])
     def action_install_kernel(self):
-        curPath = self._workDirObj.get_latest_action_dirpath()
+        if self._ts.kernel_manager == "none":
+            return
 
         if self._ts.kernel_manager == "genkernel":
+            curPath = self._workDirObj.get_latest_action_dirpath()
             t = TargetConfDirParser(curPath)
             tj = t.get_make_conf_make_opts_jobs()
             tl = t.get_make_conf_load_average()
@@ -350,7 +352,7 @@ class Builder(ActionRunner):
             return
 
         if self._ts.kernel_manager == "fake":
-            bootDir = os.path.join(curPath, "boot")
+            bootDir = os.path.join(self._workDirObj.get_latest_action_dirpath(), "boot")
             os.makedirs(bootDir, exist_ok=True)
             with open(os.path.join(bootDir, "vmlinuz"), "w") as f:
                 f.write("fake kernel")
