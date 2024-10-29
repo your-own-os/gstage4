@@ -100,6 +100,7 @@ class Util:
 
     @staticmethod
     def listSparseContain(theList, subList):
+        # example: theList [1, 2, 3, 4] subList [1, 3] returns True
         idx = -1
         for x in subList:
             idx2 = theList.index(x)
