@@ -194,6 +194,9 @@ class NotUseDeprecatedPackagesAndFunctions:
         # some files can not be removed by INSTALL_MASK
         target_settings.repo_postsync_patch_directories.append("baselayout-remove-deprecated-var-files")
 
+        # disable mtab
+        target_settings.repo_postsync_patch_directories.append("disable-mtab")
+
     _useFileContent = """
 # disable deprecated functions
 */*                                                                                                                         -deprecated
