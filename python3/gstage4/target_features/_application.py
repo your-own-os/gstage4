@@ -164,7 +164,8 @@ class UseZeroConf:
         return OneLinerScript("sed -iE '/^hosts:/ { /mdns_minimal( +.*)? +dns/! s/dns/mdns_minimal &/ }' /etc/nsswitch.conf")
 
     _useFileContent = """
-*/*     zeroconf
+*/*                     zeroconf
+media-video/pipewire    -zeroconf          # what zeroconf in pipewire is for?
 """
 
 
