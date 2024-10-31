@@ -150,6 +150,8 @@ class UseZeroConf:
         assert "10-zeroconf" not in target_settings.pkg_use_files
         assert "10-zeroconf" not in target_settings.pkg_mask_files
 
+        target_settings.pkg_use_files["10-zeroconf"] = self._useFileContent.strip("\n") + "\n"
+
     def update_world_set(self, world_set):
         world_set.add("net-dns/avahi")
         world_set.add("sys-auth/nss-mdns")
@@ -160,6 +162,10 @@ class UseZeroConf:
 
     def get_modify_nsswitch_script(self):
         return OneLinerScript("sed -iE '/^hosts:/ { /mdns_minimal( +.*)? +dns/! s/dns/mdns_minimal &/ }' /etc/nsswitch.conf")
+
+    _useFileContent = """
+*/*     zeroconf
+"""
 
 
 class NotUseZeroConf:
