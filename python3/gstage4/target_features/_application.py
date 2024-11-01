@@ -195,8 +195,8 @@ class UseBluetooth:
         assert service == "bluez"
 
     def update_target_settings(self, target_settings):
-        assert "10-no-bluetooth" not in target_settings.pkg_use_files
-        assert "10-no-bluetooth" not in target_settings.pkg_mask_files
+        assert "10-bluetooth" not in target_settings.pkg_use_files
+        assert "10-bluetooth" not in target_settings.pkg_mask_files
 
         target_settings.pkg_use_files["10-no-bluetooth"] = self._useFileContent.strip("\n") + "\n"
 
@@ -219,11 +219,7 @@ class NotUseBluetooth:
         assert "10-no-bluetooth" not in target_settings.pkg_use_files
         assert "10-no-bluetooth" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-no-bluetooth"] = self._maskFileContent.strip("\n") + "\n"
-
-    _maskFileContent = """
-net-wireless/bluez
-"""
+        target_settings.pkg_mask_files["10-no-bluetooth"] = "\n".join(UseBluetooth.get_all_related_packages()) + "\n"
 
 
 class UsePrinting:
@@ -231,20 +227,23 @@ class UsePrinting:
     @staticmethod
     def get_all_related_packages():
         return [
-            "net-print/cups"
+            "net-print/cups",
+            "net-print/cups-browsed",
+            "net-print/cups-filters",
+            "net-print/cups-meta",
         ]
 
     def __init__(self, service):
         assert service == "cups"
 
     def update_target_settings(self, target_settings):
-        assert "10-no-printing" not in target_settings.pkg_use_files
-        assert "10-no-printing" not in target_settings.pkg_mask_files
+        assert "10-printing" not in target_settings.pkg_use_files
+        assert "10-printing" not in target_settings.pkg_mask_files
 
         target_settings.pkg_use_files["10-no-printing"] = self._useFileContent.strip("\n") + "\n"
 
     def update_world_set(self, world_set):
-        world_set.add("net-print/cups")
+        world_set.add("net-print/cups-meta")
 
     def update_service_list(self, service_list):
         if "cups" not in service_list:
@@ -261,11 +260,7 @@ class NotUsePrinting:
         assert "10-no-printing" not in target_settings.pkg_use_files
         assert "10-no-printing" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-no-printing"] = self._maskFileContent.strip("\n") + "\n"
-
-    _maskFileContent = """
-net-print/cups
-"""
+        target_settings.pkg_mask_files["10-no-printing"] = "\n".join(UsePrinting.get_all_related_packages()) + "\n"
 
 
 class UseAllQemuTargets:
