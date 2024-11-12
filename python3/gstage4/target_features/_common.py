@@ -525,8 +525,8 @@ class PreferSourcePackage:
 # we prefer dev-lang/rust
 dev-lang/rust-bin
 
-# we prefer sys-firmware/edk2-ovmf
-sys-firmware/edk2-ovmf-bin
+# we prefer sys-firmware/edk2
+sys-firmware/edk2-bin
 """
 
 
