@@ -727,7 +727,7 @@ class PreferWayland:
 */*                                           INPUT_DEVICES: -* libinput
 
 # of course, we also use X when we have to
-app-emulation/wine-vanilla                    X                               # wine has no wayland support, it has to use Xwayland
+#app-emulation/wine-vanilla                    X                               # wine has no wayland support, it has to use Xwayland
 dev-util/electron                             X -wayland                      # electron wayland support needs ozone which is broken now
 gui-wm/wayfire                                X                               # enable Xwayland
 app-misc/ddcutil                              X                               # drm needs X?
