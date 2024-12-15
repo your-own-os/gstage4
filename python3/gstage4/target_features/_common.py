@@ -723,7 +723,7 @@ class PreferWayland:
     _useFileContent = """
 # we use wayland
 */*                                           wayland
-*/*                                           -X
+*/*                                           -X -xcomposite
 */*                                           INPUT_DEVICES: -* libinput
 
 # of course, we also use X when we have to
