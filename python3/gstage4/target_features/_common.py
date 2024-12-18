@@ -598,7 +598,7 @@ class SupportAllImageFormat:
 
     _useFileContent = """
 # image formats
-*/*                 apng exif gif jpeg jpeg2k jpegxl mng openexr png svg tiff webp wmf xpm
+*/*                 apng exif gif heif jpeg jpeg2k jpegxl mng openexr png svg tiff webp wmf xpm
 """
 
 
