@@ -195,7 +195,7 @@ class NotUseDeprecatedPackagesAndFunctions:
         target_settings.repo_postsync_patch_directories.append("baselayout-remove-deprecated-var-files")
 
         # disable mtab
-        target_settings.repo_postsync_patch_directories.append("disable-mtab")
+        target_settings.repo_postsync_patch_directories.append("kill-mtab")
 
     _useFileContent = """
 # disable deprecated functions
@@ -670,7 +670,7 @@ class DisablePcSpeaker:
 class DisableFstab:
 
     def update_target_settings(self, target_settings):
-        target_settings.repo_postsync_patch_directories.append("remove-fstab")
+        target_settings.repo_postsync_patch_directories.append("kill-fstab")
 
 
 class RemoveDoc:
