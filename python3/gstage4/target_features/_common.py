@@ -789,6 +789,7 @@ app-emulation/qemu                                              -alsa pipewire  
 app-emulation/spice                                             gstreamer                     # sound route 2
 app-emulation/wine-vanilla                                      -alsa pulseaudio              # sound route 5 (bad), gstreamer support in wine is not what we image
 app-emulation/wine-staging                                      -alsa pulseaudio              # sound route 5 (bad), gstreamer support in wine is not what we image
+app-emulation/wine-proton                                       -alsa pulseaudio              # sound route 5 (bad), gstreamer support in wine is not what we image
 app-emulation/virtualbox                                        -alsa pulseaudio              # sound route 5 (bad)
 games-emulation/dosbox-staging                                  -alsa fluidsynth              # sound route 4
 games-engines/scummvm                                           -alsa fluidsynth              # sound route 4
