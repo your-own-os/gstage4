@@ -10,6 +10,6 @@ try:
         buf2 = buf.replace("local mycmakeargs=(\n", "local mycmakeargs=(\n-DCMAKE_HIP_COMPILER_ROCM_ROOT=/usr\n")
         if buf == buf2:
             raise ValueError()
-        pathlib.Path(fn).write_text(buf)
+        pathlib.Path(fn).write_text(buf2)
 except ValueError:
     print("outdated")
