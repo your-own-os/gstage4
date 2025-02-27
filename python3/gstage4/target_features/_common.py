@@ -121,6 +121,7 @@ virtual/tmpfiles                                                     systemd
 x11-base/xorg-server                                                 systemd
 
 # install systemd service files
+app-pda/usbmuxd                                                      systemd
 media-video/pipewire                                                 systemd
 media-video/wireplumber                                              systemd
 net-print/cups                                                       systemd
