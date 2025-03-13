@@ -24,7 +24,15 @@
 class UseGogMirror:
 
     def update_target_settings(self, target_settings):
+        assert "10-use-mirror-gog" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-use-mirror-gog"] = self._useFileContent.strip("\n") + "\n"
+
         target_settings.repo_postsync_patch_directories.append("use-mirror-gog")
+
+    _useFileContent = """
+games-fps/duke3d-data      -demo gog
+"""
 
 
 class UseHbMirror:
