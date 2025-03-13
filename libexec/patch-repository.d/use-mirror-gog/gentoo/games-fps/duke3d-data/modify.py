@@ -8,6 +8,7 @@ try:
     for fn in sorted(glob.glob("*.ebuild"), reverse=True):
         buf = pathlib.Path(fn).read_text()
         buf = buf.replace(r'gog? ( ${MY_P_GOG}.sh )', r'gog? ( mirror://gog/${MY_P_GOG}.sh )')
+        buf = buf.replace(r'gog? ( fetch ) ', '')
         with open(fn, "w") as f:
             f.write(buf)
 except ValueError:
