@@ -782,7 +782,7 @@ class PreferPipewire:
 #                       2. gstreamer -> pipewire -> alsa
 #                       3. openal -> pipewire -> alsa
 #                       4. fluidsynth -> pipewire -> alsa
-#                       5. jack -> pipewire -> alsa
+#                       5. jack -> pipewire -> alsa (bad)
 #                       6. pulseaudio -> pipewire -> alsa (bad)
 #                       7. alsa -> pipewire -> alsa (forbidden)
 #                       8. alsa (forbidden)
