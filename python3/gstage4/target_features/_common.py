@@ -788,36 +788,37 @@ class PreferPipewire:
 #                       8. alsa (forbidden)
 app-emulation/qemu                                              -alsa pipewire                # sound route 1
 app-emulation/spice                                             gstreamer                     # sound route 2
-app-emulation/wine-vanilla                                      -alsa pulseaudio              # sound route 5 (bad), gstreamer support in wine is not what we image
-app-emulation/wine-staging                                      -alsa pulseaudio              # sound route 5 (bad), gstreamer support in wine is not what we image
-app-emulation/wine-proton                                       -alsa pulseaudio              # sound route 5 (bad), gstreamer support in wine is not what we image
-app-emulation/virtualbox                                        -alsa pulseaudio              # sound route 5 (bad)
+app-emulation/wine-vanilla                                      -alsa pulseaudio              # sound route 6 (bad), gstreamer support in wine is not what we image
+app-emulation/wine-staging                                      -alsa pulseaudio              # sound route 6 (bad), gstreamer support in wine is not what we image
+app-emulation/wine-proton                                       -alsa pulseaudio              # sound route 6 (bad), gstreamer support in wine is not what we image
+app-emulation/virtualbox                                        -alsa pulseaudio              # sound route 6 (bad)
 games-emulation/dosbox-staging                                  -alsa fluidsynth              # sound route 4
 games-engines/scummvm                                           -alsa fluidsynth              # sound route 4
 games-fps/serioussam-tfe                                        -alsa pipewire                # sound route 1
 games-fps/serioussam-tfe-vk                                     -alsa pipewire                # sound route 1
 games-fps/serioussam-tse                                        -alsa pipewire                # sound route 1
 games-fps/serioussam-tse-vk                                     -alsa pipewire                # sound route 1
+games-util/steam-launcher                                       pulseaudio                    # sound route 6 (bad)
 gui-libs/gtk                                                    gstreamer                     # sound route 2
 media-gfx/blender                                               openal                        # sound route 3
 media-libs/libmikmod                                            -alsa openal                  # sound route 3
 media-libs/libsdl                                               -alsa                         # sound route 1, support pipewire through media-libs/libsdl2
 media-libs/libsdl2                                              -alsa pipewire                # sound route 1
 media-libs/openal                                               -alsa pipewire                # sound route 1
-media-libs/mediastreamer2                                       -alsa pulseaudio              # sound route 5 (bad)
+media-libs/mediastreamer2                                       -alsa pulseaudio              # sound route 6 (bad)
 media-sound/fluidsynth                                          -alsa pipewire                # sound route 1
-media-sound/lmms                                                -alsa pulseaudio              # sound route 5 (bad)
-media-sound/mpg123                                              -alsa pulseaudio              # sound route 5 (bad)
-media-sound/sonic-visualiser                                    pulseaudio                    # sound route 5 (bad)
+media-sound/lmms                                                -alsa pulseaudio              # sound route 6 (bad)
+media-sound/mpg123                                              -alsa pulseaudio              # sound route 6 (bad)
+media-sound/sonic-visualiser                                    pulseaudio                    # sound route 6 (bad)
 media-sound/wildmidi                                            -alsa openal                  # sound route 3
 media-video/mpv                                                 -alsa pipewire                # sound route 1
-net-im/zoom                                                     pulseaudio                    # sound route 5 (bad), doesn't support alsa, gstreamer and pipewire
-net-misc/freerdp                                                -alsa gstreamer pulseaudio    # sound route 5 (bad), strange, it has USE flag alsa, ffmepg, gstreamer and pulseaudio. It seems disable both alsa and pulseaudio would make it route to OSS.
-net-wireless/gqrx                                               pulseaudio                    # sound route 5 (bad)
+net-im/zoom                                                     pulseaudio                    # sound route 6 (bad), doesn't support alsa, gstreamer and pipewire
+net-misc/freerdp                                                -alsa gstreamer pulseaudio    # sound route 6 (bad), strange, it has USE flag alsa, ffmepg, gstreamer and pulseaudio. It seems disable both alsa and pulseaudio would make it route to OSS.
+net-wireless/gqrx                                               pulseaudio                    # sound route 6 (bad)
 media-libs/libcanberra                                          -alsa gstreamer               # sound route 2
-media-sound/spotify                                             pulseaudio                    # sound route 5 (bad), doesn't support alsa, gstreamer and pipewire
-www-client/firefox-bin                                          -alsa pulseaudio              # sound route 5 (bad), doesn't support alsa, gstreamer and pipewire, it's alsa flag is for medis-sound/apulse
-www-client/chromium                                             pulseaudio                    # sound route 5 (bad), doesn't support alsa, gstreamer and pipewire
+media-sound/spotify                                             pulseaudio                    # sound route 6 (bad), doesn't support alsa, gstreamer and pipewire
+www-client/firefox-bin                                          -alsa pulseaudio              # sound route 6 (bad), doesn't support alsa, gstreamer and pipewire, it's alsa flag is for medis-sound/apulse
+www-client/chromium                                             pulseaudio                    # sound route 6 (bad), doesn't support alsa, gstreamer and pipewire
 x11-libs/wxGTK                                                  gstreamer                     # sound route 2
 
 # disable sound route 7
