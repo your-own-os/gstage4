@@ -98,11 +98,15 @@ class OverlayDb:
                     for sourceTag in nameTag.xpath("../source"):
                         tVcsType = sourceTag.get("type")
                         tUrl = sourceTag.text
-                        if tUrl.startswith("git://github.com/"):
+
+                        if tUrl.startswith("git+https://"):
+                            tUrl = tUrl.replace("git+https://", "https://")
+                        elif tUrl.startswith("git://github.com/"):
                             if self._bStrict:
                                 raise UpstreamError("git://github.com in URL of overlay \"%s\" is not supported anymore" % (overlayName))
                             else:
                                 tUrl = tUrl.replace("git://", "https://")
+
                         if tVcsType == vcsType:
                             if urlDomain is not None:
                                 if tUrl.startswith(urlProto + "://" + urlDomain + "/"):
@@ -112,6 +116,7 @@ class OverlayDb:
                                 if tUrl.startswith(urlProto + "://"):
                                     ret[overlayName] = (tVcsType, tUrl)
                                     break
+
                     if overlayName in ret:
                         break
 
