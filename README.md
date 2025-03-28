@@ -4,4 +4,4 @@ A python module for buildling stage4 of Gentoo Linux
 
 
 TODO:
-CONFIG_NULL_TTY_DEFAULT_CONSOLE
+linux-6.15: CONFIG_NULL_TTY_DEFAULT_CONSOLE
