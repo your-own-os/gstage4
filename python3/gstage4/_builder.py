@@ -537,10 +537,11 @@ class _MyRepo:
         return (m.group(1), m.group(2)) if m is not None else None
 
     def patch(self, patchDirList):
+        repoName = self.get_repo_name()
         patcher = RepoPatcher()
-        patchDirList = patcher.filter_and_convert_patch_dir_list(patchDirList, self.get_repo_name())
+        patchDirList = patcher.filter_patch_dir_list(patchDirList, repoName)
         if len(patchDirList) > 0:
-            pendingDstDirSet = patcher.patch(self.datadir_hostpath, patchDirList)
+            pendingDstDirSet = patcher.patch(self.datadir_hostpath, patchDirList, repoName)
             for x in patcher.warn_or_err_list:
                 if x.warn_or_err:
                     print("Warning: %s" % (x.msg))

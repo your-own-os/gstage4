@@ -27,10 +27,10 @@ if __name__ == "__main__":
 
     patcher = RepoPatcher()
     patchDirList = [os.path.join(sourceDir, x) for x in os.listdir(sourceDir)]
-    patchDirList = patcher.filter_and_convert_patch_dir_list(patchDirList, targetDirRepoName)
+    patchDirList = patcher.filter_patch_dir_list(patchDirList, targetDirRepoName)
     if len(patchDirList) > 0:
         print("Patching...")
-        pendingDstDirSet = patcher.patch(targetDir, patchDirList)
+        pendingDstDirSet = patcher.patch(targetDir, patchDirList, targetDirRepoName)
         for x in patcher.warn_or_err_list:
             if x.warn_or_err:
                 print("Warning: %s" % (x.msg))
