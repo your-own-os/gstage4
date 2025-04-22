@@ -32,6 +32,12 @@ from .._prototype import EmergeSyncRepository
 
 class CloudGentoo(EmergeSyncRepository):
 
+    def __init__(self, url=None):
+        if url is None:
+            self._url = "rsync://rsync.gentoo.org/gentoo-portage"
+        else:
+            self._url = url
+
     def get_name(self):
         return _NAME
 
@@ -39,8 +45,6 @@ class CloudGentoo(EmergeSyncRepository):
         return _DATADIR_PATH
 
     def get_repos_conf_file_content(self):
-        url = mrget.target_urls("mirror://gentoo-portage", filter_key=lambda x: x["protocol"] == "rsync")[0]
-
         # from Gentoo AMD64 Handbook
         # the commented part is not needed, I have tested it
         buf = ""
@@ -50,7 +54,7 @@ class CloudGentoo(EmergeSyncRepository):
         buf += "[gentoo]\n"
         buf += "location = %s\n" % (self.get_datadir_path())
         buf += "sync-type = rsync\n"
-        buf += "sync-uri = %s\n" % (url)
+        buf += "sync-uri = %s\n" % (self._url)
         buf += "auto-sync = yes\n"
         buf += "sync-rsync-verify-jobs = 1\n"
         buf += "sync-rsync-verify-metamanifest = yes\n"
@@ -66,7 +70,12 @@ class CloudGentoo(EmergeSyncRepository):
 
 class CloudGentooSnapshot(ManualSyncRepository):
 
-    def __init__(self, date=None):
+    def __init__(self, url=None, date=None):
+        if url is None:
+            self._url = "https://distfiles.gentoo.org"
+        else:
+            self._url = url
+
         if date is not None:
             self._date = date.strftime("%Y%m%d")
         else:
@@ -79,8 +88,7 @@ class CloudGentooSnapshot(ManualSyncRepository):
         return _DATADIR_PATH
 
     def sync(self, datadir_hostpath):
-        url = mrget.target_urls("mirror://gentoo", filter_key=lambda x: x["protocol"] in ["http", "https", "ftp"])[0]
-        url = os.path.join(url, "snapshots", "gentoo-%s.tar.xz" % (self._date))
+        url = os.path.join(self._url, "snapshots", "gentoo-%s.tar.xz" % (self._date))
         with urllib.request.urlopen(url) as resp:
             with tarfile.open(fileobj=resp, mode="r:xz") as tf:
                 tf.extractall(datadir_hostpath)
