@@ -31,9 +31,8 @@ class OverlayDb:
 
     URL = "https://api.gentoo.org/overlays/repositories.xml"
 
-    def __init__(self, strict=False, prefer_mirror=True):
+    def __init__(self, strict=False):
         self._bStrict = strict
-        self._bPreferMirror = prefer_mirror
         self._data = None
         self._lastModifiedTime = None
 
@@ -122,12 +121,6 @@ class OverlayDb:
 
                 if overlayName not in ret:
                     raise UpstreamError("no appropriate source for overlay \"%s\"" % (overlayName))
-
-            if self._bPreferMirror:
-                for overlayName in ret.keys():
-                    # for github mirror
-                    if ret[overlayName][1].startswith("https://github.com/"):
-                        ret[overlayName] = (ret[overlayName][0], ret[overlayName][1].replace("https://github.com/", "mirror://github/"))
 
             self._data = ret
             self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
