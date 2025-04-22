@@ -50,14 +50,14 @@ class RepoPatcher:
     def filter_patch_dir_list(self, patchDirList, targetDirRepoName):
         ret = []
         for patchDir in patchDirList:
-            if os.path.isdir(os.path.join(patchDir, "_all")) or os.path.isdir(os.path.join(patchDir, targetDirRepoName)):
+            if os.path.isdir(os.path.join(patchDir, "_all_packages")) or os.path.isdir(os.path.join(patchDir, targetDirRepoName)):
                 ret.append(patchDir)
         return ret
 
     def patch(self, targetDir, patchDirList, repoName):
         pendingDstDirSet = set()
         for patchDir in patchDirList:
-            pendingDstDirSet |= self._patchRepository(targetDir, os.path.join(patchDir, repoName))
+            pendingDstDirSet |= self._patchRepository(targetDir, patchDir, repoName)
         return pendingDstDirSet
 
     def generateManifest(self, targetDir, pendingDstDirSet):
@@ -65,70 +65,56 @@ class RepoPatcher:
         asyncio.set_event_loop(asyncio.new_event_loop())
         asyncio.get_event_loop().run_until_complete(self._doWork(targetDir, pendingDstDirSet, self._jobNumber))
 
-    def _patchRepository(self, targetDir, patchRepoDir):
+    def _patchRepository(self, targetDir, patchDir, repoName):
+        patchTypeName = os.path.basename(patchDir)                  # /etc/portage/repo.postsync.d/10-patch-repository.d/use-wayland -> "use-wayland"
+        patchRepoDir = os.path.join(patchDir, repoName)
         pendingDstDirSet = set()
 
         # patch eclass files
         eclassDir = os.path.join(patchRepoDir, "eclass")
         if os.path.exists(eclassDir):
             dstFullDir = os.path.join(targetDir, "eclass")
-            self._execPatchScript(patchRepoDir, eclassDir, dstFullDir)
+            self._execPatchScript(patchTypeName, patchRepoDir, eclassDir, dstFullDir)
 
         # patch profile files
         profilesDir = os.path.join(patchRepoDir, "profiles")
         if os.path.exists(profilesDir):
             dstFullDir = os.path.join(targetDir, "profiles")
-            self._execPatchScript(patchRepoDir, profilesDir, dstFullDir)
+            self._execPatchScript(patchTypeName, patchRepoDir, profilesDir, dstFullDir)
 
         # patch specific packages
-        for categoryDir in os.listdir(patchRepoDir):
-            if categoryDir in ["README", "eclass", "profiles", "_all"]:
-                continue
-            fullCategoryDir = os.path.join(patchRepoDir, categoryDir)
-            for ebuildDir in os.listdir(fullCategoryDir):
-                if ebuildDir in ["_all"]:
+        if os.path.exists(patchRepoDir):
+            for categoryDir in os.listdir(patchRepoDir):
+                if categoryDir in ["README", "eclass", "profiles", "_all_packages"]:
                     continue
-                srcDir = os.path.join(fullCategoryDir, ebuildDir)
-                dstDir = os.path.join(categoryDir, ebuildDir)
-                dstFullDir = os.path.join(targetDir, dstDir)
-                if self._execPatchScript(patchRepoDir, srcDir, dstFullDir):
-                    if len(glob.glob(os.path.join(dstFullDir, "*.ebuild"))) == 0:
-                        # all ebuild files are deleted, it means this package is removed
-                        shutil.rmtree(dstFullDir)
-                        if len(os.listdir(fullCategoryDir)) == 0:
-                            os.rmdir(fullCategoryDir)
+                fullCategoryDir = os.path.join(patchRepoDir, categoryDir)
+                for ebuildDir in os.listdir(fullCategoryDir):
+                    if ebuildDir in ["_all_packages"]:
                         continue
-                    pendingDstDirSet.add(dstDir)
+                    srcDir = os.path.join(fullCategoryDir, ebuildDir)
+                    dstDir = os.path.join(categoryDir, ebuildDir)
+                    dstFullDir = os.path.join(targetDir, dstDir)
+                    if self._execPatchScript(patchTypeName, patchRepoDir, srcDir, dstFullDir):
+                        if len(glob.glob(os.path.join(dstFullDir, "*.ebuild"))) == 0:
+                            # all ebuild files are deleted, it means this package is removed
+                            shutil.rmtree(dstFullDir)
+                            if len(os.listdir(fullCategoryDir)) == 0:
+                                os.rmdir(fullCategoryDir)
+                            continue
+                        pendingDstDirSet.add(dstDir)
 
         # patch all packages in specific categories
-        for categoryDir in os.listdir(patchRepoDir):
-            if categoryDir in ["README", "eclass", "profiles", "_all"]:
-                continue
-            fullAllDir = os.path.join(patchRepoDir, categoryDir, "_all")
-            if os.path.exists(fullAllDir):
-                fullDstCategoryDir = os.path.join(targetDir, categoryDir)
-                for dstEbuildDir in os.listdir(fullDstCategoryDir):
-                    fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
-                    if os.path.isdir(fullDstEbuildDir):
-                        if self._execPatchScript(patchRepoDir, fullAllDir, fullDstEbuildDir):
-                            if len(glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))) == 0:
-                                # all ebuild files are deleted, it means this package is removed
-                                shutil.rmtree(fullDstEbuildDir)
-                                if len(os.listdir(fullDstCategoryDir)) == 0:
-                                    os.rmdir(fullDstCategoryDir)
-                                continue
-                            pendingDstDirSet.add(fullDstEbuildDir)
-
-        # patch all packages
-        fullAllDir = os.path.join(patchRepoDir, "_all")
-        if os.path.exists(fullAllDir):
-            for dstCategoryDir in os.listdir(targetDir):
-                fullDstCategoryDir = os.path.join(targetDir, dstCategoryDir)
-                if os.path.isdir(fullDstCategoryDir) and (dstCategoryDir == "virtual" or "-" in dstCategoryDir):
+        if os.path.exists(patchRepoDir):
+            for categoryDir in os.listdir(patchRepoDir):
+                if categoryDir in ["README", "eclass", "profiles", "_all_packages"]:
+                    continue
+                fullAllDir = os.path.join(patchRepoDir, categoryDir, "_all_packages")
+                if os.path.exists(fullAllDir):
+                    fullDstCategoryDir = os.path.join(targetDir, categoryDir)
                     for dstEbuildDir in os.listdir(fullDstCategoryDir):
                         fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
                         if os.path.isdir(fullDstEbuildDir):
-                            if self._execPatchScript(patchRepoDir, fullAllDir, fullDstEbuildDir):
+                            if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):
                                 if len(glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))) == 0:
                                     # all ebuild files are deleted, it means this package is removed
                                     shutil.rmtree(fullDstEbuildDir)
@@ -137,17 +123,34 @@ class RepoPatcher:
                                     continue
                                 pendingDstDirSet.add(fullDstEbuildDir)
 
+        # patch all packages
+        for fullAllDir in [os.path.join(patchRepoDir, "_all_packages"), os.path.join(patchDir, "_all_packages")]:
+            if os.path.exists(fullAllDir):
+                for dstCategoryDir in os.listdir(targetDir):
+                    fullDstCategoryDir = os.path.join(targetDir, dstCategoryDir)
+                    if os.path.isdir(fullDstCategoryDir) and (dstCategoryDir == "virtual" or "-" in dstCategoryDir):
+                        for dstEbuildDir in os.listdir(fullDstCategoryDir):
+                            fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
+                            if os.path.isdir(fullDstEbuildDir):
+                                if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):        # note: srcBaseDir is not ancestor of fullAllDir for item0 in this loop
+                                    if len(glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))) == 0:
+                                        # all ebuild files are deleted, it means this package is removed
+                                        shutil.rmtree(fullDstEbuildDir)
+                                        if len(os.listdir(fullDstCategoryDir)) == 0:
+                                            os.rmdir(fullDstCategoryDir)
+                                        continue
+                                    pendingDstDirSet.add(fullDstEbuildDir)
+
         return pendingDstDirSet
 
-    def _execPatchScript(self, patchRepoDir, srcDir, dstDir):
-        patchTypeName = os.path.basename(os.path.dirname(patchRepoDir))     # /etc/portage/repo.postsync.d/10-patch-repository.d/use-wayland/gentoo -> "use-wayland"
+    def _execPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstDir):
         bModified = False
 
         for fullfn in glob.glob(os.path.join(srcDir, "*")):
             if not os.path.isfile(fullfn):
                 continue
             if not os.path.exists(dstDir):
-                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchRepoDir) + 1:])))
+                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
                 continue
 
             mtimeOld = os.path.getmtime(fullfn)
@@ -162,11 +165,11 @@ class RepoPatcher:
                     assert False
 
             if out == "outdated":
-                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchRepoDir) + 1:])))
+                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
             elif out == "":
                 pass
             else:
-                self._warnOrErrList.append(self.WarnOrErr((False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, fullfn[len(patchRepoDir) + 1:], out))))
+                self._warnOrErrList.append(self.WarnOrErr((False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out))))
 
             if os.path.getmtime(fullfn) != mtimeOld:
                 bModified = True
