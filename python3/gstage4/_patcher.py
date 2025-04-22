@@ -67,6 +67,8 @@ class RepoPatcher:
         asyncio.get_event_loop().run_until_complete(self._doWork(targetDir, pendingDstDirSet, self._jobNumber))
 
     def _patchRepository(self, targetDir, patchDir):
+        pendingDstDirSet = set()
+
         # patch eclass files
         eclassDir = os.path.join(patchDir, "eclass")
         if os.path.exists(eclassDir):
@@ -80,28 +82,67 @@ class RepoPatcher:
             self._execPatchScript(patchDir, profilesDir, dstFullDir)
 
         # patch packages
-        pendingDstDirList = []
         for categoryDir in os.listdir(patchDir):
-            if categoryDir in ["README", "eclass", "profiles"]:
+            if categoryDir in ["README", "eclass", "profiles", "_all"]:
                 continue
             fullCategoryDir = os.path.join(patchDir, categoryDir)
             for ebuildDir in os.listdir(fullCategoryDir):
+                if ebuildDir in ["_all"]:
+                    continue
                 srcDir = os.path.join(fullCategoryDir, ebuildDir)
                 dstDir = os.path.join(categoryDir, ebuildDir)
                 dstFullDir = os.path.join(targetDir, dstDir)
-                self._execPatchScript(patchDir, srcDir, dstFullDir)
-                if len(glob.glob(os.path.join(dstFullDir, "*.ebuild"))) == 0:
-                    # all ebuild files are deleted, it means this package is removed
-                    shutil.rmtree(dstFullDir)
-                    if len(os.listdir(fullCategoryDir)) == 0:
-                        os.rmdir(fullCategoryDir)
-                    continue
-                pendingDstDirList.append(dstDir)
+                if self._execPatchScript(patchDir, srcDir, dstFullDir):
+                    if len(glob.glob(os.path.join(dstFullDir, "*.ebuild"))) == 0:
+                        # all ebuild files are deleted, it means this package is removed
+                        shutil.rmtree(dstFullDir)
+                        if len(os.listdir(fullCategoryDir)) == 0:
+                            os.rmdir(fullCategoryDir)
+                        continue
+                    pendingDstDirSet.add(dstDir)
 
-        return set(pendingDstDirList)
+        # patch all packages in specific categories
+        for categoryDir in os.listdir(patchDir):
+            if categoryDir in ["README", "eclass", "profiles", "_all"]:
+                continue
+            fullAllDir = os.path.join(patchDir, categoryDir, "_all")
+            if os.path.exists(fullAllDir):
+                fullDstCategoryDir = os.path.join(targetDir, categoryDir)
+                for dstEbuildDir in os.listdir(fullDstCategoryDir):
+                    fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
+                    if os.path.isdir(fullDstEbuildDir):
+                        if self._execPatchScript(patchDir, fullAllDir, fullDstEbuildDir):
+                            if len(glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))) == 0:
+                                # all ebuild files are deleted, it means this package is removed
+                                shutil.rmtree(fullDstEbuildDir)
+                                if len(os.listdir(fullDstCategoryDir)) == 0:
+                                    os.rmdir(fullDstCategoryDir)
+                                continue
+                            pendingDstDirSet.add(fullDstEbuildDir)
+
+        # patch all packages
+        fullAllDir = os.path.join(patchDir, "_all")
+        if os.path.exists(fullAllDir):
+            for dstCategoryDir in os.listdir(targetDir):
+                fullDstCategoryDir = os.path.join(targetDir, dstCategoryDir)
+                if os.path.isdir(fullDstCategoryDir) and (dstCategoryDir == "virtual" or "-" in dstCategoryDir):
+                    for dstEbuildDir in os.listdir(fullDstCategoryDir):
+                        fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
+                        if os.path.isdir(fullDstEbuildDir):
+                            if self._execPatchScript(patchDir, fullAllDir, fullDstEbuildDir):
+                                if len(glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))) == 0:
+                                    # all ebuild files are deleted, it means this package is removed
+                                    shutil.rmtree(fullDstEbuildDir)
+                                    if len(os.listdir(fullDstCategoryDir)) == 0:
+                                        os.rmdir(fullDstCategoryDir)
+                                    continue
+                                pendingDstDirSet.add(fullDstEbuildDir)
+
+        return pendingDstDirSet
 
     def _execPatchScript(self, patchDir, srcDir, dstDir):
         patchTypeName = os.path.basename(patchDir)
+        bModified = False
 
         for fullfn in glob.glob(os.path.join(srcDir, "*")):
             if not os.path.isfile(fullfn):
@@ -109,6 +150,9 @@ class RepoPatcher:
             if not os.path.exists(dstDir):
                 self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchDir) + 1:])))
                 continue
+
+            mtimeOld = os.path.getmtime(fullfn)
+
             out = None
             with TempChdir(dstDir):
                 if fullfn.endswith(".py"):
@@ -117,12 +161,18 @@ class RepoPatcher:
                     out = subprocess.check_output(["sh", fullfn], text=True)
                 else:
                     assert False
+
             if out == "outdated":
                 self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, fullfn[len(patchDir) + 1:])))
             elif out == "":
                 pass
             else:
                 self._warnOrErrList.append(self.WarnOrErr((False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, fullfn[len(patchDir) + 1:], out))))
+
+            if os.path.getmtime(fullfn) != mtimeOld:
+                bModified = True
+
+        return bModified
 
     @classmethod
     async def _doWork(cls, targetDir, pendingDstDirSet, jobNumber):
