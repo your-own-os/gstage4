@@ -169,6 +169,7 @@ __all__ = [
     "TailorLmSensors",
     "TailorQemu",
     "PamSuWheelOk",
+    "UseGithubMirror",
     "UseGogMirror",
     "UseHbMirror",
     "UseHuggingFaceMirror",
