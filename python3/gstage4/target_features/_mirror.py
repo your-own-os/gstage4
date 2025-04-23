@@ -21,6 +21,12 @@
 # THE SOFTWARE.
 
 
+class UseGithubMirror:
+
+    def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("use-mirror-github")
+
+
 class UseGogMirror:
 
     def update_target_settings(self, target_settings):
