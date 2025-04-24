@@ -95,12 +95,6 @@ class RepoPatcher:
                     dstDir = os.path.join(categoryDir, ebuildDir)
                     dstFullDir = os.path.join(targetDir, dstDir)
                     if self._execPatchScript(patchTypeName, patchRepoDir, srcDir, dstFullDir):
-                        if len(glob.glob(os.path.join(dstFullDir, "*.ebuild"))) == 0:
-                            # all ebuild files are deleted, it means this package is removed
-                            shutil.rmtree(dstFullDir)
-                            if len(os.listdir(fullCategoryDir)) == 0:
-                                os.rmdir(fullCategoryDir)
-                            continue
                         pendingDstDirSet.add(dstDir)
 
         # patch all packages in specific categories
@@ -115,12 +109,6 @@ class RepoPatcher:
                         fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
                         if os.path.isdir(fullDstEbuildDir):
                             if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):
-                                if len(glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))) == 0:
-                                    # all ebuild files are deleted, it means this package is removed
-                                    shutil.rmtree(fullDstEbuildDir)
-                                    if len(os.listdir(fullDstCategoryDir)) == 0:
-                                        os.rmdir(fullDstCategoryDir)
-                                    continue
                                 pendingDstDirSet.add(fullDstEbuildDir)
 
         # patch all packages
@@ -133,30 +121,25 @@ class RepoPatcher:
                             fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
                             if os.path.isdir(fullDstEbuildDir):
                                 if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):        # note: srcBaseDir is not ancestor of fullAllDir for item0 in this loop
-                                    if len(glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))) == 0:
-                                        # all ebuild files are deleted, it means this package is removed
-                                        shutil.rmtree(fullDstEbuildDir)
-                                        if len(os.listdir(fullDstCategoryDir)) == 0:
-                                            os.rmdir(fullDstCategoryDir)
-                                        continue
                                     pendingDstDirSet.add(fullDstEbuildDir)
 
         return pendingDstDirSet
 
-    def _execPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstDir):
-        bModified = False
+    def _execPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstEbuildDir):
+        assert os.path.isabs(srcBaseDir)
+        assert os.path.isabs(srcDir)
 
-        for fullfn in glob.glob(os.path.join(srcDir, "*")):
-            if not os.path.isfile(fullfn):
-                continue
-            if not os.path.exists(dstDir):
-                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
-                continue
+        modifiedDict = {}
+        for fullfn in glob.glob(os.path.join(dstEbuildDir, "*.ebuild")):
+            modifiedDict[fullfn] = os.path.getmtime(fullfn)
+        assert len(modifiedDict) > 0
 
-            mtimeOld = os.path.getmtime(fullfn)
+        with TempChdir(dstEbuildDir):
+            for fullfn in glob.glob(os.path.join(srcDir, "*")):
+                if not os.path.isfile(fullfn):
+                    continue
 
-            out = None
-            with TempChdir(dstDir):
+                out = None
                 if fullfn.endswith(".py"):
                     out = subprocess.check_output(["python3", fullfn], text=True)
                 elif fullfn.endswith(".sh"):
@@ -164,17 +147,28 @@ class RepoPatcher:
                 else:
                     assert False
 
-            if out == "outdated":
-                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
-            elif out == "":
-                pass
-            else:
-                self._warnOrErrList.append(self.WarnOrErr((False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out))))
+                if out == "outdated":
+                    self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
+                elif out == "":
+                    pass
+                else:
+                    self._warnOrErrList.append(self.WarnOrErr((False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out))))
 
-            if os.path.getmtime(fullfn) != mtimeOld:
-                bModified = True
-
-        return bModified
+        fullfnList = glob.glob(os.path.join(dstEbuildDir, "*.ebuild"))
+        if len(modifiedDict) != len(fullfnList):
+            return True
+        elif len(fullfnList) == 0:
+            # all ebuild files are deleted, it means this package is removed
+            shutil.rmtree(dstEbuildDir)
+            dstCategoryDir = os.path.dirname(dstEbuildDir)
+            if len(os.listdir(dstCategoryDir)) == 0:
+                os.rmdir(dstCategoryDir)
+            return False
+        else:
+            for fullfn, mtimeOld in modifiedDict.items():
+                if not os.path.exists(fullfn) or os.path.getmtime(fullfn) != mtimeOld:
+                    return True
+            return False
 
     @classmethod
     async def _doWork(cls, targetDir, pendingDstDirSet, jobNumber):
