@@ -60,10 +60,10 @@ class RepoPatcher:
             pendingDstDirSet |= self._patchRepository(targetDir, patchDir, repoName)
         return pendingDstDirSet
 
-    def generateManifest(self, targetDir, pendingDstDirSet):
+    def generateManifest(self, pendingDstDirSet):
         # generate manifest for patched packages
         asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.get_event_loop().run_until_complete(self._doWork(targetDir, pendingDstDirSet, self._jobNumber))
+        asyncio.get_event_loop().run_until_complete(self._doWork(pendingDstDirSet, self._jobNumber))
 
     def _patchRepository(self, targetDir, patchDir, repoName):
         patchTypeName = os.path.basename(patchDir)                  # /etc/portage/repo.postsync.d/10-patch-repository.d/use-wayland -> "use-wayland"
@@ -123,6 +123,13 @@ class RepoPatcher:
                                 if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):        # note: srcBaseDir is not ancestor of fullAllDir for item0 in this loop
                                     pendingDstDirSet.add(fullDstEbuildDir)
 
+        # patch can reomve ebuild directories, so category directories can be empty either, remove them
+        for dstCategoryDir in os.listdir(targetDir):
+            fullDstCategoryDir = os.path.join(targetDir, dstCategoryDir)
+            if os.path.isdir(fullDstCategoryDir) and (dstCategoryDir == "virtual" or "-" in dstCategoryDir):
+                if len(os.listdir(fullDstCategoryDir)) == 0:
+                    os.rmdir(fullDstCategoryDir)
+
         return pendingDstDirSet
 
     def _execPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstEbuildDir):
@@ -160,9 +167,6 @@ class RepoPatcher:
         elif len(fullfnList) == 0:
             # all ebuild files are deleted, it means this package is removed
             shutil.rmtree(dstEbuildDir)
-            dstCategoryDir = os.path.dirname(dstEbuildDir)
-            if len(os.listdir(dstCategoryDir)) == 0:
-                os.rmdir(dstCategoryDir)
             return False
         else:
             for fullfn, mtimeOld in modifiedDict.items():
@@ -171,15 +175,14 @@ class RepoPatcher:
             return False
 
     @classmethod
-    async def _doWork(cls, targetDir, pendingDstDirSet, jobNumber):
+    async def _doWork(cls, pendingDstDirSet, jobNumber):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
         if jobNumber is None:
             pool = asyncio_pool.AioPool()
         else:
             pool = asyncio_pool.AioPool(size=jobNumber)
         for dstDir in pendingDstDirSet:
-            dstFullDir = os.path.join(targetDir, dstDir)
-            pool.spawn_n(cls._generateEbuildManifest(dstFullDir))
+            pool.spawn_n(cls._generateEbuildManifest(dstDir))
         await pool.join()
 
     @staticmethod
