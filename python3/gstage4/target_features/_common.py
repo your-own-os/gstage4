@@ -674,6 +674,20 @@ class DisableFstab:
         target_settings.repo_postsync_patch_directories.append("kill-fstab")
 
 
+class NotUsePypy:
+
+    def update_target_settings(self, target_settings):
+        assert "10-no-pypy" not in target_settings.install_mask_files
+
+        target_settings.pkg_mask_files["10-no-pypy"] = self._maskFileContent.strip("\n") + "\n"
+
+    _maskFileContent = """
+dev-lang/pypy
+dev-python/pypy-exe
+dev-python/pypy-exe-bin
+"""
+
+
 class RemoveDoc:
 
     def update_target_settings(self, target_settings):

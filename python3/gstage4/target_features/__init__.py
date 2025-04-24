@@ -59,6 +59,7 @@ from ._common import PreferPythonMagic
 
 from ._common import DisablePcSpeaker
 from ._common import DisableFstab
+from ._common import NotUsePypy
 from ._common import RemoveDoc
 
 from ._common import SupportAllVideoFormat
@@ -147,6 +148,7 @@ __all__ = [
     "PreferPythonMagic",
     "DisablePcSpeaker",
     "DisableFstab",
+    "NotUsePypy",
     "RemoveDoc",
     "SupportAllVideoFormat",
     "SupportAllAudioFormat",
