@@ -7,8 +7,9 @@ import pathlib
 try:
     for fn in sorted(glob.glob("*.ebuild"), reverse=True):
         buf = pathlib.Path(fn).read_text()
-        buf2 = buf.replace(r'SRC_URI="https://github.com/', r'SRC_URI="mirror://github/')
-        if buf2 != buf:
-            pathlib.Path(fn).write_text(buf2)
+        if 'SRC_URI="https://github.com/' not in buf:
+            continue
+        buf = buf.replace('SRC_URI="https://github.com/', 'SRC_URI="mirror://github/')
+        pathlib.Path(fn).write_text(buf)
 except ValueError:
     print("outdated")
