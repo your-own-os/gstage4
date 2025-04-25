@@ -135,7 +135,7 @@ class Builder(ActionRunner):
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            pendingDstDirSet = myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories])
+            pendingDstDirSet = myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories], self._s)
             with _MyChrooter(self) as m:
                 # FIXME: it a bit hard to parallelize the following code
                 for dstDir in pendingDstDirSet:
@@ -225,7 +225,7 @@ class Builder(ActionRunner):
             for overlay in overlay_list:
                 myRepo = myRepoDict[overlay.get_name()]
                 patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
-                pendingDstDirSet = myRepo.patch(patchDirList)
+                pendingDstDirSet = myRepo.patch(patchDirList, self._s)
                 with _MyChrooter(self) as m:
                     # FIXME: it a bit hard to parallelize the following code
                     for dstDir in pendingDstDirSet:
@@ -536,9 +536,9 @@ class _MyRepo:
         m = re.search(r'mount-params = "(.*)","(.*)"', pathlib.Path(self.repos_conf_file_hostpath).read_text(), re.M)
         return (m.group(1), m.group(2)) if m is not None else None
 
-    def patch(self, patchDirList):
+    def patch(self, patchDirList, s):
         repoName = self.get_repo_name()
-        patcher = RepoPatcher()
+        patcher = RepoPatcher(settings=s)
         patchDirList = patcher.filter_patch_dir_list(patchDirList, repoName)
         if len(patchDirList) > 0:
             pendingDstDirSet = patcher.patch(self.datadir_hostpath, patchDirList, repoName)

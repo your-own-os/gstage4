@@ -3,7 +3,17 @@
 
 import os
 import sys
+import portage_cfg
 from gstage4._patcher import RepoPatcher
+
+
+def get_int(s):
+    if s is None:
+        return None
+    try:
+        return int(s)
+    except ValueError:
+        return None
 
 
 def usage():
@@ -25,7 +35,42 @@ if __name__ == "__main__":
     syncUrl = sys.argv[2]                   # not used, only to fulfill gentoo postsync.d script spec
     targetDir = sys.argv[3]
 
-    patcher = RepoPatcher()
+    jobNumber = None
+    loadAverage = None
+    if True:
+        makeConf = portage_cfg.MakeConf()
+        if True:
+            value = makeConf.get_var("MAKEOPTS")
+            if jobNumber is None:
+                m = re.search("\\B--jobs(=([0-9]+))?\\b", value)
+                if m is not None:
+                    jobNumber = get_int(m.group(2))
+            if jobNumber is None:
+                m = re.search("\\B-j([0-9]+)?\\b", value)
+                if m is not None:
+                    jobNumber = get_int(m.group(2))
+            if loadAverage is None:
+                m = re.search("\\B--load-average(=([0-9\\.]+))?\\b", value)
+                if m is not None:
+                    loadAverage = get_int(m.group(2))
+            if loadAverage is None:
+                m = re.search("\\B-l([0-9]+)?\\b", value)
+                if m is not None:
+                    loadAverage = get_int(m.group(2))
+        if True:
+            value = makeConf.get_var("EMERGE_DEFAULT_OPTS")
+            if jobNumber is None:
+                m = re.search("\\B--jobs(=([0-9]+))?\\b", value)
+                if m is not None:
+                    jobNumber = get_int(m.group(2))
+            if loadAverage is None:
+                m = re.search("\\B--load-average(=([0-9\\.]+))?\\b", value)
+                if m is not None:
+                    loadAverage = get_int(m.group(2))
+    if jobNumber is None:
+        jobNumber = 1
+
+    patcher = RepoPatcher(jobNumber=jobNumber, loadAverage=loadAverage)
     patchDirList = [os.path.join(sourceDir, x) for x in os.listdir(sourceDir)]
     patchDirList = patcher.filter_patch_dir_list(patchDirList, targetDirRepoName)
     if len(patchDirList) > 0:

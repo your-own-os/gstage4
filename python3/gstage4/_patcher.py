@@ -38,7 +38,18 @@ class RepoPatcher:
             self.warn_or_err = warnOrErr
             self.msg = msg
 
-    def __init__(self, jobNumber=1, loadAverage=None):
+    def __init__(self, settings=None, jobNumber=None, loadAverage=None):
+        if settings is not None:
+            assert jobNumber is None and loadAverage is None
+            if settings.host_cooling_level <= 1:
+                jobNumber = 1
+                loadAverage = 1
+            else:
+                jobNumber = settings.host_cpu_core_count + 2
+                loadAverage = settings.host_cpu_core_count
+        else:
+            assert jobNumber is not None
+
         self._jobNumber = jobNumber
         self._loadAverage = loadAverage
         self._warnOrErrList = []
