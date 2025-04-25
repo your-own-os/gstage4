@@ -25,7 +25,7 @@ import os
 import glob
 import asyncio
 import asyncio_pool
-import aiofiles
+import aiofiles.os
 import aioshutil
 import subprocess
 from ._util import Util
