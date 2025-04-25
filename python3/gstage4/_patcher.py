@@ -174,7 +174,7 @@ class RepoPatcher:
                 else:
                     assert False
 
-                proc = await asyncio.create_subprocess_exec(args, stdout=asyncio.subprocess.PIPE)
+                proc = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE)
                 out, _ = await proc.communicate()
                 if proc.returncode != 0:
                     raise subprocess.CalledProcessError(proc.returncode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
