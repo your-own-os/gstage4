@@ -174,11 +174,12 @@ class RepoPatcher:
                 else:
                     assert False
 
-                proc = await asyncio.create_subprocess_exec(args, stdout=asyncio.subprocess.PIPE, text=True)
+                proc = await asyncio.create_subprocess_exec(args, stdout=asyncio.subprocess.PIPE)
                 out, _ = await proc.communicate()
                 if proc.returncode != 0:
                     raise subprocess.CalledProcessError(proc.returncode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
 
+                out = out.decode()
                 if out == "outdated":
                     self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
                 elif out == "":
