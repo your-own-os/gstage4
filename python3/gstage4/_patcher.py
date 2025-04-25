@@ -38,8 +38,9 @@ class RepoPatcher:
             self.warn_or_err = warnOrErr
             self.msg = msg
 
-    def __init__(self):
-        self._jobNumber = 1
+    def __init__(self, jobNumber=1, loadAverage=None):
+        self._jobNumber = jobNumber
+        self._loadAverage = loadAverage
         self._warnOrErrList = []
 
     @property
@@ -63,7 +64,7 @@ class RepoPatcher:
     def generateManifest(self, pendingDstDirSet):
         # generate manifest for patched packages
         asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.get_event_loop().run_until_complete(self._doWork(pendingDstDirSet, self._jobNumber))
+        asyncio.get_event_loop().run_until_complete(self._doWork(pendingDstDirSet))
 
     def _patchRepository(self, targetDir, patchDir, repoName):
         patchTypeName = os.path.basename(patchDir)                  # /etc/portage/repo.postsync.d/10-patch-repository.d/use-wayland -> "use-wayland"
@@ -123,7 +124,7 @@ class RepoPatcher:
                                 if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):        # note: srcBaseDir is not ancestor of fullAllDir for item0 in this loop
                                     pendingDstDirSet.add(fullDstEbuildDir)
 
-        # patch can reomve ebuild directories, so category directories can be empty either, remove them
+        # patch can remove ebuild directories, so category directories can be empty either, remove them
         for dstCategoryDir in os.listdir(targetDir):
             fullDstCategoryDir = os.path.join(targetDir, dstCategoryDir)
             if os.path.isdir(fullDstCategoryDir) and (dstCategoryDir == "virtual" or "-" in dstCategoryDir):
@@ -175,20 +176,21 @@ class RepoPatcher:
             return False
 
     @classmethod
-    async def _doWork(cls, pendingDstDirSet, jobNumber):
+    async def _doWork(self, pendingDstDirSet, jobNumber):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
-        if jobNumber is None:
-            pool = asyncio_pool.AioPool()
-        else:
-            pool = asyncio_pool.AioPool(size=jobNumber)
+        pool = asyncio_pool.AioPool(size=self._jobNumber)
         for dstDir in pendingDstDirSet:
-            pool.spawn_n(cls._generateEbuildManifest(dstDir))
+            pool.spawn_n(self._generateEbuildManifest(dstDir))
         await pool.join()
 
     @staticmethod
     async def _generateEbuildManifest(ebuildDir):
         # operate on any ebuild file generates manifest for the whole ebuild directory
-        fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
+        try:
+            fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
+        except IndexError:
+            print(ebuildDir)
+            raise
         args = ["ebuild", fn, "manifest"]
         proc = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.DEVNULL)
         retcode = await proc.wait()
