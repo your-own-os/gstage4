@@ -8,7 +8,7 @@ import portage_cfg
 from gstage4._patcher import RepoPatcher
 
 
-def get_int(s):
+def get_int_or_none(s):
     if s is None:
         return None
     try:
@@ -40,34 +40,34 @@ if __name__ == "__main__":
     loadAverage = None
     if True:
         makeConf = portage_cfg.MakeConf()
-        if True:
+        if jobNumber is None or loadAverage is None:
             value = makeConf.get_var("MAKEOPTS")
             if jobNumber is None:
                 m = re.search("\\B--jobs(=([0-9]+))?\\b", value)
                 if m is not None:
-                    jobNumber = get_int(m.group(2))
+                    jobNumber = get_int_or_none(m.group(2))
             if jobNumber is None:
                 m = re.search("\\B-j([0-9]+)?\\b", value)
                 if m is not None:
-                    jobNumber = get_int(m.group(2))
+                    jobNumber = get_int_or_none(m.group(1))
             if loadAverage is None:
                 m = re.search("\\B--load-average(=([0-9\\.]+))?\\b", value)
                 if m is not None:
-                    loadAverage = get_int(m.group(2))
+                    loadAverage = get_int_or_none(m.group(2))
             if loadAverage is None:
                 m = re.search("\\B-l([0-9]+)?\\b", value)
                 if m is not None:
-                    loadAverage = get_int(m.group(2))
-        if True:
+                    loadAverage = get_int_or_none(m.group(1))
+        if jobNumber is None or loadAverage is None:
             value = makeConf.get_var("EMERGE_DEFAULT_OPTS")
             if jobNumber is None:
                 m = re.search("\\B--jobs(=([0-9]+))?\\b", value)
                 if m is not None:
-                    jobNumber = get_int(m.group(2))
+                    jobNumber = get_int_or_none(m.group(2))
             if loadAverage is None:
                 m = re.search("\\B--load-average(=([0-9\\.]+))?\\b", value)
                 if m is not None:
-                    loadAverage = get_int(m.group(2))
+                    loadAverage = get_int_or_none(m.group(2))
     if jobNumber is None:
         jobNumber = 1
 
