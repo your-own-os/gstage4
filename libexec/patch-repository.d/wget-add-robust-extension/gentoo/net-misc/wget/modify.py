@@ -26,7 +26,7 @@ src_install() {
 
         # insert to the end of src_install()
         pos = buf.find("src_install() {")
-        if pos >=0:
+        if pos >= 0:
             raise ValueError()
 
         # do insert

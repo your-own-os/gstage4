@@ -1,6 +1,8 @@
 #!/bin/bash
 
-FILES=$(find ./python3 -name '*.py' | tr '\n' ' ')
+FILES=""
+FILES="${FILES} $(find ./python3 -name '*.py' | tr '\n' ' ')"
+FILES="${FILES} $(find ./libexec -name '*.py' | tr '\n' ' ')"
 ERRFLAG=0
 
 OUTPUT=`pyflakes ${FILES} 2>&1`
