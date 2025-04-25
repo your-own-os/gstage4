@@ -135,10 +135,10 @@ class Builder(ActionRunner):
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            pendingDstDirSet = myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories], self._s)
+            pendingDstDirList = myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories], self._s)
             with _MyChrooter(self) as m:
                 # FIXME: it a bit hard to parallelize the following code
-                for dstDir in pendingDstDirSet:
+                for dstDir in pendingDstDirList:
                     hostEbuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
                     fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
                     chrootEbuildDir = os.path.join(myRepo.datadir_path, dstDir)
@@ -225,10 +225,10 @@ class Builder(ActionRunner):
             for overlay in overlay_list:
                 myRepo = myRepoDict[overlay.get_name()]
                 patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
-                pendingDstDirSet = myRepo.patch(patchDirList, self._s)
+                pendingDstDirList = myRepo.patch(patchDirList, self._s)
                 with _MyChrooter(self) as m:
                     # FIXME: it a bit hard to parallelize the following code
-                    for dstDir in pendingDstDirSet:
+                    for dstDir in pendingDstDirList:
                         hostEbuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
                         fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
                         chrootEbuildDir = os.path.join(myRepo.datadir_path, dstDir)
@@ -541,13 +541,13 @@ class _MyRepo:
         patcher = RepoPatcher(settings=s)
         patchDirList = patcher.filter_patch_dir_list(patchDirList, repoName)
         if len(patchDirList) > 0:
-            pendingDstDirSet = patcher.patch(self.datadir_hostpath, patchDirList, repoName)
+            pendingDstDirList = patcher.patch(self.datadir_hostpath, patchDirList, repoName)
             for x in patcher.warn_or_err_list:
                 if x.warn_or_err:
                     print("Warning: %s" % (x.msg))
                 else:
                     raise BuildError(x.msg)
-            return pendingDstDirSet
+            return pendingDstDirList
         else:
             return set()
 

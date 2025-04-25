@@ -219,6 +219,15 @@ class Util:
         return ret
 
     @staticmethod
+    def repoListEbuildDir(repoCategoryDir):
+        ret = []
+        for dstEbuildDir in os.listdir(repoCategoryDir):
+            fullDstEbuildDir = os.path.join(repoCategoryDir, dstEbuildDir)
+            if os.path.isdir(fullDstEbuildDir):
+                ret.append((dstEbuildDir, fullDstEbuildDir))
+        return ret
+
+    @staticmethod
     def portageIsPkgInstalled(rootDir, pkg):
         dir = os.path.join(rootDir, "var", "db", "pkg", os.path.dirname(pkg))
         if os.path.exists(dir):
