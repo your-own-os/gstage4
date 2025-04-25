@@ -27,6 +27,7 @@ import shutil
 import asyncio
 import asyncio_pool
 import subprocess
+from ._util import Util
 from ._util import TempChdir
 
 
@@ -75,12 +76,25 @@ class RepoPatcher:
     def generateManifest(self, pendingDstDirSet):
         # generate manifest for patched packages
         asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.get_event_loop().run_until_complete(self._doWork(pendingDstDirSet))
+        asyncio.get_event_loop().run_until_complete(self._doGenerateEbuildManifest(pendingDstDirSet))
 
     def _patchRepository(self, targetDir, patchDir, repoName):
         patchTypeName = os.path.basename(patchDir)                  # /etc/portage/repo.postsync.d/10-patch-repository.d/use-wayland -> "use-wayland"
         patchRepoDir = os.path.join(patchDir, repoName)
         pendingDstDirSet = set()
+
+        def __patchListCategoryDir(patchRepoDir):
+            if os.path.exists(patchRepoDir):
+                ret = os.listdir(patchRepoDir)
+                ret = [(x, os.path.join(patchRepoDir, x)) for x in ret if x not in ["README", "eclass", "profiles", "_all_packages"]]
+                return ret
+            else:
+                return []
+
+        def __patchListEbuildDir(patchRepoCategoryDir):
+            ret = os.listdir(patchRepoCategoryDir)
+            ret = [(x, os.path.join(patchRepoCategoryDir, x)) for x in ret if x not in ["_all_packages"]]
+            return ret
 
         # patch eclass files
         eclassDir = os.path.join(patchRepoDir, "eclass")
@@ -95,52 +109,38 @@ class RepoPatcher:
             self._execPatchScript(patchTypeName, patchRepoDir, profilesDir, dstFullDir)
 
         # patch specific packages
-        if os.path.exists(patchRepoDir):
-            for categoryDir in os.listdir(patchRepoDir):
-                if categoryDir in ["README", "eclass", "profiles", "_all_packages"]:
-                    continue
-                fullCategoryDir = os.path.join(patchRepoDir, categoryDir)
-                for ebuildDir in os.listdir(fullCategoryDir):
-                    if ebuildDir in ["_all_packages"]:
-                        continue
-                    srcDir = os.path.join(fullCategoryDir, ebuildDir)
-                    dstDir = os.path.join(categoryDir, ebuildDir)
-                    dstFullDir = os.path.join(targetDir, dstDir)
-                    if self._execPatchScript(patchTypeName, patchRepoDir, srcDir, dstFullDir):
-                        pendingDstDirSet.add(dstDir)
+        for categoryDir, fullCategoryDir in __patchListCategoryDir(patchRepoDir):
+            for ebuildDir, srcDir in __patchListEbuildDir(fullCategoryDir):
+                dstDir = os.path.join(categoryDir, ebuildDir)
+                dstFullDir = os.path.join(targetDir, dstDir)
+                if self._execPatchScript(patchTypeName, patchRepoDir, srcDir, dstFullDir):
+                    pendingDstDirSet.add(dstFullDir)
 
         # patch all packages in specific categories
-        if os.path.exists(patchRepoDir):
-            for categoryDir in os.listdir(patchRepoDir):
-                if categoryDir in ["README", "eclass", "profiles", "_all_packages"]:
-                    continue
-                fullAllDir = os.path.join(patchRepoDir, categoryDir, "_all_packages")
-                if os.path.exists(fullAllDir):
-                    fullDstCategoryDir = os.path.join(targetDir, categoryDir)
-                    for dstEbuildDir in os.listdir(fullDstCategoryDir):
-                        fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
-                        if os.path.isdir(fullDstEbuildDir):
-                            if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):
-                                pendingDstDirSet.add(fullDstEbuildDir)
+        for categoryDir, fullCategoryDir in __patchListCategoryDir(patchRepoDir):
+            fullAllDir = os.path.join(fullCategoryDir, "_all_packages")
+            if os.path.exists(fullAllDir):
+                fullDstCategoryDir = os.path.join(targetDir, categoryDir)
+                for dstEbuildDir in os.listdir(fullDstCategoryDir):
+                    fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
+                    if os.path.isdir(fullDstEbuildDir):
+                        if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):
+                            pendingDstDirSet.add(fullDstEbuildDir)
 
         # patch all packages
         for fullAllDir in [os.path.join(patchRepoDir, "_all_packages"), os.path.join(patchDir, "_all_packages")]:
             if os.path.exists(fullAllDir):
-                for dstCategoryDir in os.listdir(targetDir):
-                    fullDstCategoryDir = os.path.join(targetDir, dstCategoryDir)
-                    if os.path.isdir(fullDstCategoryDir) and (dstCategoryDir == "virtual" or "-" in dstCategoryDir):
-                        for dstEbuildDir in os.listdir(fullDstCategoryDir):
-                            fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
-                            if os.path.isdir(fullDstEbuildDir):
-                                if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):        # note: srcBaseDir is not ancestor of fullAllDir for item0 in this loop
-                                    pendingDstDirSet.add(fullDstEbuildDir)
+                for dstCategoryDir, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
+                    for dstEbuildDir in os.listdir(fullDstCategoryDir):
+                        fullDstEbuildDir = os.path.join(fullDstCategoryDir, dstEbuildDir)
+                        if os.path.isdir(fullDstEbuildDir):
+                            if self._execPatchScript(patchTypeName, patchRepoDir, fullAllDir, fullDstEbuildDir):        # note: srcBaseDir is not ancestor of fullAllDir for item0 in this loop
+                                pendingDstDirSet.add(fullDstEbuildDir)
 
         # patch can remove ebuild directories, so category directories can be empty either, remove them
-        for dstCategoryDir in os.listdir(targetDir):
-            fullDstCategoryDir = os.path.join(targetDir, dstCategoryDir)
-            if os.path.isdir(fullDstCategoryDir) and (dstCategoryDir == "virtual" or "-" in dstCategoryDir):
-                if len(os.listdir(fullDstCategoryDir)) == 0:
-                    os.rmdir(fullDstCategoryDir)
+        for dstCategoryDir, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
+            if len(os.listdir(fullDstCategoryDir)) == 0:
+                os.rmdir(fullDstCategoryDir)
 
         return pendingDstDirSet
 
@@ -187,7 +187,7 @@ class RepoPatcher:
             return False
 
     @classmethod
-    async def _doWork(self, pendingDstDirSet, jobNumber):
+    async def _doGenerateEbuildManifest(self, pendingDstDirSet):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
         pool = asyncio_pool.AioPool(size=self._jobNumber)
         for dstDir in pendingDstDirSet:

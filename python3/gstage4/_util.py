@@ -210,6 +210,15 @@ class Util:
             time.sleep(1.0)
 
     @staticmethod
+    def repoListCategoryDir(repoDir):
+        ret = []
+        for categoryDir in os.listdir(repoDir):
+            fullCategoryDir = os.path.join(repoDir, categoryDir)
+            if os.path.isdir(fullCategoryDir) and (categoryDir == "virtual" or "-" in categoryDir):
+                ret.append((categoryDir, fullCategoryDir))
+        return ret
+
+    @staticmethod
     def portageIsPkgInstalled(rootDir, pkg):
         dir = os.path.join(rootDir, "var", "db", "pkg", os.path.dirname(pkg))
         if os.path.exists(dir):
