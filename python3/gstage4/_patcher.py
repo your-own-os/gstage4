@@ -29,7 +29,6 @@ import aiofiles.os
 import aioshutil
 import subprocess
 from ._util import Util
-from ._errors import UpstreamError
 
 
 class RepoPatcher:
