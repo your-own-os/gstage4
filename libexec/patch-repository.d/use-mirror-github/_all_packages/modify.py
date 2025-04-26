@@ -28,9 +28,11 @@ try:
                 break
 
             try:
+                print("s ", os.path.abspath(fn))
                 out = subprocess.check_output(["ebuild", fn, "manifest"], stderr=subprocess.STDOUT)
                 if len(out) == 0:
                     # manifest generation succeed, we can modify ebuild files
+                    print("e ", os.path.abspath(fn))
                     break
             except subprocess.CalledProcessError:
                 pass
