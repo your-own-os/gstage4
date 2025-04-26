@@ -164,7 +164,8 @@ class RepoPatcher:
         for fullfn in glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild")):
             modifiedDict[fullfn] = await aiofiles.os.path.getmtime(fullfn)
         if len(modifiedDict) == 0:
-            raise UpstreamError("ebuild directory \"%s\" has no ebuild file" % (fullDstEbuildDir))
+            # there's really some directories (in overlays) that has no ebuild file, we ignore them, and of course no need to regenerate manifest file
+            return False
 
         for fullfn in glob.glob(os.path.join(fullSrcDir, "*")):
             if not await aiofiles.os.path.isfile(fullfn):
