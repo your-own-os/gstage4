@@ -11,7 +11,7 @@ try:
         if 'SRC_URI="https://github.com/' not in buf:
             continue
 
-        # we don't want to see the warning when generating manifest file if EAPI is too old
+        # we don't want to see the warning when re-generating manifest file if EAPI is too old
         bFound = False
         for eapi in ["8", "7", "6"]:
             if f'\nEAPI={eapi}' in buf or f'\nEAPI="{eapi}"' in buf or f"\nEAPI='{eapi}'" in buf:
