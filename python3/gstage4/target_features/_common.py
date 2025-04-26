@@ -29,6 +29,7 @@ from ..custom_actions import SimpleCustomAction
 class FixBugs:
 
     def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("kill-var-files")
         target_settings.repo_postsync_patch_directories.append("bugfix")
 
 
