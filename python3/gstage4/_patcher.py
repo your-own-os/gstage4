@@ -213,6 +213,7 @@ class RepoPatcher:
         if not os.path.exists(os.path.join(fullDstEbuildDir, "Manifest")):
             return False
 
+        print("patched", fullDstEbuildDir)
         return True
 
     async def _doGenerateEbuildManifest(self, pendingDstDirList):
@@ -224,6 +225,8 @@ class RepoPatcher:
 
     @staticmethod
     async def _generateEbuildManifest(ebuildDir):
+        print("generating", ebuildDir)
+
         # operating on any ebuild file is enough to generate manifest for the whole ebuild directory
         fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
         args = ["ebuild", fn, "manifest"]
@@ -231,3 +234,5 @@ class RepoPatcher:
         retcode = await proc.wait()
         if retcode != 0:
             raise subprocess.CalledProcessError(retcode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
+
+        print("generated", ebuildDir)
