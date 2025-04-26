@@ -153,9 +153,6 @@ class RepoPatcher:
         for fullDstEbuildDir, fut in futDict.items():
             if not fut.result():
                 continue
-            if not os.path.exists(os.path.join(fullDstEbuildDir, "Manifest")):
-                # some overlay does support manifest file
-                continue
             pendingFullDstDirSet.add(fullDstEbuildDir)
 
     async def _execPatchScript(self, patchTypeName, srcBaseDir, fullSrcDir, fullDstEbuildDir):
@@ -176,7 +173,8 @@ class RepoPatcher:
             elif fullfn.endswith(".sh"):
                 args = ["sh", fullfn]
             else:
-                assert False
+                # ignore data files in directory
+                continue
 
             proc = await asyncio.create_subprocess_exec(*args, cwd=fullDstEbuildDir, stdout=asyncio.subprocess.PIPE)
             out, _ = await proc.communicate()
@@ -198,13 +196,22 @@ class RepoPatcher:
             return False
         elif len(modifiedDict) != len(fullfnList):
             # some ebuild files are deleted or added, need to regenerate manifest file
-            return True
+            pass
         else:
-            # need to regenerate manifest file if any ebuild file is modified
+            # no need to regenerate manifest file if no ebuild file is modified
+            bFound = False
             for fullfn, mtimeOld in modifiedDict.items():
                 if not await aiofiles.os.path.exists(fullfn) or await aiofiles.os.path.getmtime(fullfn) != mtimeOld:
-                    return True
+                    bFound = True
+                    break
+            if not bFound:
+                return False
+
+        # some overlay does support manifest file
+        if not os.path.exists(os.path.join(fullDstEbuildDir, "Manifest")):
             return False
+
+        return True
 
     async def _doGenerateEbuildManifest(self, pendingDstDirList):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
