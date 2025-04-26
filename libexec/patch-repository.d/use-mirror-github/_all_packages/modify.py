@@ -2,6 +2,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 
 import os
+import sys
 import glob
 import pathlib
 import subprocess
@@ -15,18 +16,26 @@ try:
             continue
 
         # check all ebuild files in this package, don't do modification if check failed
-        if not bChecked:
-            if os.path.exists("Manifest"):
-                try:
-                    out = subprocess.check_output(["ebuild", fn, "manifest"], stderr=subprocess.STDOUT)
-                    if len(out) > 0:
-                        break
-                except subprocess.CalledProcessError:
-                    break
-            else:
-                # no manifest file means no need to run ebuild after modification
-                pass
+        while not bChecked:
             bChecked = True
+
+            if not os.path.exists("Manifest"):
+                # no manifest file means no need to run ebuild after modification
+                break
+
+            if pathlib.Path("../../profiles/repo_name").read_text().rstrip("\n") == "gentoo":
+                # we have confidence that manifest generation in gentoo repository can succeed
+                break
+
+            try:
+                out = subprocess.check_output(["ebuild", fn, "manifest"], stderr=subprocess.STDOUT)
+                if len(out) == 0:
+                    # manifest generation succeed, we can modify ebuild files
+                    break
+            except subprocess.CalledProcessError:
+                pass
+
+            sys.exit(0)
 
         buf = buf.replace('SRC_URI="https://github.com/', 'SRC_URI="mirror://github/')
         pathlib.Path(fn).write_text(buf)
