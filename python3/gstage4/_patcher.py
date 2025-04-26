@@ -185,7 +185,7 @@ class RepoPatcher:
                 elif out == "":
                     pass
                 else:
-                    self._warnOrErrList.append(self.WarnOrErr((False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out))))
+                    self._warnOrErrList.append(self.WarnOrErr(False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out)))
 
         fullfnList = glob.glob(os.path.join(dstEbuildDir, "*.ebuild"))
         if len(fullfnList) == 0:
