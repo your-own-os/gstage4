@@ -144,14 +144,19 @@ class RepoPatcher:
 
     async def _doExecPatchScript(self, patchTypeName, fullSrcBaseDir, fullDstSrcDirDict, pendingFullDstDirSet):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
-        pool = asyncio_pool.AioPool(size=self._jobNumber)
         futDict = {}
+        pool = asyncio_pool.AioPool(size=self._jobNumber)
         for fullDstEbuildDir, fullSrcDir in fullDstSrcDirDict.items():
             futDict[fullDstEbuildDir] = pool.spawn_n(self._execPatchScript(patchTypeName, fullSrcBaseDir, fullSrcDir, fullDstEbuildDir))
         await pool.join()
+
         for fullDstEbuildDir, fut in futDict.items():
-            if fut.result():
-                pendingFullDstDirSet.add(fullDstEbuildDir)
+            if not fut.result():
+                continue
+            if not os.path.exists(os.path.join(fullDstEbuildDir, "Manifest")):
+                # some overlay does support manifest file
+                continue
+            pendingFullDstDirSet.add(fullDstEbuildDir)
 
     async def _execPatchScript(self, patchTypeName, srcBaseDir, fullSrcDir, fullDstEbuildDir):
         assert os.path.isabs(srcBaseDir)
