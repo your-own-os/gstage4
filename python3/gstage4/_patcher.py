@@ -29,6 +29,7 @@ import aiofiles.os
 import aioshutil
 import subprocess
 from ._util import Util
+from ._errors import UpstreamError
 
 
 class RepoPatcher:
@@ -162,7 +163,8 @@ class RepoPatcher:
         modifiedDict = {}
         for fullfn in glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild")):
             modifiedDict[fullfn] = await aiofiles.os.path.getmtime(fullfn)
-        assert len(modifiedDict) > 0
+        if len(modifiedDict) == 0:
+            raise UpstreamError("ebuild directory \"%s\" has no ebuild file" % (fullDstEbuildDir))
 
         for fullfn in glob.glob(os.path.join(fullSrcDir, "*")):
             if not await aiofiles.os.path.isfile(fullfn):
