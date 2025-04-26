@@ -69,7 +69,7 @@ class RepoPatcher:
         return ret
 
     def patch(self, targetDir, patchDirList, repoName):
-        pendingDstDirSet = set()
+        pendingFullDstDirSet = set()
 
         def __patchListCategoryDir(patchRepoDir):
             if os.path.exists(patchRepoDir):
@@ -103,31 +103,32 @@ class RepoPatcher:
                 self._execPatchScript(patchTypeName, patchRepoDir, profilesDir, dstFullDir)
 
             # patch specific packages
-            dstFullDirList = []
+            fullDstSrcDirDict = {}
             for categoryDir, fullCategoryDir in __patchListCategoryDir(patchRepoDir):
                 for ebuildDir, srcDir in __patchListEbuildDir(fullCategoryDir):
-                    dstFullDirList.append(os.path.join(targetDir, categoryDir, ebuildDir))
-            asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, srcDir, dstFullDirList, pendingDstDirSet))
+                    fullDstEbuildDir = os.path.join(targetDir, categoryDir, ebuildDir)
+                    fullDstSrcDirDict[fullDstEbuildDir] = srcDir
+            asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, fullDstSrcDirDict, pendingFullDstDirSet))
 
             # patch all packages in specific categories
-            dstFullDirList = []
+            fullDstSrcDirDict = {}
             for categoryDir, fullCategoryDir in __patchListCategoryDir(patchRepoDir):
                 fullAllDir = os.path.join(fullCategoryDir, "_all_packages")
                 if os.path.exists(fullAllDir):
                     for dstEbuildDir, fullDstEbuildDir in Util.repoListEbuildDir(os.path.join(targetDir, categoryDir)):
-                        dstFullDirList.append(fullDstEbuildDir)
-            asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, fullAllDir, dstFullDirList, pendingDstDirSet))
+                        fullDstSrcDirDict[fullDstEbuildDir] = fullAllDir
+            asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, fullDstSrcDirDict, pendingFullDstDirSet))
 
             # patch all packages
             for fullAllDir in [os.path.join(patchRepoDir, "_all_packages"), os.path.join(patchDir, "_all_packages")]:
                 if not os.path.exists(fullAllDir):
                     continue
-                dstFullDirList = []
+                fullDstSrcDirDict = {}
                 for dstCategoryDir, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
                     for dstEbuildDir, fullDstEbuildDir in Util.repoListEbuildDir(fullDstCategoryDir):
-                        dstFullDirList.append(fullDstEbuildDir)
+                        fullDstSrcDirDict[fullDstEbuildDir] = fullAllDir
                 # note: srcBaseDir parameter of self._doExecPatchScript() is not ancestor of fullAllDir for item0 in this loop
-                asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, fullAllDir, dstFullDirList, pendingDstDirSet))
+                asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, fullDstSrcDirDict, pendingFullDstDirSet))
 
         # patch can remove ebuild directories, so category directories can be empty either, remove them
         for dstCategoryDir, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
@@ -135,23 +136,23 @@ class RepoPatcher:
                 os.rmdir(fullDstCategoryDir)
 
         # some modified ebuild directories may be removed by later patches, so we need to check again before returning
-        return [x for x in pendingDstDirSet if os.path.exists(x)]
+        return [x for x in pendingFullDstDirSet if os.path.exists(x)]
 
-    def generateManifest(self, pendingDstDirList):
+    def generateManifest(self, pendingFullDstDirList):
         # generate manifest for patched packages
         asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.get_event_loop().run_until_complete(self._doGenerateEbuildManifest(pendingDstDirList))
+        asyncio.get_event_loop().run_until_complete(self._doGenerateEbuildManifest(pendingFullDstDirList))
 
-    async def _doExecPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstEbuildDirList, pendingDstEbuildDirSet):
+    async def _doExecPatchScript(self, patchTypeName, srcBaseDir, fullDstSrcDirDict, pendingFullDstDirSet):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
         pool = asyncio_pool.AioPool(size=self._jobNumber)
-        futList = []
-        for dstEbuildDir in dstEbuildDirList:
-            futList.append(pool.spawn_n(self._execPatchScript(patchTypeName, srcBaseDir, srcDir, dstEbuildDir)))
+        futDict = {}
+        for fullDstEbuildDir, fullSrcDir in fullDstSrcDirDict.items():
+            futDict[fullDstEbuildDir] = pool.spawn_n(self._execPatchScript(patchTypeName, srcBaseDir, fullSrcDir, fullDstEbuildDir))
         await pool.join()
-        for i, dstEbuildDir in enumerate(dstEbuildDirList):
-            if futList[i].result():
-                pendingDstEbuildDirSet.add(dstEbuildDir)
+        for fullDstEbuildDir, fut in futDict.items():
+            if fut.result():
+                pendingFullDstDirSet.add(fullDstEbuildDir)
 
     async def _execPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstEbuildDir):
         assert os.path.isabs(srcBaseDir)
