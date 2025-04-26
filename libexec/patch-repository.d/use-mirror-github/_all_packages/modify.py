@@ -3,6 +3,7 @@
 
 import glob
 import pathlib
+import subprocess
 
 try:
     for fn in sorted(glob.glob("*.ebuild"), reverse=True):
@@ -11,13 +12,13 @@ try:
         if 'SRC_URI="https://github.com/' not in buf:
             continue
 
-        # we don't want to see the warning when re-generating manifest file if EAPI is too old
-        bFound = False
-        for eapi in ["8", "7", "6"]:
-            if f'\nEAPI={eapi}' in buf or f'\nEAPI="{eapi}"' in buf or f"\nEAPI='{eapi}'" in buf:
-                bFound = True
-        if not bFound:
-            continue
+        # check all ebuild files in this package, don't do modification if check failed
+        try:
+            out = subprocess.check_output(["ebuild", fn, "manifest"], stderr=subprocess.STDOUT)
+            if len(out) > 0:
+                break
+        except subprocess.CalledProcessError:
+            break
 
         buf = buf.replace('SRC_URI="https://github.com/', 'SRC_URI="mirror://github/')
         pathlib.Path(fn).write_text(buf)
