@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 
-import os
+import re
 import sys
 import glob
 import pathlib
@@ -18,8 +18,8 @@ try:
         # do manifest file generation test, skip modification if test failed
         while not bChecked:
             bChecked = True
-            if not os.path.exists("Manifest"):
-                # no manifest file means no need to generate manifest file after modification, test is not needed
+            if re.search(r'^thin-manifests\s*=\s*true$', pathlib.Path("../../metadata/layout.conf").read_text(), re.MULTILINE):
+                # "thin manifest" means ebuild file is not contained in manifest file, no need to re-generate manifest file after modification, test is not needed
                 break
             if pathlib.Path("../../profiles/repo_name").read_text().rstrip("\n") == "gentoo":
                 # we have confidence that manifest file generation in gentoo repository can succeed, test is not needed
