@@ -179,8 +179,8 @@ class RepoPatcher:
                 if proc.returncode != 0:
                     raise subprocess.CalledProcessError(proc.returncode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
 
-                out = out.decode()
-                if out == "outdated\n":
+                out = out.decode().rstrip("\n")
+                if out == "outdated":
                     self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
                 elif out == "":
                     pass
