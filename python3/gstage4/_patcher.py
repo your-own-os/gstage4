@@ -225,11 +225,7 @@ class RepoPatcher:
     @staticmethod
     async def _generateEbuildManifest(ebuildDir):
         # operating on any ebuild file is enough to generate manifest for the whole ebuild directory
-        try:
-            fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
-        except IndexError:
-            print(ebuildDir)
-            raise
+        fn = glob.glob(os.path.join(ebuildDir, "*.ebuild"))[0]
         args = ["ebuild", fn, "manifest"]
         proc = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.DEVNULL)
         retcode = await proc.wait()
