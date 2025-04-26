@@ -149,8 +149,8 @@ class RepoPatcher:
         for dstEbuildDir in dstEbuildDirList:
             futList.append(pool.spawn_n(self._execPatchScript(patchTypeName, srcBaseDir, srcDir, dstEbuildDir)))
         await pool.join()
-        for fut in futList:
-            if fut.result():
+        for i, dstEbuildDir in enumerate(dstEbuildDirList):
+            if futList[i].result():
                 pendingDstEbuildDirSet.add(dstEbuildDir)
 
     async def _execPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstEbuildDir):
