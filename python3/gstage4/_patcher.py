@@ -29,7 +29,6 @@ import aiofiles.os
 import aioshutil
 import subprocess
 from ._util import Util
-from ._util import TempChdir
 
 
 class RepoPatcher:
@@ -143,55 +142,54 @@ class RepoPatcher:
         asyncio.set_event_loop(asyncio.new_event_loop())
         asyncio.get_event_loop().run_until_complete(self._doGenerateEbuildManifest(pendingFullDstDirList))
 
-    async def _doExecPatchScript(self, patchTypeName, srcBaseDir, fullDstSrcDirDict, pendingFullDstDirSet):
+    async def _doExecPatchScript(self, patchTypeName, fullSrcBaseDir, fullDstSrcDirDict, pendingFullDstDirSet):
         # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
         pool = asyncio_pool.AioPool(size=self._jobNumber)
         futDict = {}
         for fullDstEbuildDir, fullSrcDir in fullDstSrcDirDict.items():
-            futDict[fullDstEbuildDir] = pool.spawn_n(self._execPatchScript(patchTypeName, srcBaseDir, fullSrcDir, fullDstEbuildDir))
+            futDict[fullDstEbuildDir] = pool.spawn_n(self._execPatchScript(patchTypeName, fullSrcBaseDir, fullSrcDir, fullDstEbuildDir))
         await pool.join()
         for fullDstEbuildDir, fut in futDict.items():
             if fut.result():
                 pendingFullDstDirSet.add(fullDstEbuildDir)
 
-    async def _execPatchScript(self, patchTypeName, srcBaseDir, srcDir, dstEbuildDir):
+    async def _execPatchScript(self, patchTypeName, srcBaseDir, fullSrcDir, fullDstEbuildDir):
         assert os.path.isabs(srcBaseDir)
-        assert os.path.isabs(srcDir)
+        assert os.path.isabs(fullSrcDir)
 
         modifiedDict = {}
-        for fullfn in glob.glob(os.path.join(dstEbuildDir, "*.ebuild")):
+        for fullfn in glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild")):
             modifiedDict[fullfn] = await aiofiles.os.path.getmtime(fullfn)
         assert len(modifiedDict) > 0
 
-        with TempChdir(dstEbuildDir):
-            for fullfn in glob.glob(os.path.join(srcDir, "*")):
-                if not await aiofiles.os.path.isfile(fullfn):
-                    continue
+        for fullfn in glob.glob(os.path.join(fullSrcDir, "*")):
+            if not await aiofiles.os.path.isfile(fullfn):
+                continue
 
-                if fullfn.endswith(".py"):
-                    args = ["python3", fullfn]
-                elif fullfn.endswith(".sh"):
-                    args = ["sh", fullfn]
-                else:
-                    assert False
+            if fullfn.endswith(".py"):
+                args = ["python3", fullfn]
+            elif fullfn.endswith(".sh"):
+                args = ["sh", fullfn]
+            else:
+                assert False
 
-                proc = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE)
-                out, _ = await proc.communicate()
-                if proc.returncode != 0:
-                    raise subprocess.CalledProcessError(proc.returncode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
+            proc = await asyncio.create_subprocess_exec(*args, cwd=fullDstEbuildDir, stdout=asyncio.subprocess.PIPE)
+            out, _ = await proc.communicate()
+            if proc.returncode != 0:
+                raise subprocess.CalledProcessError(proc.returncode, args)      # use subprocess.CalledProcessError since there's no equivalent in asyncio
 
-                out = out.decode().rstrip("\n")
-                if out == "outdated":
-                    self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
-                elif out == "":
-                    pass
-                else:
-                    self._warnOrErrList.append(self.WarnOrErr(False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out)))
+            out = out.decode().rstrip("\n")
+            if out == "outdated":
+                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
+            elif out == "":
+                pass
+            else:
+                self._warnOrErrList.append(self.WarnOrErr(False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out)))
 
-        fullfnList = glob.glob(os.path.join(dstEbuildDir, "*.ebuild"))
+        fullfnList = glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))
         if len(fullfnList) == 0:
             # all ebuild files are deleted, it means this package is removed, no need to regenerate manifest file
-            await aioshutil.rmtree(dstEbuildDir)
+            await aioshutil.rmtree(fullDstEbuildDir)
             return False
         elif len(modifiedDict) != len(fullfnList):
             # some ebuild files are deleted or added, need to regenerate manifest file

@@ -237,19 +237,6 @@ class Util:
         return False
 
 
-class TempChdir:
-
-    def __init__(self, dirname):
-        self.olddir = os.getcwd()
-        os.chdir(dirname)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        os.chdir(self.olddir)
-
-
 class DirListMount:
 
     def __init__(self, mountList):
