@@ -25,7 +25,7 @@ import os
 import re
 import mrget
 import lxml.html
-import urllib.request
+from .._util import Util
 
 
 class GentooReleases:
@@ -93,7 +93,7 @@ class GentooReleases:
             return
 
         self._archList = []
-        with urllib.request.urlopen(os.path.join(self._baseUrl, "releases")) as resp:
+        with Util.robustUrlOpen(os.path.join(self._baseUrl, "releases")) as resp:
             root = lxml.html.parse(resp)
             for elem in root.xpath(".//a"):
                 if elem.text is None:
@@ -109,7 +109,7 @@ class GentooReleases:
 
         variantList = []
         versionList = []
-        with urllib.request.urlopen(self.__getAutoBuildsUrl(self._baseUrl, arch)) as resp:
+        with Util.robustUrlOpen(self.__getAutoBuildsUrl(self._baseUrl, arch)) as resp:
             for elem in lxml.html.parse(resp).xpath(".//a"):
                 if elem.text is not None:
                     m = re.fullmatch("current-(\\S+)/", elem.text)
@@ -159,7 +159,7 @@ class GentooSnapshots:
             return
 
         self._snapshotList = []
-        with urllib.request.urlopen(os.path.join(self._baseUrl, "snapshots", "squashfs")) as resp:
+        with Util.robustUrlOpen(os.path.join(self._baseUrl, "snapshots", "squashfs")) as resp:
             for elem in lxml.html.parse(resp).xpath(".//a"):
                 if elem.text is not None:
                     m = re.fullmatch("gentoo-([0-9]+).xz.sqfs", elem.text)

@@ -24,6 +24,7 @@
 import lxml.etree
 import urllib.request
 from datetime import datetime
+from .._util import Util
 from .._errors import UpstreamError
 
 
@@ -64,7 +65,7 @@ class OverlayDb:
         if self._lastModifiedTime is not None:
             return
 
-        with urllib.request.urlopen(urllib.request.Request(self.URL, method="HEAD")) as resp:
+        with Util.robustUrlOpen(urllib.request.Request(self.URL, method="HEAD")) as resp:
             self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
 
     def _ensureData(self):
@@ -84,7 +85,7 @@ class OverlayDb:
             ("rsync", "rsync", None),
         ]
 
-        with urllib.request.urlopen(self.URL) as resp:
+        with Util.robustUrlOpen(self.URL) as resp:
             ret = dict()
 
             rootElem = lxml.etree.fromstring(resp.read())

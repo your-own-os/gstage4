@@ -23,7 +23,7 @@
 
 import os
 import tarfile
-import urllib.request
+from .._util import Util
 from .._util import SqfsExtractor
 from .._prototype import ManualSyncRepository
 from .._prototype import EmergeSyncRepository
@@ -88,7 +88,7 @@ class CloudGentooSnapshot(ManualSyncRepository):
 
     def sync(self, datadir_hostpath):
         url = os.path.join(self._url, "snapshots", "gentoo-%s.tar.xz" % (self._date))
-        with urllib.request.urlopen(url) as resp:
+        with Util.robustUrlOpen(url) as resp:
             with tarfile.open(fileobj=resp, mode="r:xz") as tf:
                 tf.extractall(datadir_hostpath)
 

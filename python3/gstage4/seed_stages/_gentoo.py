@@ -26,7 +26,7 @@ import re
 import mrget
 import tarfile
 import pathlib
-import urllib.request
+from .._util import Util
 from .._prototype import SeedStage
 
 
@@ -109,13 +109,13 @@ class CloudGentooStage3Archive(SeedStage):
         autoBuildsUrl = os.path.join(baseUrl, "releases", self._arch, "autobuilds")
 
         self._stage3FileUrl = None
-        with urllib.request.urlopen(os.path.join(autoBuildsUrl, indexFileName)) as resp:
+        with Util.robustUrlOpen(os.path.join(autoBuildsUrl, indexFileName)) as resp:
             m = re.search(r'^(\S+) [0-9]+', resp.read().decode("UTF-8"), re.M)
             self._stage3FileUrl = os.path.join(autoBuildsUrl, m.group(1))
 
         self._stage3HashFileUrl = self._stage3FileUrl + ".DEGISTS"
 
-        self._resp = urllib.request.urlopen(self._stage3FileUrl)
+        self._resp = Util.robustUrlOpen(self._stage3FileUrl)
         try:
             self._tf = tarfile.open(fileobj=resp, mode="r:xz")
         except BaseException:
@@ -127,7 +127,7 @@ class CloudGentooStage3Archive(SeedStage):
         return self._arch
 
     def get_digest(self):
-        with urllib.request.urlopen(self._stage3HashFileUrl) as resp:
+        with Util.robustUrlOpen(self._stage3HashFileUrl) as resp:
             return resp.read()
 
     def unpack(self, target_dir):

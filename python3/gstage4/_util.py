@@ -26,6 +26,7 @@ import re
 import abc
 import time
 import shutil
+import urllib.request
 import platform
 import subprocess
 import PySquashfsImage
@@ -33,9 +34,15 @@ import PySquashfsImage
 
 class Util:
 
-    @staticmethod
-    def robustIn(element, container):
-        return container is not None and element in container
+    def robustUrlOpen(*kargs, **kwargs):
+        assert "timeout" not in kwargs
+        try:
+            return urllib.request.urlopen(*kargs, **kwargs, timeout=60)
+        except urllib.error.URLError as e:
+            if isinstance(e.reason, TimeoutError):
+                time.sleep(1)
+            else:
+                raise
 
     @staticmethod
     def getLangEncoding():
