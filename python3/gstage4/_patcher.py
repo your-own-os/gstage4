@@ -232,7 +232,6 @@ class RepoPatcher:
         if not os.path.exists(os.path.join(fullDstEbuildDir, "Manifest")):
             return False
 
-        print("patched", fullDstEbuildDir)
         return True
 
     async def _doGenerateEbuildManifest(self, pendingDstDirList):

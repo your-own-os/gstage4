@@ -24,12 +24,14 @@ try:
             if pathlib.Path("../../profiles/repo_name").read_text().rstrip("\n") == "gentoo":
                 # we have confidence that manifest file generation in gentoo repository can succeed, test is not needed
                 break
-            try:
-                subprocess.check_output(["ebuild", fn, "manifest"], stderr=subprocess.STDOUT)
-                break
-            except subprocess.CalledProcessError:
-                # test failed, do not modify any ebuild file
-                sys.exit(0)
+            if True:
+                proc = subprocess.Popen(["ebuild", fn, "manifest"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                out, err = proc.communicate()
+                if proc.returncode == 0 and len(err) == 0:
+                    # we have confirmed that manifest file generation can succeed
+                    break
+            # test failed, do not modify any ebuild file
+            sys.exit(0)
 
         buf = buf.replace('SRC_URI="https://github.com/', 'SRC_URI="mirror://github/')
         pathlib.Path(fn).write_text(buf)
