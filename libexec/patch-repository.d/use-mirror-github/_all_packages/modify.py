@@ -25,6 +25,7 @@ try:
                 # we have confidence that manifest file generation in gentoo repository can succeed, test is not needed
                 break
             if True:
+                # FIXME: if this command runs forever (infinite retry download), then we would stuck here
                 proc = subprocess.Popen(["ebuild", fn, "manifest"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = proc.communicate()
                 if proc.returncode == 0 and len(err) == 0:
