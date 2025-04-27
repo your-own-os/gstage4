@@ -34,6 +34,7 @@ import PySquashfsImage
 
 class Util:
 
+    @staticmethod
     def robustUrlOpen(*kargs, **kwargs):
         assert "timeout" not in kwargs
         try:
