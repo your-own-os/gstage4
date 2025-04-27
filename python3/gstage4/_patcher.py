@@ -95,13 +95,13 @@ class RepoPatcher:
             eclassDir = os.path.join(patchRepoDir, "eclass")
             if os.path.exists(eclassDir):
                 dstFullDir = os.path.join(targetDir, "eclass")
-                self._execPatchScript(patchTypeName, patchRepoDir, eclassDir, dstFullDir)
+                asyncio.get_event_loop().run_until_complete(self._execPatchScript(patchTypeName, patchRepoDir, eclassDir, dstFullDir))
 
             # patch profile files
             profilesDir = os.path.join(patchRepoDir, "profiles")
             if os.path.exists(profilesDir):
                 dstFullDir = os.path.join(targetDir, "profiles")
-                self._execPatchScript(patchTypeName, patchRepoDir, profilesDir, dstFullDir)
+                asyncio.get_event_loop().run_until_complete(self._execPatchScript(patchTypeName, patchRepoDir, profilesDir, dstFullDir))
 
             # patch specific packages
             fullDstSrcDirDict = {}
@@ -181,9 +181,6 @@ class RepoPatcher:
         modifiedDict = {}
         for fullfn in glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild")):
             modifiedDict[fullfn] = await aiofiles.os.path.getmtime(fullfn)
-        if len(modifiedDict) == 0:
-            # there's really some directories (in overlays) that has no ebuild file, we ignore them, and of course no need to regenerate manifest file
-            return False
 
         for fullfn in glob.glob(os.path.join(fullSrcDir, "*")):
             if not await aiofiles.os.path.isfile(fullfn):
@@ -210,27 +207,28 @@ class RepoPatcher:
             else:
                 self._warnOrErrList.append(self.WarnOrErr(False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out)))
 
-        fullfnList = glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))
-        if len(fullfnList) == 0:
-            # all ebuild files are deleted, it means this package is removed, no need to regenerate manifest file
-            await aioshutil.rmtree(fullDstEbuildDir)
+        if len(modifiedDict) == 0:
+            # there're really some directories (in overlays) that has no ebuild file, we ignore them, and of course no need to regenerate manifest file
+            # and we need to deal with "eclass" or "profiles" directory
             return False
-        elif len(modifiedDict) != len(fullfnList):
-            # some ebuild files are deleted or added, need to regenerate manifest file
-            pass
         else:
-            # no need to regenerate manifest file if no ebuild file is modified
-            bFound = False
-            for fullfn, mtimeOld in modifiedDict.items():
-                if not await aiofiles.os.path.exists(fullfn) or await aiofiles.os.path.getmtime(fullfn) != mtimeOld:
-                    bFound = True
-                    break
-            if not bFound:
+            fullfnList = glob.glob(os.path.join(fullDstEbuildDir, "*.ebuild"))
+            if len(fullfnList) == 0:
+                # all ebuild files are deleted, it means this package is removed, no need to regenerate manifest file
+                await aioshutil.rmtree(fullDstEbuildDir)
                 return False
-
-        # some overlay does support manifest file
-        if not os.path.exists(os.path.join(fullDstEbuildDir, "Manifest")):
-            return False
+            elif len(modifiedDict) != len(fullfnList):
+                # some ebuild files are deleted or added, need to regenerate manifest file
+                pass
+            else:
+                # no need to regenerate manifest file if no ebuild file is modified
+                bFound = False
+                for fullfn, mtimeOld in modifiedDict.items():
+                    if not await aiofiles.os.path.exists(fullfn) or await aiofiles.os.path.getmtime(fullfn) != mtimeOld:
+                        bFound = True
+                        break
+                if not bFound:
+                    return False
 
         return True
 
