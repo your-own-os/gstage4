@@ -134,8 +134,25 @@ class RepoPatcher:
             if len(os.listdir(fullDstCategoryDir)) == 0:
                 os.rmdir(fullDstCategoryDir)
 
-        # some modified ebuild directories may be removed by later patches, so we need to check again before returning
-        return [x for x in pendingFullDstDirSet if os.path.exists(x)]
+        # final filter
+        ret = []
+        bThinManifestDict = {}
+        for fullDstDir in pendingFullDstDirSet:
+            # some modified ebuild directories may be removed by later patches
+            if not os.path.exists(fullDstDir):
+                continue
+            # "thin manifest" means *.ebuild and files/* are not in manifest file, no need to re-generate manifest file
+            if True:
+                repoDir = os.path.dirname(os.path.dirname(fullDstDir))
+                if repoDir not in bThinManifestDict:
+                    layoutConf = os.path.join(repoDir, "metadata", "layout.conf")
+                    m = re.search(r'^thin-manifests\s*=\s*true$', pathlib.Path(layoutConf).read_text(), re.MULTILINE)
+                    bThinManifestDict[repoDir] = (m is not None)
+                if bThinManifestDict[repoDir]:
+                    continue
+            # ok, keep it in return value
+            ret.append(fullDstDir)
+        return ret
 
     def generateManifest(self, pendingFullDstDirList):
         # generate manifest for patched packages
