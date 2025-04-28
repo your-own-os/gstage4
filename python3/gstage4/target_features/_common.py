@@ -835,7 +835,7 @@ games-fps/serioussam-tse                                        -alsa pipewire  
 games-fps/serioussam-tse-vk                                     -alsa pipewire                # sound route 1
 games-util/steam-launcher                                       pulseaudio                    # sound route 6 (bad)
 gui-libs/gtk                                                    gstreamer                     # sound route 2
-media-gfx/blender                                               openal                        # sound route 3
+media-gfx/blender                                               pipewire                      # sound route 1
 media-libs/libmikmod                                            -alsa openal                  # sound route 3
 media-libs/libsdl                                               -alsa                         # sound route 1, support pipewire through media-libs/libsdl2
 media-libs/libsdl2                                              -alsa pipewire                # sound route 1
