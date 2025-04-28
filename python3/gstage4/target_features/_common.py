@@ -600,7 +600,8 @@ class SupportAllImageFormat:
 
     _useFileContent = """
 # image formats
-*/*                 apng exif gif heif jpeg jpeg2k jpegxl mng openexr png svg tiff webp wmf xpm
+# we do not support xpm format anymore, because it relies on X11
+*/*                 apng exif gif heif jpeg jpeg2k jpegxl mng openexr png svg tiff webp wmf
 """
 
 
