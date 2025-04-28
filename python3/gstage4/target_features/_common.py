@@ -662,7 +662,13 @@ class SupportAllGraphicsApi:
 
     _waylandUseFileContent = """
 # we disable opengl when it conflicts with gles or wayland
+games-fps/yamagi-quake2                                       -opengl
+media-video/ffmpeg                                            -opengl
 media-video/mpv                                               -opengl
+x11-libs/fltk                                                 -opengl
+
+# it seems that packages must enable this USE flag if they have it, or X11 would be pulled in
+*/*                                                           gles2-only
 """
 
 
