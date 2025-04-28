@@ -777,6 +777,9 @@ x11-misc/vdpauinfo
 
 # the folllowing packages won't support wayland in future
 x11-libs/motif
+
+# GTK+ 2.0 is not wayland compatible
+x11-libs/gtk+:2
 """
 
 
