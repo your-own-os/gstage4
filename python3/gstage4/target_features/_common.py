@@ -29,8 +29,18 @@ from ..custom_actions import SimpleCustomAction
 class FixBugs:
 
     def update_target_settings(self, target_settings):
+        assert "10-bugfix" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-bugfix"] = self._useFileContent.strip("\n") + "\n"
+
         target_settings.repo_postsync_patch_directories.append("kill-var-files")
         target_settings.repo_postsync_patch_directories.append("bugfix")
+
+    _useFileContent = """
+# https://bugs.gentoo.org/782685:
+# Clover (the OpenCL runtime in Mesa) supports only a small set of some rather old Radeons, it still tries to attach itself to newer AMD GPUs - and fails, causing segfaults.
+media-libs/mesa         -opencl
+"""
 
 
 class UsePortage:
