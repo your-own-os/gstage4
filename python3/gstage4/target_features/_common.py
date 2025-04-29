@@ -29,8 +29,18 @@ from ..custom_actions import SimpleCustomAction
 class FixBugs:
 
     def update_target_settings(self, target_settings):
+        assert "10-bugfix" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-bugfix"] = self._useFileContent.strip("\n") + "\n"
+
         target_settings.repo_postsync_patch_directories.append("kill-var-files")
         target_settings.repo_postsync_patch_directories.append("bugfix")
+
+    _useFileContent = """
+# https://bugs.gentoo.org/782685:
+# Clover (the OpenCL runtime in Mesa) supports only a small set of some rather old Radeons, it still tries to attach itself to newer AMD GPUs - and fails, causing segfaults.
+media-libs/mesa         -opencl
+"""
 
 
 class UsePortage:
@@ -600,7 +610,8 @@ class SupportAllImageFormat:
 
     _useFileContent = """
 # image formats
-*/*                 apng exif gif heif jpeg jpeg2k jpegxl mng openexr png svg tiff webp wmf xpm
+# we do not support xpm format anymore, because it relies on X11
+*/*                 apng exif gif heif jpeg jpeg2k jpegxl mng openexr png svg tiff webp wmf
 """
 
 
@@ -651,7 +662,13 @@ class SupportAllGraphicsApi:
 
     _waylandUseFileContent = """
 # we disable opengl when it conflicts with gles or wayland
+games-fps/yamagi-quake2                                       -opengl
+media-video/ffmpeg                                            -opengl
 media-video/mpv                                               -opengl
+x11-libs/fltk                                                 -opengl
+
+# it seems that packages must enable this USE flag if they have it, or X11 would be pulled in
+*/*                                                           gles2-only
 """
 
 
@@ -766,6 +783,9 @@ x11-misc/vdpauinfo
 
 # the folllowing packages won't support wayland in future
 x11-libs/motif
+
+# GTK+ 2.0 is not wayland compatible
+x11-libs/gtk+:2
 """
 
 
@@ -815,7 +835,7 @@ games-fps/serioussam-tse                                        -alsa pipewire  
 games-fps/serioussam-tse-vk                                     -alsa pipewire                # sound route 1
 games-util/steam-launcher                                       pulseaudio                    # sound route 6 (bad)
 gui-libs/gtk                                                    gstreamer                     # sound route 2
-media-gfx/blender                                               openal                        # sound route 3
+media-gfx/blender                                               pipewire                      # sound route 1
 media-libs/libmikmod                                            -alsa openal                  # sound route 3
 media-libs/libsdl                                               -alsa                         # sound route 1, support pipewire through media-libs/libsdl2
 media-libs/libsdl2                                              -alsa pipewire                # sound route 1
