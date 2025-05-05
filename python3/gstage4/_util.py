@@ -25,8 +25,10 @@ import os
 import re
 import abc
 import time
+import http.client
 import shutil
 import urllib.request
+import urllib.error
 import platform
 import subprocess
 import PySquashfsImage
@@ -39,6 +41,8 @@ class Util:
         assert "timeout" not in kwargs
         try:
             return urllib.request.urlopen(*kargs, **kwargs, timeout=60)
+        except http.client.RemoteDisconnected:
+            time.sleep(1)
         except urllib.error.URLError as e:
             if isinstance(e.reason, TimeoutError):
                 time.sleep(1)
