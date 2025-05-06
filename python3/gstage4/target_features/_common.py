@@ -785,7 +785,7 @@ x11-misc/vdpauinfo
 x11-libs/motif
 
 # GTK+ 2.0 is not wayland compatible
-#x11-libs/gtk+:2                    # many games still needs this
+x11-libs/gtk+:2
 """
 
 
