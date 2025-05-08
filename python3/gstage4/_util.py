@@ -39,15 +39,16 @@ class Util:
     @staticmethod
     def robustUrlOpen(*kargs, **kwargs):
         assert "timeout" not in kwargs
-        try:
-            return urllib.request.urlopen(*kargs, **kwargs, timeout=60)
-        except http.client.RemoteDisconnected:
-            time.sleep(1)
-        except urllib.error.URLError as e:
-            if isinstance(e.reason, TimeoutError):
+        while True:
+            try:
+                return urllib.request.urlopen(*kargs, **kwargs, timeout=60)
+            except http.client.RemoteDisconnected:
                 time.sleep(1)
-            else:
-                raise
+            except urllib.error.URLError as e:
+                if isinstance(e.reason, TimeoutError):
+                    time.sleep(1)
+                else:
+                    raise
 
     @staticmethod
     def getLangEncoding():
