@@ -27,7 +27,6 @@ import abc
 import aio
 import time
 import http.client
-import getres
 import shutil
 import urllib.request
 import urllib.error
@@ -571,6 +570,7 @@ class AioPoolWithJobAndLoadAverage:
         await self.join()
 
     def __len__(self):
+        '''Returns count of coroutines that is active or waiting.'''
         return len(self._waiting) + self.n_active
 
     @property
@@ -581,12 +581,12 @@ class AioPoolWithJobAndLoadAverage:
     @property
     def is_empty(self):
         '''Returns `True` if no coroutines are active or waiting.'''
-        return 0 == len(self._waiting) == self.n_active
+        return 0 == len(self._waiting) == self.n_active                     # equvalent to `len(self) == 0`
 
     @property
     def is_full(self):
         '''Returns `True` if `size` coroutines are already active.'''
-        return self.size <= len(self)
+        return self.size <= len(self)                                      # in fact using `len(self) >= self.size` would be more understandable
 
     async def join(self):
         '''Waits (blocks) for all spawned coroutines to finish, both active and
@@ -688,32 +688,6 @@ class AioPoolWithJobAndLoadAverage:
             self._active[future] = task
         return future
 
-    async def spawn(self, coro, cb=None, ctx=None):
-        '''Waits for pool space and creates task for given `coro` coroutine,
-        returns a future for it's result.
-
-        If callback `cb` coroutine function (not coroutine itself!) is passed,
-        `coro` result won't be assigned to created future, instead, `cb` will
-        be executed with it as a first positional argument. Callback function
-        should accept 1,2 or 3 positional arguments. Full callback sigature is
-        `cb(res, err, ctx)`. It makes no sense to create a callback without
-        `coro` result, so first positional argument is mandatory.
-
-        Second positional argument of callback will be error, which `is None`
-        if coroutine did not crash and wasn't cancelled. In case any exception
-        was raised during `coro` execution, error will be a tuple containing
-        (`exc` exception object, `tb` traceback string). if you wish to ignore
-        errors, you can pass callback without seconds and third positional
-        arguments.
-
-        If context `ctx` is passed to `spawn`, it will be re-sent to callback
-        as third argument. If you don't plan to use any context, you can create
-        callback with positional arguments only for result and error.
-        '''
-        future = self.loop.create_future()
-        self._waiting[future] = self.loop.create_future()  # as a placeholder
-        return await self._spawn(future, coro, cb=cb, ctx=ctx)
-
     def spawn_n(self, coro, cb=None, ctx=None):
         '''Creates waiting task for given `coro` regardless of pool space. If
         pool is not full, this task will be executed very soon. Main difference
@@ -725,38 +699,6 @@ class AioPoolWithJobAndLoadAverage:
         task = self.loop.create_task(self._spawn(future, coro, cb=cb, ctx=ctx))
         self._waiting[future] = task
         return future
-
-    def map_n(self, fn, iterable, cb=None, ctx=None):
-        '''Creates coroutine with `fn` function for each item in `iterable`,
-        spawns each of them with `spawn_n`, returning futures.
-
-        Read more about callbacks in `spawn` docstring.
-        '''
-        futures = []
-        for it in iterable:
-            fut = self.spawn_n(fn(it), cb, ctx)
-            futures.append(fut)
-        return futures
-
-    async def itermap(self, fn, iterable, cb=None, ctx=None, *, flat=True, get_result=getres.flat, timeout=None, yield_when=aio.ALL_COMPLETED):
-        # modified from MxAsyncGenPool.itermap()
-        futures = self.map_n(fn, iterable, cb, ctx)
-        generator = self._iterwait(futures, flat=flat, timeout=timeout, get_result=get_result, yield_when=yield_when)
-        async for batch in generator:
-            yield batch  # TODO is it possible to return a generator?
-
-    @staticmethod
-    async def _iterwait(futures, *, flat=True, get_result=getres.flat, timeout=None, yield_when=aio.ALL_COMPLETED, loop=None):
-        # modified from iterwait() in the file of MxAsyncGenPool class
-        _futures = futures[:]
-        while _futures:
-            done, _futures = await aio.wait(_futures, timeout=timeout,
-                                            return_when=yield_when, loop=loop)
-            if flat:
-                for fut in done:
-                    yield get_result(fut)
-            else:
-                yield [get_result(fut) for fut in done]
 
     @staticmethod
     def _get_loop():
