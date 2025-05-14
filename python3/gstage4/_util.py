@@ -684,13 +684,17 @@ class AioPoolWithJobAndLoadAverage:
                 self.semaphore.release()
         else:  # all good, can spawn now
             while True:
+                if self.load_average is not None:
+                    break                           # skip if no load average limit is specified
+                if len(self._active) == 0:
+                    break                           # there should always be at least one active task no matter what the load average is
                 try:
                     avg = os.getloadavg()[0]        # load average of the shortest interval
                 except OSError:
                     break                           # also spawn when we can not get load average, for robustness
                 if avg < self.load_average:
                     break
-                await asyncio.sleep(1)
+                await asyncio.sleep(2)              # FIXME: is waiting 2 seconds the best? should refer to the implementation of "make -j X -l Y"
             wrapped = self._wrap(coro, future, cb=cb, ctx=ctx)
             task = self.loop.create_task(wrapped)
             self._active[future] = task
