@@ -26,11 +26,11 @@ import re
 import glob
 import pathlib
 import asyncio
-import asyncio_pool
 import aiofiles.os
 import aioshutil
 import subprocess
 from ._util import Util
+from ._util import AioPoolWithJobAndLoadAverage
 
 
 class RepoPatcher:
@@ -162,9 +162,9 @@ class RepoPatcher:
         asyncio.get_event_loop().run_until_complete(self._doGenerateEbuildManifest(pendingFullDstDirList))
 
     async def _doExecPatchScript(self, patchTypeName, fullSrcBaseDir, fullDstSrcDirDict, pendingFullDstDirSet):
-        # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
+        # AioPoolWithJobAndLoadAverage object needs a running event loop, so this function is needed, sucks
         futDict = {}
-        pool = asyncio_pool.AioPool(size=self._jobNumber)
+        pool = AioPoolWithJobAndLoadAverage(self._jobNumber, self._loadAverage)
         for fullDstEbuildDir, fullSrcDir in fullDstSrcDirDict.items():
             futDict[fullDstEbuildDir] = pool.spawn_n(self._execPatchScript(patchTypeName, fullSrcBaseDir, fullSrcDir, fullDstEbuildDir))
         await pool.join()
@@ -233,8 +233,8 @@ class RepoPatcher:
         return True
 
     async def _doGenerateEbuildManifest(self, pendingDstDirList):
-        # asyncio_pool.AioPool() needs a running event loop, so this function is needed, sucks
-        pool = asyncio_pool.AioPool(size=self._jobNumber)
+        # AioPoolWithJobAndLoadAverage class needs a running event loop, so this function is needed, sucks
+        pool = AioPoolWithJobAndLoadAverage(size=self._jobNumber)
         for dstDir in pendingDstDirList:
             pool.spawn_n(self._generateEbuildManifest(dstDir))
         await pool.join()
