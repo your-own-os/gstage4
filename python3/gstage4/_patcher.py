@@ -234,7 +234,7 @@ class RepoPatcher:
 
     async def _doGenerateEbuildManifest(self, pendingDstDirList):
         # AioPoolWithJobAndLoadAverage class needs a running event loop, so this function is needed, sucks
-        pool = AioPoolWithJobAndLoadAverage(size=self._jobNumber)
+        pool = AioPoolWithJobAndLoadAverage(self._jobNumber, self._loadAverage)
         for dstDir in pendingDstDirList:
             pool.spawn_n(self._generateEbuildManifest(dstDir))
         await pool.join()
