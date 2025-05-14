@@ -24,12 +24,12 @@
 import os
 import re
 import abc
-import aio
 import time
 import http.client
 import shutil
 import urllib.request
 import urllib.error
+import asyncio
 import platform
 import traceback
 import subprocess
@@ -561,7 +561,7 @@ class AioPoolWithJobAndLoadAverage:
         self._joined = set()
         self._waiting = {}  # future -> task
         self._active = {}  # future -> task
-        self.semaphore = aio.Semaphore(value=self.size)
+        self.semaphore = asyncio.Semaphore(value=self.size)
 
     async def __aenter__(self):
         return self
@@ -683,6 +683,14 @@ class AioPoolWithJobAndLoadAverage:
             if not acq_error and future.cancelled():  # outside action
                 self.semaphore.release()
         else:  # all good, can spawn now
+            while True:
+                try:
+                    avg = os.getloadavg()[0]        # load average of the shortest interval
+                except OSError:
+                    break                           # also spawn when we can not get load average, for robustness
+                if avg < self.load_average:
+                    break
+                await asyncio.sleep(1)
             wrapped = self._wrap(coro, future, cb=cb, ctx=ctx)
             task = self.loop.create_task(wrapped)
             self._active[future] = task
@@ -706,6 +714,6 @@ class AioPoolWithJobAndLoadAverage:
         Backward compatibility w/ py<3.8
         """
 
-        if hasattr(aio, 'get_running_loop'):
-            return aio.get_running_loop()
-        return aio.get_event_loop()
+        if hasattr(asyncio, 'get_running_loop'):
+            return asyncio.get_running_loop()
+        return asyncio.get_event_loop()
