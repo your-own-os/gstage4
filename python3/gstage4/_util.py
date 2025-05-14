@@ -576,7 +576,7 @@ class AioPoolWithJobAndLoadAverage:
     @property
     def n_active(self):
         '''Counts active coroutines'''
-        return self.size - self.semaphore._value
+        return len(self._active)
 
     @property
     def is_empty(self):
