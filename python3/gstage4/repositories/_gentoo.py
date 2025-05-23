@@ -88,7 +88,7 @@ class CloudGentooSnapshot(ManualSyncRepository):
 
     def sync(self, datadir_hostpath):
         url = os.path.join(self._url, "snapshots", "gentoo-%s.tar.xz" % (self._date))
-        with Util.robustUrlOpen(url) as resp:
+        for resp in Util.robustUrlOpen(url):
             with tarfile.open(fileobj=resp, mode="r:xz") as tf:
                 tf.extractall(datadir_hostpath)
 

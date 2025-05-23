@@ -39,9 +39,6 @@ class CloudGentooStage3Archive(SeedStage):
         self._stage3FileUrl = None
         self._stage3HashFileUrl = None
 
-        self._resp = None
-        self._tf = None
-
         if self._arch == "alpha":
             assert False
         elif self._arch == "amd64":
@@ -109,37 +106,26 @@ class CloudGentooStage3Archive(SeedStage):
         autoBuildsUrl = os.path.join(baseUrl, "releases", self._arch, "autobuilds")
 
         self._stage3FileUrl = None
-        with Util.robustUrlOpen(os.path.join(autoBuildsUrl, indexFileName)) as resp:
+        for resp in Util.robustUrlOpen(os.path.join(autoBuildsUrl, indexFileName)):
             m = re.search(r'^(\S+) [0-9]+', resp.read().decode("UTF-8"), re.M)
             self._stage3FileUrl = os.path.join(autoBuildsUrl, m.group(1))
 
         self._stage3HashFileUrl = self._stage3FileUrl + ".DEGISTS"
 
-        self._resp = Util.robustUrlOpen(self._stage3FileUrl)
-        try:
-            self._tf = tarfile.open(fileobj=resp, mode="r:xz")
-        except BaseException:
-            self._resp.close()
-            self._resp = None
-            raise
-
     def get_arch(self):
         return self._arch
 
     def get_digest(self):
-        with Util.robustUrlOpen(self._stage3HashFileUrl) as resp:
+        for resp in Util.robustUrlOpen(self._stage3HashFileUrl):
             return resp.read()
 
     def unpack(self, target_dir):
-        self._tf.extractall(target_dir)
+        for resp in Util.robustUrlOpen(self._stage3FileUrl):
+            tf = tarfile.open(fileobj=resp, mode="r:xz")
+            tf.extractall(target_dir)
 
     def close(self):
-        if self._tf is not None:
-            self._tf.close()
-            self._tf = None
-        if self._resp is not None:
-            self._resp.close()
-            self._resp = None
+        pass
 
     def __enter__(self):
         return self

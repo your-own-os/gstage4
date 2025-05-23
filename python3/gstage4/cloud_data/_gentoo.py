@@ -93,7 +93,7 @@ class GentooReleases:
             return
 
         self._archList = []
-        with Util.robustUrlOpen(os.path.join(self._baseUrl, "releases")) as resp:
+        for resp in Util.robustUrlOpen(os.path.join(self._baseUrl, "releases")):
             root = lxml.html.parse(resp)
             for elem in root.xpath(".//a"):
                 if elem.text is None:
@@ -109,7 +109,7 @@ class GentooReleases:
 
         variantList = []
         versionList = []
-        with Util.robustUrlOpen(self.__getAutoBuildsUrl(self._baseUrl, arch)) as resp:
+        for resp in Util.robustUrlOpen(self.__getAutoBuildsUrl(self._baseUrl, arch)):
             for elem in lxml.html.parse(resp).xpath(".//a"):
                 if elem.text is not None:
                     m = re.fullmatch("current-(\\S+)/", elem.text)
@@ -159,7 +159,7 @@ class GentooSnapshots:
             return
 
         self._snapshotList = []
-        with Util.robustUrlOpen(os.path.join(self._baseUrl, "snapshots", "squashfs")) as resp:
+        for resp in Util.robustUrlOpen(os.path.join(self._baseUrl, "snapshots", "squashfs")):
             for elem in lxml.html.parse(resp).xpath(".//a"):
                 if elem.text is not None:
                     m = re.fullmatch("gentoo-([0-9]+).xz.sqfs", elem.text)

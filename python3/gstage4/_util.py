@@ -27,6 +27,7 @@ import abc
 import time
 import http.client
 import shutil
+import socket
 import urllib.request
 import urllib.error
 import asyncio
@@ -43,24 +44,26 @@ class Util:
     def robustUrlOpen(*kargs, **kwargs):
         assert "timeout" not in kwargs
 
-        retryer = Retrying(wait=wait_fixed(1),
-                           retry=retry_if_exception_type(RetryError),
-                           reraise=True)
-
-        def _make_request():
-            try:
-                return urllib.request.urlopen(*kargs, **kwargs, timeout=60)
-            except http.client.RemoteDisconnected:
-                raise tenacity.RetryError(e)
-            except urllib.error.URLError as e:
+        def _check_exception(e):
+            if isinstance(e, http.client.RemoteDisconnected):
+                return True
+            if isinstance(e, urllib.error.URLError):
+                if isinstance(e.reason, socket.gaierror):
+                    return True
                 if isinstance(e.reason, TimeoutError):
-                    raise tenacity.RetryError(e)
-                raise
+                    return True
+            if isinstance(e, TimeoutError):
+                return True
+            return False
 
-    for attempt in retryer:
-        resp = _make_request()
-        yield response, attempt
-        break
+        retryer = tenacity.Retrying(wait=tenacity.wait_fixed(1),
+                                    retry=tenacity.retry_if_exception(_check_exception),
+                                    reraise=True)
+        for attempt in retryer:
+            with attempt:
+                with urllib.request.urlopen(*kargs, **kwargs, timeout=60) as resp:
+                    yield resp
+                    break
 
     @staticmethod
     def getLangEncoding():
