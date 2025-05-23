@@ -44,7 +44,7 @@ class Util:
     def robustUrlOpen(*kargs, **kwargs):
         assert "timeout" not in kwargs
 
-        def _check_exception(e):
+        def _retryIfTrue(e):
             if isinstance(e, http.client.RemoteDisconnected):
                 return True
             if isinstance(e, urllib.error.URLError):
@@ -57,7 +57,7 @@ class Util:
             return False
 
         retryer = tenacity.Retrying(wait=tenacity.wait_fixed(1),
-                                    retry=tenacity.retry_if_exception(_check_exception),
+                                    retry=tenacity.retry_if_exception(_retryIfTrue),
                                     reraise=True)
         for attempt in retryer:
             with attempt:
