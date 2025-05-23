@@ -31,8 +31,10 @@ import socket
 import urllib.request
 import urllib.error
 import asyncio
+import pathlib
 import tenacity
 import platform
+import functools
 import traceback
 import subprocess
 import PySquashfsImage
@@ -40,9 +42,12 @@ import PySquashfsImage
 
 class Util:
 
-    @staticmethod
-    def robustUrlOpen(*kargs, **kwargs):
+    @classmethod
+    def robustUrlOpen(cls, *kargs, **kwargs):
         assert "timeout" not in kwargs
+
+        timeoutSeconds = 60
+        tryCount, retryWaitSeconds = cls._parseWgetrc()
 
         def _retryIfTrue(e):
             if isinstance(e, http.client.RemoteDisconnected):
@@ -56,14 +61,41 @@ class Util:
                 return True
             return False
 
-        retryer = tenacity.Retrying(wait=tenacity.wait_fixed(1),
-                                    retry=tenacity.retry_if_exception(_retryIfTrue),
-                                    reraise=True)
+        if tryCount == 0:
+            retryer = tenacity.Retrying(wait=tenacity.wait_fixed(retryWaitSeconds),
+                                        retry=tenacity.retry_if_exception(_retryIfTrue),
+                                        reraise=True)
+        else:
+            retryer = tenacity.Retrying(wait=tenacity.wait_fixed(retryWaitSeconds),
+                                        stop=tenacity.stop_after_attempt(tryCount),
+                                        retry=tenacity.retry_if_exception(_retryIfTrue),
+                                        reraise=True)
         for attempt in retryer:
             with attempt:
-                with urllib.request.urlopen(*kargs, **kwargs, timeout=60) as resp:
+                with urllib.request.urlopen(*kargs, **kwargs, timeout=timeoutSeconds) as resp:
                     yield resp
                     break
+
+    @functools.cache
+    @staticmethod
+    def _parseWgetrc():
+        tryCount = 20
+        waitRetry = 10
+
+        try:
+            buf = pathlib.Path("/etc/wgetrc").read_text()
+            # tryCount
+            m = re.search(r"^\s*tries\s*=\s*([0-9]+)\s*$", buf, re.M)
+            if m is not None:
+                tryCount = int(m.group(1))
+            # waitRetry
+            m = re.search(r"^\s*waitretry\s*=\s*([0-9]+)\s*$", buf, re.M)
+            if m is not None:
+                waitRetry = int(m.group(2))
+        except FileNotFoundError:
+            pass
+
+        return (tryCount, waitRetry)
 
     @staticmethod
     def getLangEncoding():
