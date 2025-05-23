@@ -30,6 +30,7 @@ import shutil
 import urllib.request
 import urllib.error
 import asyncio
+import tenacity
 import platform
 import traceback
 import subprocess
@@ -41,16 +42,25 @@ class Util:
     @staticmethod
     def robustUrlOpen(*kargs, **kwargs):
         assert "timeout" not in kwargs
-        while True:
+
+        retryer = Retrying(wait=wait_fixed(1),
+                           retry=retry_if_exception_type(RetryError),
+                           reraise=True)
+
+        def _make_request():
             try:
                 return urllib.request.urlopen(*kargs, **kwargs, timeout=60)
             except http.client.RemoteDisconnected:
-                time.sleep(1)
+                raise tenacity.RetryError(e)
             except urllib.error.URLError as e:
                 if isinstance(e.reason, TimeoutError):
-                    time.sleep(1)
-                else:
-                    raise
+                    raise tenacity.RetryError(e)
+                raise
+
+    for attempt in retryer:
+        resp = _make_request()
+        yield response, attempt
+        break
 
     @staticmethod
     def getLangEncoding():
