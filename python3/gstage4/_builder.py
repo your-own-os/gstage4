@@ -173,7 +173,6 @@ class Builder(ActionRunner):
         tw.write_package_accept_keywords()
         tw.write_package_license()
         tw.write_package_env()
-        tw.write_use_mask()
         # FIXME: should put files in patch-repository.d into config dir, so that target system can patch after every syncing
         #        but not all repositories and overlays use "emerge --sync"
 
@@ -1076,16 +1075,6 @@ class TargetConfDirWriter:
 
         # FIXME
         assert False
-
-    def write_use_mask(self):
-        # modify and write out use.mask (in chroot)
-        if len(self._ts.use_mask) > 0:
-            fpath = os.path.join(self._dir, "profile", "use.mask")
-            os.makedirs(os.path.dirname(fpath), exist_ok=True)
-            with open(fpath, "w") as myf:
-                for use_flag in self._ts.use_mask:
-                    myf.write("%s\n" % (use_flag))
-
 
 class TargetConfDirCleaner:
 
