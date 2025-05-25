@@ -87,7 +87,7 @@ class Releng:
         self._dir = local_dir
 
     def sync(self):
-        # robust_layer.simple_git.pull(self._dir, reclone_on_failure=True, url=self.URL)
+        # git-pull
         assert False
 
     def get_arch_list(self):
