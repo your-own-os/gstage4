@@ -1076,6 +1076,7 @@ class TargetConfDirWriter:
         # FIXME
         assert False
 
+
 class TargetConfDirCleaner:
 
     def __init__(self, chrootDir):

@@ -24,6 +24,7 @@
 import os
 import re
 import pygit2
+import pathlib
 
 
 class Releng:
@@ -86,7 +87,8 @@ class Releng:
         self._dir = local_dir
 
     def sync(self):
-        robust_layer.simple_git.pull(self._dir, reclone_on_failure=True, url=self.URL)
+        # robust_layer.simple_git.pull(self._dir, reclone_on_failure=True, url=self.URL)
+        assert False
 
     def get_arch_list(self):
         assert self._isSynced()
