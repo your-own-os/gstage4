@@ -4,7 +4,7 @@
 import os
 import re
 import sys
-import strict_portage_cfg
+import pathlib
 from gstage4._patcher import RepoPatcher
 
 
@@ -15,6 +15,26 @@ def get_int_or_none(s):
         return int(s)
     except ValueError:
         return None
+
+
+def make_conf_get_var(buf, var_name):
+    m = re.search("^%s=\"(.*)\"$" % (var_name), buf, re.MULTILINE)
+    if m is None:
+        return ""
+    varVal = m.group(1)
+
+    while True:
+        m = re.search("\\${(\\S+)?}", varVal)
+        if m is None:
+            break
+        varName2 = m.group(1)
+        varVal2 = make_conf_get_var(buf, varName2)
+        if varVal2 is None:
+            varVal2 = ""
+
+        varVal = varVal.replace(m.group(0), varVal2)
+
+    return varVal
 
 
 def usage():
@@ -39,9 +59,12 @@ if __name__ == "__main__":
     jobNumber = None
     loadAverage = None
     if True:
-        makeConf = strict_portage_cfg.MakeConf()
-        if jobNumber is None or loadAverage is None:
-            value = makeConf.get_var("MAKEOPTS")
+        try:
+            buf = pathlib.Path("/etc/portage/make.conf").read_text()
+        except FileNotFound:
+            buf = ""
+        if True:
+            value = make_conf_get_var(buf, "MAKEOPTS")
             if jobNumber is None:
                 m = re.search("\\B--jobs(=([0-9]+))?\\b", value)
                 if m is not None:
@@ -59,7 +82,7 @@ if __name__ == "__main__":
                 if m is not None:
                     loadAverage = get_int_or_none(m.group(1))
         if jobNumber is None or loadAverage is None:
-            value = makeConf.get_var("EMERGE_DEFAULT_OPTS")
+            value = make_conf_get_var(buf, "EMERGE_DEFAULT_OPTS")
             if jobNumber is None:
                 m = re.search("\\B--jobs(=([0-9]+))?\\b", value)
                 if m is not None:
