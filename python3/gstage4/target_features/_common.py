@@ -248,7 +248,7 @@ net-misc/networkmanager                                                         
 <dev-lang/python-3.0.0
 
 # iptables is deprecated by nftables
-net-firewall/iptables
+# net-firewall/iptables              FIXME
 
 # deprecated gnome libs
 gnome-base/gconf
