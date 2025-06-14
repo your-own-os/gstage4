@@ -220,6 +220,9 @@ class NotUseDeprecatedPackagesAndFunctions:
 # framebuffer device is deprecated by DRM
 */*                                                                                                                         -fbdev
 
+# iptables is deprecated by nftables
+*/*                                                                                                                         -iptables nftables
+
 # don't use python2.x
 */*                                                                                                                         -python_targets_python2_7
 */*                                                                                                                         -python_single_target_python2_7
@@ -243,6 +246,9 @@ net-misc/networkmanager                                                         
     _maskFileContent = """
 # don't use python2.x
 <dev-lang/python-3.0.0
+
+# iptables is deprecated by nftables
+net-firewall/iptables
 
 # deprecated gnome libs
 gnome-base/gconf
