@@ -2,15 +2,15 @@ diff -u -r /var/tmp/portage/dev-vcs/git-2.32.0/work/git-2.32.0/http.c ./http.c
 --- /var/tmp/portage/dev-vcs/git-2.32.0/work/git-2.32.0/http.c	2021-07-02 15:45:10.416264259 +0800
 +++ ./http.c	2021-07-02 15:53:51.730857595 +0800
 @@ -83,6 +83,7 @@
- static const char *ssl_cainfo;
+ static char *ssl_cainfo;
  static long curl_low_speed_limit = -1;
  static long curl_low_speed_time = -1;
 +static long curl_connecttimeout = -1; // in seconds, see man 3 CURLOPT_CONNECTTIMEOUT, default(for me, depending on sysctl setting probably!) is 2min10sec
  static int curl_ftp_no_epsv;
- static const char *curl_http_proxy;
- static const char *http_proxy_authmethod;
+ static char *curl_http_proxy;
+ static char *http_proxy_authmethod;
 @@ -361,6 +362,10 @@
-		curl_low_speed_time = (long)git_config_int(var, value, ctx->kvi);
+		curl_low_speed_time = git_config_int(var, value, ctx->kvi);
  		return 0;
  	}
 +	if (!strcmp("http.connecttimeout", var)) { // overriden by env var GIT_HTTP_CONNECT_TIMEOUT
@@ -30,24 +30,6 @@ diff -u -r /var/tmp/portage/dev-vcs/git-2.32.0/work/git-2.32.0/http.c ./http.c
 +		curl_easy_setopt(result, CURLOPT_CONNECTTIMEOUT, curl_connecttimeout); //10L = timeout in 10 seconds instead of 2min10s eg. `git fetch` when: fatal: unable to access 'https://g>
 +	}
  
- 	curl_easy_setopt(result, CURLOPT_MAXREDIRS, 20);
- #if LIBCURL_VERSION_NUM >= 0x071301
-@@ -1105,6 +1115,7 @@
- {
- 	char *low_speed_limit;
- 	char *low_speed_time;
-+	char *connecttimeout;
- 	char *normalized_url;
- 	struct urlmatch_config config = { STRING_LIST_INIT_DUP };
- 
-@@ -1197,6 +1208,10 @@
- 	if (low_speed_time != NULL)
- 		curl_low_speed_time = strtol(low_speed_time, NULL, 10);
- 
-+	connecttimeout = getenv("GIT_HTTP_CONNECT_TIMEOUT"); // man 3 CURLOPT_CONNECTTIMEOUT ; can also be set in ~/.gitconfig as http.connecttimeout aka [http]\n\tconnecttimeout=10
-+	if (connecttimeout != NULL)
-+		curl_connecttimeout = strtol(connecttimeout, NULL, 10); //10 is base
-+
- 	if (curl_ssl_verify == -1)
- 		curl_ssl_verify = 1;
+ 	curl_easy_setopt(result, CURLOPT_MAXREDIRS, 20L);
+ 	curl_easy_setopt(result, CURLOPT_POSTREDIR, (long)CURL_REDIR_POST_ALL);
  
