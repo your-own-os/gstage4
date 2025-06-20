@@ -598,8 +598,7 @@ class TailorGit:
 
         bHttpConnectionTimeout = False
         if "http-connection-timeout-extension" in items:
-            # FIXME: this patch has compile errors, do we need it anymore?
-            # target_settings.repo_postsync_patch_directories.append("git-add-http-connection-timeout-extension")
+            target_settings.repo_postsync_patch_directories.append("git-add-http-connection-timeout-extension")
             items.remove("http-connection-timeout-extension")
             bHttpConnectionTimeout = True
 
