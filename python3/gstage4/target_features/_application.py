@@ -240,7 +240,7 @@ class UsePrinting:
         assert "10-printing" not in target_settings.pkg_use_files
         assert "10-printing" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_use_files["10-no-printing"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_use_files["10-printing"] = self._useFileContent.strip("\n") + "\n"
 
     def update_world_set(self, world_set):
         world_set.add("net-print/cups-meta")
