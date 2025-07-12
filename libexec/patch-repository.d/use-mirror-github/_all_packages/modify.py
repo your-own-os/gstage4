@@ -12,6 +12,9 @@ try:
     for fn in sorted(glob.glob("*.ebuild"), reverse=True):
         buf = pathlib.Path(fn).read_text()
 
+        # remove leading spaces in SRC_URI variable
+        buf = re.sub(r'SRC_URI="\s+(\S)', r'SRC_URI="\1', buf)
+
         if 'SRC_URI="https://github.com/' not in buf:
             continue
 
