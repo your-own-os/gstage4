@@ -777,8 +777,6 @@ class PreferWayland:
 dev-util/electron                             X -wayland                      # electron wayland support needs ozone which is broken now
 gui-wm/wayfire                                X                               # enable Xwayland
 app-misc/ddcutil                              X                               # drm needs X?
-app-emulation/wine-vanilla                    X
-app-emulation/wine-staging                    X
 
 # keep X minimal
 x11-base/xorg-server                          -elogind                        # why it enables by default?
