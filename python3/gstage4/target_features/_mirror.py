@@ -47,6 +47,12 @@ class UseHbMirror:
         target_settings.repo_postsync_patch_directories.append("use-mirror-hb")
 
 
+class UseItchMirror:
+
+    def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("use-mirror-itch")
+
+
 class UseHuggingFaceMirror:
 
     def update_target_settings(self, target_settings):

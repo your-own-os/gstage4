@@ -90,6 +90,7 @@ from ._pam import PamSuWheelOk
 from ._mirror import UseGithubMirror
 from ._mirror import UseGogMirror
 from ._mirror import UseHbMirror
+from ._mirror import UseItchMirror
 from ._mirror import UseHuggingFaceMirror
 
 from ._new_use import AddSystemServiceUseFlag
@@ -174,6 +175,7 @@ __all__ = [
     "UseGithubMirror",
     "UseGogMirror",
     "UseHbMirror",
+    "UseItchMirror",
     "UseHuggingFaceMirror",
     "AddSystemServiceUseFlag",
     "NotUsePolicyKit",
