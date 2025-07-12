@@ -235,10 +235,12 @@ class NotUseDeprecatedPackagesAndFunctions:
 
 # select between gtk2, gtk3 and gtk4
 */*                                                                                                                         -gtk2 gtk3 gtk4
+app-office/libreoffice                                                                                                      -gtk3 gtk4
 
 # select between qt4, qt5 and qt6
 */*                                                                                                                         -qt4 -qt5 qt6
 www-client/chromium                                                                                                         qt5 qt6         # qt6 depends on qt5
+app-office/libreoffice                                                                                                      -qt6            # use gtk only
 
 # some packages are strange, they can't enable gtk and qt simutaneously
 media-libs/opencv                                                                                                           -gtk3 qt6
