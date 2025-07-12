@@ -23,7 +23,6 @@
 
 import os
 import re
-import pygit2
 import pathlib
 
 
