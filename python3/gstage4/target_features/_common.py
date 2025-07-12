@@ -775,7 +775,7 @@ class PreferWayland:
 
 # of course, we also use X when we have to
 dev-util/electron                             X -wayland                      # electron wayland support needs ozone which is broken now
-gui-wm/wayfire                                X                               # enable Xwayland
+#gui-wm/wayfire                                X                               # enable Xwayland
 app-misc/ddcutil                              X                               # drm needs X?
 
 # keep X minimal
@@ -787,6 +787,7 @@ x11-base/xorg-server						  -suid -udev -xorg
 # we use wayland
 x11-apps/xinit
 #x11-base/xorg-server               # we still needs xvfb
+x11-base/xwayland
 
 # vdpau is from NVIDIA (it does not support pure wayland yet), use vaapi is enough
 x11-libs/libvdpau
