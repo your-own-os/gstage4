@@ -175,12 +175,7 @@ class NotUseZeroConf:
         assert "10-no-zeroconf" not in target_settings.pkg_use_files
         assert "10-no-zeroconf" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_mask_files["10-no-zeroconf"] = self._maskFileContent.strip("\n") + "\n"
-
-    _maskFileContent = """
-net-dns/avahi
-sys-auth/nss-mdns
-"""
+        target_settings.pkg_mask_files["10-no-zeroconf"] = "\n".join(UseZeroConf.get_all_related_packages()) + "\n"
 
 
 class UseBluetooth:
