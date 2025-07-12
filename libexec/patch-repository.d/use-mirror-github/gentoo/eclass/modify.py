@@ -23,14 +23,14 @@ try:
     # first insert after idx2, then insert before idx
     # FIXME: the whole script should die when mrget fails
     buf = buf[:idx2 + len(s2)] + \
-          '\t\tif [[ ${r} == mirror:* ]]; then\n' + \
-          '\t\t\trepos[$index]=$(mrget ${r} | head -n 1)\n' + \
-          '\t\tfi\n' + \
-          '\t\t((index++))' + \
-          buf[idx2 + len(s2):]
+        '\t\tif [[ ${r} == mirror:* ]]; then\n' + \
+        '\t\t\trepos[$index]=$(mrget ${r} | head -n 1)\n' + \
+        '\t\tfi\n' + \
+        '\t\t((index++))' + \
+        buf[idx2 + len(s2):]
     buf = buf[:idx] + \
-          '\n\tindex=0' + \
-          buf[idx:]
+        '\n\tindex=0' + \
+        buf[idx:]
     pathlib.Path(fn).write_text(buf)
 except (FileNotFoundError, ValueError):
     print("outdated")
