@@ -15,25 +15,25 @@ try:
 
         i = buf2.find('SRC_URI="')
         if i >= 0:
-            i2 = buf2.find('"', beg=i+len('SRC_URI="'))
+            i2 = buf2.find('"', start=i+len('SRC_URI="'))
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
 
         i = buf2.find('SRC_URI+="')
         if i >= 0:
-            i2 = buf2.find('"', beg=i+len('SRC_URI+="'))
+            i2 = buf2.find('"', start=i+len('SRC_URI+="'))
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
 
         i = buf2.find('EGIT_REPO_URI="')
         if i >= 0:
-            i2 = buf2.find('"', beg=i+len('EGIT_REPO_URI="'))
+            i2 = buf2.find('"', start=i+len('EGIT_REPO_URI="'))
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
 
         i = buf2.find('EGIT_REPO_URI+="')
         if i >= 0:
-            i2 = buf2.find('"', beg=i+len('EGIT_REPO_URI+="'))
+            i2 = buf2.find('"', start=i+len('EGIT_REPO_URI+="'))
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
 
