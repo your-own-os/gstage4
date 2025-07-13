@@ -11,17 +11,31 @@ try:
     bChecked = False
     for fn in sorted(glob.glob("*.ebuild"), reverse=True):
         buf = pathlib.Path(fn).read_text()
-
-        # remove leading spaces
-        buf = re.sub(r'SRC_URI="\s+(\S)', r'SRC_URI="\1', buf)
-        buf = re.sub(r'EGIT_REPO_URI="\s+(\S)', r'EGIT_REPO_URI="\1', buf)
-
-        # replace
         buf2 = buf
-        buf2 = buf2.replace(r'SRC_URI="https://github.com/', r'SRC_URI="mirror://github/')
-        buf2 = re.sub(r'(SRC_URI\+="\s*)http://github.com/', r'\1mirror://github/', buf2)
-        buf2 = buf2.replace(r'EGIT_REPO_URI="https://github.com/', r'EGIT_REPO_URI="mirror://github/')
-        buf2 = re.sub(r'(EGIT_REPO_URI\+="\s*)http://github.com/', r'\1mirror://github/', buf2)
+
+        i = buf2.index('SRC_URI="')
+        if i >= 0:
+            i2 = buf2[i + len('SRC_URI="')].index('"')
+            assert i2 >= 0
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
+
+        i = buf2.index('SRC_URI+="')
+        if i >= 0:
+            i2 = buf2[i + len('SRC_URI+="')].index('"')
+            assert i2 >= 0
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
+
+        i = buf2.index('EGIT_REPO_URI="')
+        if i >= 0:
+            i2 = buf2[i + len('EGIT_REPO_URI="')].index('"')
+            assert i2 >= 0
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
+
+        i = buf2.index('EGIT_REPO_URI+="')
+        if i >= 0:
+            i2 = buf2[i + len('EGIT_REPO_URI+="')].index('"')
+            assert i2 >= 0
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
 
         # nothing changed
         if buf2 == buf:
