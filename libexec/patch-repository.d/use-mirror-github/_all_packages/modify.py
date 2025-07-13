@@ -13,29 +13,17 @@ try:
         buf = pathlib.Path(fn).read_text()
         buf2 = buf
 
-        i = buf2.find('SRC_URI="')
-        if i >= 0:
-            i2 = buf2.find('"', i+len('SRC_URI="'))
-            assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
+        for m in re.finditer(r'SRC_URI=".*?"', buf2):
+            buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
-        i = buf2.find('SRC_URI+="')
-        if i >= 0:
-            i2 = buf2.find('"', i+len('SRC_URI+="'))
-            assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
+        for m in re.finditer(r'SRC_URI\+=".*?"', buf2):
+            buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
-        i = buf2.find('EGIT_REPO_URI="')
-        if i >= 0:
-            i2 = buf2.find('"', i+len('EGIT_REPO_URI="'))
-            assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
+        for m in re.finditer(r'EGIT_REPO_URI=".*?"', buf2):
+            buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
-        i = buf2.find('EGIT_REPO_URI+="')
-        if i >= 0:
-            i2 = buf2.find('"', i+len('EGIT_REPO_URI+="'))
-            assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+len('"')].replace("https://github.com/", "mirror://github/") + buf2[i2+len('"'):]
+        for m in re.finditer(r'EGIT_REPO_URI\+=".*?"', buf2):
+            buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
         # nothing changed
         if buf2 == buf:
