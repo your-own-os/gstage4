@@ -42,6 +42,7 @@ try:
             continue
 
         # do manifest file generation test, skip modification if test failed
+        # this code only gets executed only once (by bChecked variable)
         while not bChecked:
             bChecked = True
             if re.search(r'^thin-manifests\s*=\s*true$', pathlib.Path("../../metadata/layout.conf").read_text(), re.MULTILINE):
