@@ -776,7 +776,6 @@ class PreferWayland:
 
 # of course, we also use X when we have to
 dev-util/electron                             X -wayland                      # electron wayland support needs ozone which is broken now
-#gui-wm/wayfire                                X                               # enable Xwayland
 app-misc/ddcutil                              X                               # drm needs X?
 
 # keep X minimal
