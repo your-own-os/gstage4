@@ -92,6 +92,7 @@ virtual/linux-sources
 sys-kernel/*-sources
 sys-kernel/*-kernel
 sys-kernel/*-kernel-bin
+sys-kernel/*-firmware
 net-wireless/wireless-regdb
 app-emulation/virtualbox-modules
 sys-fs/vhba
