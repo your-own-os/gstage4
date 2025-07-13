@@ -95,9 +95,8 @@ sys-kernel/*-kernel-bin
 app-emulation/virtualbox-modules
 sys-fs/vhba
 
-# we don't use any firmware related package
+# we don't use any kernel firmware related package
 net-wireless/wireless-regdb
-sys-firmware/*
 sys-kernel/*-firmware
 
 # we manage kernel ourself
