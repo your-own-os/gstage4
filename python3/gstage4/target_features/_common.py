@@ -139,6 +139,7 @@ x11-base/xorg-server                                                 systemd
 
 # install systemd service files
 app-pda/usbmuxd                                                      systemd
+media-libs/monado                                                    systemd
 media-video/pipewire                                                 systemd
 media-video/wireplumber                                              systemd
 net-print/cups                                                       systemd
