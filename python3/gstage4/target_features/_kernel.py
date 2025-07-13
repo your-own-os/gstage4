@@ -87,15 +87,18 @@ class UseBbki:
 """
 
     _maskFileContent = """
-# we don't use any kernel & firmware related package
+# we don't use any kernel related package
 virtual/linux-sources
 sys-kernel/*-sources
 sys-kernel/*-kernel
 sys-kernel/*-kernel-bin
-sys-kernel/*-firmware
-net-wireless/wireless-regdb
 app-emulation/virtualbox-modules
 sys-fs/vhba
+
+# we don't use any firmware related package
+net-wireless/wireless-regdb
+sys-firmware/*
+sys-kernel/*-firmware
 
 # we manage kernel ourself
 sys-kernel/installkernel-*
