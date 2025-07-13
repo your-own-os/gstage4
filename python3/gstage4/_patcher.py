@@ -201,11 +201,11 @@ class RepoPatcher:
 
             out = out.decode().rstrip("\n")
             if out == "outdated":
-                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir))))
+                self._warnOrErrList.append(self.WarnOrErr(True, "patch %s script \"%s\" for \"%s\" is outdated." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), fullDstEbuildDir)))
             elif out == "":
                 pass
             else:
-                self._warnOrErrList.append(self.WarnOrErr(False, "patch %s script \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), out)))
+                self._warnOrErrList.append(self.WarnOrErr(False, "patch %s script \"%s\" for \"%s\" exits with error \"%s\"." % (patchTypeName, os.path.relpath(fullfn, srcBaseDir), fullDstEbuildDir, out)))
 
         if len(modifiedDict) == 0:
             # there're really some directories (in overlays) that has no ebuild file, we ignore them, and of course no need to regenerate manifest file

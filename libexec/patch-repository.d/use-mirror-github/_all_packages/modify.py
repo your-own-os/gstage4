@@ -17,25 +17,25 @@ try:
         if i >= 0:
             i2 = buf2[i + len('SRC_URI="')].index('"')
             assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
         i = buf2.index('SRC_URI+="')
         if i >= 0:
             i2 = buf2[i + len('SRC_URI+="')].index('"')
             assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
         i = buf2.index('EGIT_REPO_URI="')
         if i >= 0:
             i2 = buf2[i + len('EGIT_REPO_URI="')].index('"')
             assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
         i = buf2.index('EGIT_REPO_URI+="')
         if i >= 0:
             i2 = buf2[i + len('EGIT_REPO_URI+="')].index('"')
             assert i2 >= 0
-            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1]
+            buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
         # nothing changed
         if buf2 == buf:
