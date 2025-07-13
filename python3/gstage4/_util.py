@@ -282,9 +282,13 @@ class Util:
     def repoListEbuildDir(repoCategoryDir):
         ret = []
         for dstEbuildDir in os.listdir(repoCategoryDir):
+            if dstEbuildDir.startswith("."):
+                # some overlay has hidden package, ignore them
+                continue
             fullDstEbuildDir = os.path.join(repoCategoryDir, dstEbuildDir)
-            if os.path.isdir(fullDstEbuildDir):
-                ret.append((dstEbuildDir, fullDstEbuildDir))
+            if not os.path.isdir(fullDstEbuildDir):
+                continue
+            ret.append((dstEbuildDir, fullDstEbuildDir))
         return ret
 
     @staticmethod
