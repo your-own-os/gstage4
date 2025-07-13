@@ -1,11 +1,16 @@
 #!/usr/bin/python3
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 
+import os
 import re
 import sys
 import glob
 import pathlib
 import subprocess
+
+# some overlay has hidden package, ignore them
+if not os.path.basename(os.cwd()).startswith("."):
+    sys.exit(0)
 
 try:
     bChecked = False
@@ -15,25 +20,25 @@ try:
 
         i = buf2.index('SRC_URI="')
         if i >= 0:
-            i2 = buf2[i + len('SRC_URI="')].index('"')
+            i2 = buf2[i+len('SRC_URI="'):].index('"')
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
         i = buf2.index('SRC_URI+="')
         if i >= 0:
-            i2 = buf2[i + len('SRC_URI+="')].index('"')
+            i2 = buf2[i+len('SRC_URI+="'):].index('"')
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
         i = buf2.index('EGIT_REPO_URI="')
         if i >= 0:
-            i2 = buf2[i + len('EGIT_REPO_URI="')].index('"')
+            i2 = buf2[i+len('EGIT_REPO_URI="'):].index('"')
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
         i = buf2.index('EGIT_REPO_URI+="')
         if i >= 0:
-            i2 = buf2[i + len('EGIT_REPO_URI+="')].index('"')
+            i2 = buf2[i+len('EGIT_REPO_URI+="'):].index('"')
             assert i2 >= 0
             buf2 = buf2[:i] + buf2[i:i2+1].replace("https://github.com/", "mirror://github/") + buf2[i2+1:]
 
