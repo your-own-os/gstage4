@@ -13,16 +13,16 @@ try:
         buf = pathlib.Path(fn).read_text()
         buf2 = buf
 
-        for m in re.finditer(r'SRC_URI=".*?"', buf2):
+        for m in re.finditer(r'SRC_URI=".*?"', buf2, re.DOTALL):
             buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
-        for m in re.finditer(r'SRC_URI\+=".*?"', buf2):
+        for m in re.finditer(r'SRC_URI\+=".*?"', buf2, re.DOTALL):
             buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
-        for m in re.finditer(r'EGIT_REPO_URI=".*?"', buf2):
+        for m in re.finditer(r'EGIT_REPO_URI=".*?"', buf2, re.DOTALL):
             buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
-        for m in re.finditer(r'EGIT_REPO_URI\+=".*?"', buf2):
+        for m in re.finditer(r'EGIT_REPO_URI\+=".*?"', buf2, re.DOTALL):
             buf2 = buf2.replace(m.group(0), m.group(0).replace("https://github.com/", "mirror://github/"))
 
         # nothing changed
