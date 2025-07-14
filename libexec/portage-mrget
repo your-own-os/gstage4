@@ -10,9 +10,7 @@ def parse_file(path):
     try:
         for line in pathlib.Path(path).read_text().splitlines():
             line = line.strip()
-            if line == "":
-                continue
-            if line.startswith("#"):
+            if line == "" or line.startswith("#"):
                 continue
             items = line.split()
             ret[items[0]] = items[1]        # <mirror-name: the-first-mirror-url>
