@@ -7,16 +7,17 @@ import pathlib
 
 def parse_file(path):
     ret = {}
-
-    for line in pathlib.Path(path).read_text().splitlines():
-        line = line.strip()
-        if line == "":
-            continue
-        if line.startswith("#"):
-            continue
-        items = line.split()
-        ret[items[0]] = items[1]        # <mirror-name: the-first-mirror-url>
-
+    try:
+        for line in pathlib.Path(path).read_text().splitlines():
+            line = line.strip()
+            if line == "":
+                continue
+            if line.startswith("#"):
+                continue
+            items = line.split()
+            ret[items[0]] = items[1]        # <mirror-name: the-first-mirror-url>
+    except FileNotFoundError:
+        pass
     return ret
 
 
