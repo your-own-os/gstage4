@@ -10,14 +10,12 @@ def parse_file(path):
 
     for line in pathlib.Path(path).read_text().splitlines():
         line = line.strip()
-        if line.startswith("#"):
-            continue
         if line == "":
             continue
-        items = line.split("\t")
-        mirrorName = items[0]
-        mirrorUrls = items[1].split()
-        ret[mirrorName] = mirrorUrls[0]
+        if line.startswith("#"):
+            continue
+        items = line.split()
+        ret[items[0]] = items[1]        # <mirror-name: the-first-mirror-url>
 
     return ret
 
@@ -42,7 +40,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     mirrorDict = {}
-    mirrorDict.update(parse_file("/var/lib/portage/repo-gentoo/profiles/thirdpartymirrors"))
+    mirrorDict.update(parse_file("/var/lib/portage/repo-gentoo/profiles/thirdpartymirrors"))        # FIXME
     mirrorDict.update(parse_file("/etc/portage/mirrors"))
 
     tstr = mirrorUrl[len("mirror://"):]         # "mirror://github/abc" -> "github/abc"
