@@ -21,11 +21,9 @@ try:
     idx2 = idx + idx2
 
     # first insert after idx2, then insert before idx
-    # FIXME: the whole script should die when mrget fails
+    # FIXME: the whole script should die when portage-mrget fails
     buf = buf[:idx2 + len(s2)] + \
-        '\t\tif [[ ${r} == mirror:* ]]; then\n' + \
-        '\t\t\trepos[$index]=$(mrget ${r} | head -n 1)\n' + \
-        '\t\tfi\n' + \
+        '\t\trepos[$index]=$(/usr/libexec/gstage4/portage-mrget ${r})\n' + \
         '\t\t((index++))' + \
         buf[idx2 + len(s2):]
     buf = buf[:idx] + \

@@ -1,0 +1,54 @@
+#!/usr/bin/python3
+# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
+
+import sys
+import pathlib
+
+
+def parse_file(path):
+    ret = {}
+
+    for line in pathlib.Path(path).read_text().splitlines():
+        line = line.strip()
+        if line.startswith("#"):
+            continue
+        if line == "":
+            continue
+        items = line.split("\t")
+        mirrorName = items[0]
+        mirrorUrls = items[1].split()
+        ret[mirrorName] = mirrorUrls[0]
+
+    return ret
+
+
+def usage():
+    print("Usage:")
+    print("  %s <mirror uri>" % (sys.argv[0]))
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "--help":
+        usage()
+        sys.exit(0)
+
+    if len(sys.argv) < 2:
+        usage()
+        sys.exit(1)
+
+    mirrorUrl = sys.argv[1]
+    if not mirrorUrl.startswith("mirror://"):
+        print(mirrorUrl)
+        sys.exit(0)
+
+    mirrorDict = {}
+    mirrorDict.update(parse_file("/var/lib/portage/repo-gentoo/profiles/thirdpartymirrors"))
+    mirrorDict.update(parse_file("/etc/portage/mirrors"))
+
+    tstr = mirrorUrl[len("mirror://"):]         # "mirror://github/abc" -> "github/abc"
+    tlist = tstr.split("/")                     # "github/abc" -> ["github", "abc"]
+    tlist[0] = mirrorDict[tlist[0]]             # ["github", "abc"] -> ["https://github.com", "abc"]
+    tstr = "/".join(tlist)                      # ["https://github.com", "abc"] -> "https://github.com/abc"
+
+    print(tstr)
+    sys.exit(0)
