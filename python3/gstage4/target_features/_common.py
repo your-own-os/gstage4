@@ -786,7 +786,7 @@ app-emulation/wine-staging                    X
 # we use wayland
 x11-apps/xinit
 x11-base/xorg-server
-x11-base/xwayland
+#x11-base/xwayland
 
 # vdpau is from NVIDIA (it does not support pure wayland yet), use vaapi is enough
 x11-libs/libvdpau
