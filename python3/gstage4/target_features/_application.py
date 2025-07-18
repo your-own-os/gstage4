@@ -175,7 +175,12 @@ class NotUseZeroConf:
         assert "10-no-zeroconf" not in target_settings.pkg_use_files
         assert "10-no-zeroconf" not in target_settings.pkg_mask_files
 
+        target_settings.pkg_use_files["10-no-zeroconf"] = self._useFileContent.strip("\n") + "\n"
         target_settings.pkg_mask_files["10-no-zeroconf"] = "\n".join(UseZeroConf.get_all_related_packages()) + "\n"
+
+    _useFileContent = """
+*/*                     -zeroconf
+"""
 
 
 class UseBluetooth:
@@ -193,7 +198,7 @@ class UseBluetooth:
         assert "10-bluetooth" not in target_settings.pkg_use_files
         assert "10-bluetooth" not in target_settings.pkg_mask_files
 
-        target_settings.pkg_use_files["10-no-bluetooth"] = self._useFileContent.strip("\n") + "\n"
+        target_settings.pkg_use_files["10-bluetooth"] = self._useFileContent.strip("\n") + "\n"
 
     def update_world_set(self, world_set):
         world_set.add("net-wireless/bluez")
@@ -214,7 +219,12 @@ class NotUseBluetooth:
         assert "10-no-bluetooth" not in target_settings.pkg_use_files
         assert "10-no-bluetooth" not in target_settings.pkg_mask_files
 
+        target_settings.pkg_use_files["10-no-bluetooth"] = self._useFileContent.strip("\n") + "\n"
         target_settings.pkg_mask_files["10-no-bluetooth"] = "\n".join(UseBluetooth.get_all_related_packages()) + "\n"
+
+    _useFileContent = """
+*/*                         -bluetooth
+"""
 
 
 class UsePrinting:
