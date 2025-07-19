@@ -242,6 +242,7 @@ app-office/libreoffice                                                          
 */*                                                                                                                         -qt4 -qt5 qt6
 www-client/chromium                                                                                                         qt5 qt6         # qt6 depends on qt5
 app-office/libreoffice                                                                                                      -qt6            # use gtk only
+media-libs/libv4l                                                                                                           -qt6            # don't pull in X11
 
 # some packages are strange, they can't enable gtk and qt simutaneously
 media-libs/opencv                                                                                                           -gtk3 qt6
