@@ -539,6 +539,9 @@ class PreferBinaryPackage:
 # we prefer dev-lang/rust-bin
 dev-lang/rust
 
+# we prefer dev-java/openjdk-bin
+dev-java/openjdk
+
 # we prefer sys-firmware/edk2-ovmf-bin
 sys-firmware/edk2-ovmf
 """
@@ -554,6 +557,9 @@ class PreferSourcePackage:
     _maskFileContent = """
 # we prefer dev-lang/rust
 dev-lang/rust-bin
+
+# we prefer dev-java/openjdk
+dev-java/openjdk-bin
 
 # we prefer sys-firmware/edk2
 sys-firmware/edk2-bin
