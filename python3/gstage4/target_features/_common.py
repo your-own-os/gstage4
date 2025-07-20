@@ -241,7 +241,6 @@ app-office/libreoffice                                                          
 # select between qt4, qt5 and qt6
 */*                                                                                                                         -qt4 -qt5 qt6
 app-office/libreoffice                                                                                                      -qt6            # use gtk only
-media-libs/libv4l                                                                                                           -qt6            # don't pull in X11
 www-client/chromium                                                                                                         qt5 qt6         # qt6 depends on qt5
 
 # some packages are strange, they can't enable gtk and qt simutaneously
@@ -781,6 +780,10 @@ gui-wm/wayfire                                X                               # 
 app-misc/ddcutil                              X                               # drm needs X?
 app-emulation/wine-vanilla                    X
 app-emulation/wine-staging                    X
+
+# don't pull in X11
+media-libs/libv4l                             -qt6
+x11-libs/wxGTK                                -tiff -spell -keyring
 """
 
     _maskFileContent = """
