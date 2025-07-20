@@ -911,9 +911,12 @@ media-sound/alsa-tools
 media-sound/alsa-utils
 
 # packages only support sound route 7, 8
-media-sound/audacity                                        # sound route 7
-media-sound/moc                                             # sound route 7
-media-sound/vkeybd                                          # sound route 7
+#dev-java/openjdk-bin
+#dev-java/openjdk-jre-bin
+#dev-java/openjdk
+media-sound/audacity
+media-sound/moc
+media-sound/vkeybd
 """
 
 
