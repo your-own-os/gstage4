@@ -560,6 +560,7 @@ dev-lang/rust-bin
 
 # we prefer dev-java/openjdk
 dev-java/openjdk-bin
+dev-java/openjdk-jre-bin
 
 # we prefer sys-firmware/edk2
 sys-firmware/edk2-bin
