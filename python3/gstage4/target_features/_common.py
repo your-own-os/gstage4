@@ -539,11 +539,11 @@ class PreferBinaryPackage:
 # we prefer dev-lang/rust-bin
 dev-lang/rust
 
-# we prefer dev-java/openjdk-bin
+# we prefer dev-java/openjdk-bin & dev-java/openjdk-jre-bin
 dev-java/openjdk
 
-# we prefer sys-firmware/edk2-ovmf-bin
-sys-firmware/edk2-ovmf
+# we prefer sys-firmware/edk2-bin
+sys-firmware/edk2
 """
 
 
