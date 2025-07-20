@@ -836,14 +836,14 @@ class PreferPipewire:
         }
 
     _useFileContent = """
-# prefered sound route: 1. pipewire -> alsa
-#                       2. gstreamer -> pipewire -> alsa
-#                       3. openal -> pipewire -> alsa
-#                       4. fluidsynth -> pipewire -> alsa
-#                       5. jack -> pipewire -> alsa (bad)
-#                       6. pulseaudio -> pipewire -> alsa (bad)
-#                       7. alsa -> pipewire -> alsa (forbidden)
-#                       8. alsa (forbidden)
+# prefered sound route: 1. app -> pipewire -> alsa
+#                       2. app -> gstreamer -> pipewire -> alsa
+#                       3. app -> openal -> pipewire -> alsa
+#                       4. app -> fluidsynth -> pipewire -> alsa
+#                       5. app -> jack -> pipewire -> alsa (bad)
+#                       6. app -> pulseaudio -> pipewire -> alsa (bad)
+#                       7. app -> alsa -> pipewire -> alsa (forbidden)
+#                       8. app -> alsa (forbidden)
 app-emulation/qemu                                              -alsa pipewire                # sound route 1
 app-emulation/spice                                             gstreamer                     # sound route 2
 app-emulation/wine-vanilla                                      -alsa pulseaudio              # sound route 6 (bad), gstreamer support in wine is not what we image
@@ -889,9 +889,9 @@ media-sound/pulseaudio                                          -*
 
     _maskFileContent = """
 # we prefer the following paradim:
-#   App --> Pipewire --> ALSA
+#   app --> pipewire --> alsa
 #              |
-#              +-------> Bluetooth
+#              +-------> bluetooth
 media-sound/bluez-alsa
 
 # use pipewire instead of pulseaudio (media-sound/pulseaudio is still needed, see package.use)
