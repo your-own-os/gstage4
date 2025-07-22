@@ -293,6 +293,7 @@ class UseAllLlvmTargets:
 
         target_settings.pkg_use_files["10-llvm-all-targets"] = self._useFileContent.strip("\n") + "\n"
 
+    # FIXME: should exclude all experiment target
     _useFileContent = """
 */*                 LLVM_TARGETS: *
 """
