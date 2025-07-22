@@ -100,6 +100,7 @@ from ._priviledge import NotUseSudo
 from ._priviledge import UniversalWheelGroup
 
 from ._application import UseAllQemuTargets
+from ._application import UseAllLlvmTargets
 from ._application import NotUseLogrotate
 
 from ._application import MemTest
@@ -182,6 +183,7 @@ __all__ = [
     "NotUseSudo",
     "UniversalWheelGroup",
     "UseAllQemuTargets",
+    "UseAllLlvmTargets",
     "NotUseLogrotate",
     "MemTest",
     "SshServer",

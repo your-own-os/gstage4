@@ -286,6 +286,17 @@ app-emulation/qemu  QEMU_SOFTMMU_TARGETS: *
 app-emulation/qemu  QEMU_USER_TARGETS: *
 """
 
+class UseAllLlvmTargets:
+
+    def update_target_settings(self, target_settings):
+        assert "10-llvm-all-targets" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-llvm-all-targets"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+*/*                 LLVM_TARGETS: *
+"""
+
 
 class NotUseLogrotate:
 
