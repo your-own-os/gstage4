@@ -32,9 +32,6 @@ class TailorSystemd:
         assert "10-tailor-systemd" not in target_settings.install_mask_files
 
         disableItems = list(self._disableItems)
-        removeItems = list(self._removeItems)
-        td = {}
-        tm = []
 
         if "systemd-udevd-socket-activation" in disableItems:
             target_settings.repo_postsync_patch_directories.append("systemd-disable-systemd-udevd-socket-activation")
@@ -43,6 +40,10 @@ class TailorSystemd:
         if "kmod-static-nodes" in disableItems:
             target_settings.repo_postsync_patch_directories.append("systemd-disable-kmod-static-nodes")
             disableItems.remove("kmod-static-nodes")
+
+        removeItems = list(self._removeItems)
+        td = {}
+        tm = []
 
         if "systemd-battery-check" in removeItems:
             _updateDict(td, {
