@@ -106,6 +106,7 @@ class UseSystemd:
         target_settings.install_mask_files["10-systemd"] = {
             "*/*": [
                 "/etc/init.d",
+                "/etc/user/init.d",
                 "/etc/conf.d",
                 "/etc/rc.d",
             ],
