@@ -36,11 +36,8 @@ class FixBugs:
         target_settings.pkg_use_files["10-bugfix"] = self._useFileContent.strip("\n") + "\n"
         target_settings.pkg_mask_files["10-bugfix"] = self._maskFileContent.strip("\n") + "\n"
 
-        target_settings.install_mask_files["10-bugfix"] = {
-            "net-misc/chrony": [
-                "/etc/chrony.conf",
-            ],
-        }
+        # FIXME
+        # target_settings.install_mask_files["10-bugfix"] = {}
 
         target_settings.repo_postsync_patch_directories.append("kill-var-files")
         target_settings.repo_postsync_patch_directories.append("bugfix")
