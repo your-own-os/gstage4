@@ -718,15 +718,6 @@ class TailorPam:
             })
             items.remove("pam_access")
 
-        if "pam_env" in items:
-            _updateDict(td, {
-                "sys-libs/pam": [
-                    "*pam_env*",            # including /etc/security/pam_env.conf
-                ],
-            })
-            items.remove("pam_env")
-        # FIXME: "/etc/environments"?
-
         if "pam_group" in items:
             _updateDict(td, {
                 "sys-libs/pam": [
@@ -779,6 +770,15 @@ class TailorPam:
             })
             items.remove("pam_xauth")
 
+        if "pam_env_conf" in items:
+            _updateDict(td, {
+                "sys-libs/pam": [
+                    "/etc/security/pam_env.conf",
+                ],
+            })
+            items.remove("pam_env_conf")
+        # FIXME: modify pam files, add conffile=/dev/null
+
         if "pam_faillock_conf" in items:
             _updateDict(td, {
                 "sys-libs/pam": [
@@ -794,7 +794,7 @@ class TailorPam:
         # also remove the whole /etc/security directory if we can
         etcSecurityDirItem = [
             "pam_access",
-            "pam_env",
+            "pam_env_conf",
             "pam_faillock_conf",
             "pam_group",
             "pam_limits",
