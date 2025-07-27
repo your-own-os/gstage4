@@ -725,14 +725,6 @@ class TailorPam:
             items.remove("pam_env")
         # FIXME: "/etc/environments"?
 
-        if "pam_faillock" in items:
-            _updateDict(td, {
-                "sys-libs/pam": [
-                    "*faillock*",
-                ],
-            })
-            items.remove("pam_faillock")
-
         if "pam_group" in items:
             _updateDict(td, {
                 "sys-libs/pam": [
@@ -785,6 +777,15 @@ class TailorPam:
                 ],
             })
             items.remove("pam_xauth")
+
+        if "pam_faillock_conf" in items:
+            _updateDict(td, {
+                "sys-libs/pam": [
+                    "/etc/security/faillock.conf",
+                ],
+            })
+            items.remove("pam_faillock_conf")
+        # FIXME: modify pam files, add conf=/dev/null
 
         # passwdqc.conf
 
