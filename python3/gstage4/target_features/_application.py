@@ -286,6 +286,7 @@ app-emulation/qemu  QEMU_SOFTMMU_TARGETS: *
 app-emulation/qemu  QEMU_USER_TARGETS: *
 """
 
+
 class UseAllLlvmTargets:
 
     def update_target_settings(self, target_settings):
