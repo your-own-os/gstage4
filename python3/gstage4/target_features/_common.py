@@ -105,10 +105,11 @@ class UseSystemd:
 
         target_settings.install_mask_files["10-systemd"] = {
             "*/*": [
+                "/etc/conf.d",
                 "/etc/init.d",
                 "/etc/user/init.d",
-                "/etc/conf.d",
                 "/etc/rc.d",
+                "/etc/xinetd.d",
             ],
             "sys-apps/systemd": [
                 "*initctl*",                    # FIXME: no initctl for >=systemd-253-r1?
