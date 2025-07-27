@@ -793,11 +793,16 @@ class TailorPam:
         # FIXME:
         # passwdqc.conf
 
-        # also remove the whole /etc/security directory
+        # also remove the whole /etc/security directory if we can
         etcSecurityDirItem = [
+            "pam_access",
             "pam_env",
             "pam_faillock_conf",
+            "pam_group",
             "pam_limits",
+            "pam_namespace",
+            "pam_pwhistory",
+            "pam_time",
         ]
         if Util.listSparseContain(self._removeItems, etcSecurityDirItem):
             _updateDict(td, {
