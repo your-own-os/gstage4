@@ -721,8 +721,7 @@ class TailorPam:
         if "pam_env" in items:
             _updateDict(td, {
                 "sys-libs/pam": [
-                    "*pam_env.so",
-                    "/etc/security/pam_env.conf",
+                    "*pam_env*",            # including /etc/security/pam_env.conf
                 ],
             })
             items.remove("pam_env")
@@ -731,8 +730,7 @@ class TailorPam:
         if "pam_group" in items:
             _updateDict(td, {
                 "sys-libs/pam": [
-                    "*pam_group.so",
-                    "/etc/security/group.conf",
+                    "*group*",              # including /etc/security/group.conf
                 ],
             })
             items.remove("pam_group")
