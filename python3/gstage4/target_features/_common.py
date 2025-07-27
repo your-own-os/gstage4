@@ -104,7 +104,7 @@ class UseSystemd:
             "*/*": [
                 "/etc/conf.d",
                 "/etc/init.d",
-                "/etc/user/init.d",
+                "/etc/user",                    # this is to eliminate /etc/user/init.d, but there's no other files in /etc/user
                 "/etc/rc.d",
                 "/etc/xinetd.d",
             ],
