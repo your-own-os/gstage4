@@ -21,6 +21,9 @@
 # THE SOFTWARE.
 
 
+from .._util import Util
+
+
 class TailorSystemd:
 
     def __init__(self, disable_items=[], remove_items=[]):
@@ -787,7 +790,21 @@ class TailorPam:
             items.remove("pam_faillock_conf")
         # FIXME: modify pam files, add conf=/dev/null
 
+        # FIXME:
         # passwdqc.conf
+
+        # also remove the whole /etc/security directory
+        etcSecurityDirItem = [
+            "pam_env",
+            "pam_faillock_conf",
+            "pam_limits",
+        ]
+        if Util.listSparseContain(self._removeItems, etcSecurityDirItem):
+            _updateDict(td, {
+                "sys-libs/pam": [
+                    "/etc/security",
+                ],
+            })
 
         assert len(items) == 0
         if len(td) > 0:
