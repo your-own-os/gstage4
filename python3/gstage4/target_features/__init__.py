@@ -67,6 +67,7 @@ from ._common import SupportAllAudioFormat
 from ._common import SupportAllImageFormat
 from ._common import SupportAllDocumentFormat
 from ._common import SupportAllCompressFormat
+from ._common import SupportAllHashFormat
 from ._common import SupportAllGraphicsApi
 from ._common import SupportAllTermType
 
@@ -157,6 +158,7 @@ __all__ = [
     "SupportAllImageFormat",
     "SupportAllDocumentFormat",
     "SupportAllCompressFormat",
+    "SupportAllHashFormat",
     "SupportAllGraphicsApi",
     "SupportAllTermType",
     "GettyAutoLogin",

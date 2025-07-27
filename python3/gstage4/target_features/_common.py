@@ -672,6 +672,19 @@ class SupportAllCompressFormat:
 """
 
 
+class SupportAllHashFormat:
+
+    def update_target_settings(self, target_settings):
+        assert "10-hash-formats" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-hash-formats"] = self._useFileContent.strip("\n") + "\n"
+
+    _useFileContent = """
+# hash formats
+*/*                 xxhash
+"""
+
+
 class SupportAllGraphicsApi:
 
     def __init__(self, prefer_wayland=False):
