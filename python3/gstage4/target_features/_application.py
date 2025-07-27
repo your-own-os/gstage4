@@ -292,11 +292,11 @@ class UseAllLlvmTargets:
     def update_target_settings(self, target_settings):
         assert "10-llvm-all-targets" not in target_settings.pkg_use_files
 
+        # experiment targets are excluded
         target_settings.pkg_use_files["10-llvm-all-targets"] = self._useFileContent.strip("\n") + "\n"
 
-    # experiment targets are excluded
     _useFileContent = """
-*/*                 LLVM_TARGETS: AArch64 AMDGPU ARM AVR BPF Hexagon Lanai Mips NVPTX PowerPC RISCV SPIRV Sparc SystemZ VE WebAssembly X86 XCore
+*/*  LLVM_TARGETS: AArch64 AMDGPU ARM AVR BPF Hexagon Lanai Mips NVPTX PowerPC RISCV SPIRV Sparc SystemZ VE WebAssembly X86 XCore
 """
 
 
