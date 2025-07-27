@@ -294,9 +294,9 @@ class UseAllLlvmTargets:
 
         target_settings.pkg_use_files["10-llvm-all-targets"] = self._useFileContent.strip("\n") + "\n"
 
-    # FIXME: should exclude all experiment target
+    # experiment targets are excluded
     _useFileContent = """
-*/*                 LLVM_TARGETS: *
+*/*                 LLVM_TARGETS: AArch64 AMDGPU ARM AVR BPF Hexagon Lanai Mips NVPTX PowerPC RISCV SPIRV Sparc SystemZ VE WebAssembly X86 XCore
 """
 
 
