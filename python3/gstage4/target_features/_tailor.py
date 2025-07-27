@@ -748,8 +748,8 @@ class TailorPam:
                     "*limits*",             # including /etc/security/limits.conf
                 ],
                 "*/*": [
-                    "/etc/security/limis.d"
-                ]
+                    "/etc/security/limits.d",
+                ],
             })
             items.remove("pam_limits")
 
