@@ -116,7 +116,7 @@ class RepoPatcher:
             for categoryDir, fullCategoryDir in __patchListCategoryDir(patchRepoDir):
                 fullAllDir = os.path.join(fullCategoryDir, "_all_packages")
                 if os.path.exists(fullAllDir):
-                    for dstEbuildDir, fullDstEbuildDir in Util.repoListEbuildDir(os.path.join(targetDir, categoryDir)):
+                    for _, fullDstEbuildDir in Util.repoListEbuildDir(os.path.join(targetDir, categoryDir)):
                         fullDstSrcDirDict[fullDstEbuildDir] = fullAllDir
             asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, fullDstSrcDirDict, pendingFullDstDirSet))
 
@@ -125,14 +125,14 @@ class RepoPatcher:
                 if not os.path.exists(fullAllDir):
                     continue
                 fullDstSrcDirDict = {}
-                for dstCategoryDir, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
-                    for dstEbuildDir, fullDstEbuildDir in Util.repoListEbuildDir(fullDstCategoryDir):
+                for _, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
+                    for _, fullDstEbuildDir in Util.repoListEbuildDir(fullDstCategoryDir):
                         fullDstSrcDirDict[fullDstEbuildDir] = fullAllDir
                 # note: srcBaseDir parameter of self._doExecPatchScript() is not ancestor of fullAllDir for item0 in this loop
                 asyncio.get_event_loop().run_until_complete(self._doExecPatchScript(patchTypeName, patchRepoDir, fullDstSrcDirDict, pendingFullDstDirSet))
 
         # patch can remove ebuild directories, so category directories can be empty either, remove them
-        for dstCategoryDir, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
+        for _, fullDstCategoryDir in Util.repoListCategoryDir(targetDir):
             if len(os.listdir(fullDstCategoryDir)) == 0:
                 os.rmdir(fullDstCategoryDir)
 
@@ -152,14 +152,16 @@ class RepoPatcher:
                     bThinManifestDict[repoDir] = (m is not None)
                 if bThinManifestDict[repoDir]:
                     continue
-            # ok, keep it in return value
-            ret.append(fullDstDir)
+            # ok, add it into return value
+            ret.append(fullDstDir[len(repoDir) + 1:])
         return ret
 
-    def generateManifest(self, pendingFullDstDirList):
+    def generateManifest(self, targetDir, pendingDstDirList):
         # generate manifest for patched packages
+        assert len(pendingDstDirList) > 0
         asyncio.set_event_loop(asyncio.new_event_loop())
-        asyncio.get_event_loop().run_until_complete(self._doGenerateEbuildManifest(pendingFullDstDirList))
+        ebuildDirList = [os.path.join(targetDir, x) for x in pendingDstDirList]
+        asyncio.get_event_loop().run_until_complete(self._doGenerateEbuildManifest(ebuildDirList))
 
     async def _doExecPatchScript(self, patchTypeName, fullSrcBaseDir, fullDstSrcDirDict, pendingFullDstDirSet):
         # AioPoolWithJobAndLoadAverage object needs a running event loop, so this function is needed, sucks
@@ -232,11 +234,11 @@ class RepoPatcher:
 
         return True
 
-    async def _doGenerateEbuildManifest(self, pendingDstDirList):
+    async def _doGenerateEbuildManifest(self, pendingFullFullDstDirList):
         # AioPoolWithJobAndLoadAverage class needs a running event loop, so this function is needed, sucks
         pool = AioPoolWithJobAndLoadAverage(self._jobNumber, self._loadAverage)
-        for dstDir in pendingDstDirList:
-            pool.spawn_n(self._generateEbuildManifest(dstDir))
+        for ebuildDir in pendingFullFullDstDirList:
+            pool.spawn_n(self._generateEbuildManifest(ebuildDir))
         await pool.join()
 
     @staticmethod

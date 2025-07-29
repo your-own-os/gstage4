@@ -25,6 +25,7 @@ import os
 import re
 import abc
 import pathlib
+import functools
 from ._util import Util
 from ._util import ActionRunner
 from ._util import DirListMount
@@ -135,14 +136,7 @@ class Builder(ActionRunner):
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            pendingDstDirList = myRepo.patch([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories], self._s)
-            with _MyChrooter(self) as m:
-                # FIXME: it a bit hard to parallelize the following code
-                for dstDir in pendingDstDirList:
-                    hostEbuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
-                    fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
-                    chrootEbuildDir = os.path.join(myRepo.datadir_path, dstDir)
-                    m.shell_exec("", "ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)), quiet=True)
+            myRepo.patch_and_generate_manifest([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories], self._s)
 
         self._actionStorage["repo"] = repo
 
@@ -224,14 +218,7 @@ class Builder(ActionRunner):
             for overlay in overlay_list:
                 myRepo = myRepoDict[overlay.get_name()]
                 patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
-                pendingDstDirList = myRepo.patch(patchDirList, self._s)
-                with _MyChrooter(self) as m:
-                    # FIXME: it a bit hard to parallelize the following code
-                    for dstDir in pendingDstDirList:
-                        hostEbuildDir = os.path.join(myRepo.datadir_hostpath, dstDir)
-                        fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
-                        chrootEbuildDir = os.path.join(myRepo.datadir_path, dstDir)
-                        m.shell_exec("", "ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)), quiet=True)
+                myRepo.patch_and_generate_manifest(patchDirList, self._s)
 
         self._actionStorage["overlays"] = overlayRecord
 
@@ -515,40 +502,62 @@ class _MyRepo:
         return "/etc/portage/repos.conf/%s" % (self._repos_conf_file_name)
 
     @property
+    @functools.cache
     def datadir_path(self):
-        return re.search(r'location = (\S+)', pathlib.Path(self.repos_conf_file_hostpath).read_text(), re.M).group(1)
+        buf = pathlib.Path(self.repos_conf_file_hostpath).read_text()
+        m = re.search(r'location = (\S+)', buf, re.M)
+        return m.group(1)
 
     def write_repos_conf_file(self, buf):
         os.makedirs(os.path.dirname(self.repos_conf_file_hostpath), exist_ok=True)
         with open(self.repos_conf_file_hostpath, "w") as f:
             f.write(buf)
 
+    @functools.cache
     def get_repo_name(self):
-        m = re.search("^\\[(.*)\\]$", pathlib.Path(self.repos_conf_file_hostpath).read_text(), re.M)
+        buf = pathlib.Path(self.repos_conf_file_hostpath).read_text()
+        m = re.search("^\\[(.*)\\]$", buf, re.M)
         return m.group(1)
 
+    @functools.cache
     def get_sync_type(self):
-        m = re.search(r'sync-type = (\S+)', pathlib.Path(self.repos_conf_file_hostpath).read_text(), re.M)
+        buf = pathlib.Path(self.repos_conf_file_hostpath).read_text()
+        m = re.search(r'sync-type = (\S+)', buf, re.M)
         return m.group(1) if m is not None else None
 
+    # FIXME: is it being used?
+    @functools.cache
     def get_mount_params(self):
-        m = re.search(r'mount-params = "(.*)","(.*)"', pathlib.Path(self.repos_conf_file_hostpath).read_text(), re.M)
+        buf = pathlib.Path(self.repos_conf_file_hostpath).read_text()
+        m = re.search(r'mount-params = "(.*)","(.*)"', buf, re.M)
         return (m.group(1), m.group(2)) if m is not None else None
 
-    def patch(self, patchDirList, s):
-        repoName = self.get_repo_name()
+    def patch_and_generate_manifest(self, patchDirList, s):
         patcher = RepoPatcher(settings=s)
-        patchDirList = patcher.filter_patch_dir_list(patchDirList, repoName)
-        if len(patchDirList) > 0:
-            pendingDstDirList = patcher.patch(self.datadir_hostpath, patchDirList, repoName)
-            for x in patcher.warn_or_err_list:
-                if x.warn_or_err:
-                    print("Warning: %s" % (x.msg))
-                else:
-                    raise BuildError(x.msg)
-            return pendingDstDirList
-        else:
-            return set()
+        patchDirList = patcher.filter_patch_dir_list(patchDirList, self.get_repo_name())
+
+        # patching is not needed
+        if len(patchDirList) == 0:
+            return
+
+        pendingDstDirList = patcher.patch(self.datadir_hostpath, patchDirList, self.get_repo_name())
+        for x in patcher.warn_or_err_list:
+            if x.warn_or_err:
+                print("Warning: %s" % (x.msg))
+            else:
+                raise BuildError(x.msg)
+
+        # no need to generate manifest
+        if len(pendingDstDirList) == 0:
+            return
+
+        # FIXME: it a bit hard to parallelize the following code
+        with _MyChrooter(self) as m:
+            for dstDir in pendingDstDirList:
+                hostEbuildDir = os.path.join(self.datadir_hostpath, dstDir)
+                fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
+                chrootEbuildDir = os.path.join(self.datadir_path, dstDir)
+                m.shell_exec("", "ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)), quiet=True)
 
 
 class _MyChrooter(Runner):
