@@ -128,6 +128,7 @@ class Builder(ActionRunner):
             repo.sync(os.path.join(curPath, repo.get_datadir_path()[1:]))
         elif isinstance(repo, EmergeSyncRepository):
             myRepo = _MyRepoUtil.createFromEmergeSyncRepo(repo, True, curPath)
+            assert myRepo.get_sync_type() in ['rsync', 'webrsync', 'zipfile']       # in this stage, we don't have program for other sync type: 'cvs', 'git', 'mercurial', 'svn'
             with _MyChrooter(self) as m:
                 m.script_exec("", ScriptSync(), quiet=self._getQuiet())
         else:
