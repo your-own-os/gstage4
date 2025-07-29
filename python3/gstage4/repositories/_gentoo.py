@@ -23,13 +23,14 @@
 
 import os
 import tarfile
+import urllib.parse
 from .._util import Util
 from .._util import SqfsExtractor
 from .._prototype import ManualSyncRepository
 from .._prototype import EmergeSyncRepository
 
 
-class CloudGentoo(EmergeSyncRepository):
+class CloudGentooRsync(EmergeSyncRepository):
 
     def __init__(self, url=None):
         if url is None:
@@ -64,6 +65,30 @@ class CloudGentoo(EmergeSyncRepository):
         buf += "sync-openpgp-key-refresh-retry-delay-exp-base = 2\n"
         buf += "sync-openpgp-key-refresh-retry-delay-max = 60\n"
         buf += "sync-openpgp-key-refresh-retry-delay-mult = 4\n"
+        return buf
+
+
+class CloudGentooGit(EmergeSyncRepository):
+
+    def __init__(self, url=None):
+        if url is None:
+            self._url = "mirror://gentoo-portage-git"
+        else:
+            self._url = url
+
+    def get_name(self):
+        return _NAME
+
+    def get_datadir_path(self):
+        return _DATADIR_PATH
+
+    def get_repos_conf_file_content(self):
+        buf = ""
+        buf += "[gentoo]\n"
+        buf += "location = %s\n" % (self.get_datadir_path())
+        buf += "sync-type = %s\n" % (urllib.parse.urlparse(self._url).scheme)
+        buf += "sync-uri = %s\n" % (self._url)
+        buf += "auto-sync = yes\n"
         return buf
 
 

@@ -21,7 +21,8 @@
 # THE SOFTWARE.
 
 
-from ._gentoo import CloudGentoo
+from ._gentoo import CloudGentooRsync
+from ._gentoo import CloudGentooGit
 from ._gentoo import CloudGentooSnapshot
 from ._gentoo import GentooSnapshot
 
@@ -30,7 +31,8 @@ from ._overlay import RegisteredOverlay
 from ._overlay import UserDefinedOverlay
 
 __all__ = [
-    "CloudGentoo",
+    "CloudGentooRsync",
+    "CloudGentooGit",
     "CloudGentooSnapshot",
     "GentooSnapshot",
     "OverlayFromHostLayman",
