@@ -72,7 +72,7 @@ class CloudGentooGit(EmergeSyncRepository):
 
     def __init__(self, url=None):
         if url is None:
-            self._url = "mirror://gentoo-portage-git"
+            self._url = "https://anongit.gentoo.org/git/repo/gentoo.git"
         else:
             self._url = url
 
