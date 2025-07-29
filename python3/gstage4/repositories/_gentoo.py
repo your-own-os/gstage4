@@ -88,6 +88,8 @@ class CloudGentooGit(EmergeSyncRepository):
         buf += "location = %s\n" % (self.get_datadir_path())
         buf += "sync-type = %s\n" % (urllib.parse.urlparse(self._url).scheme)
         buf += "sync-uri = %s\n" % (self._url)
+        buf += "sync-depth = 1\n"
+        buf += "clone-depth = 1\n"
         buf += "auto-sync = yes\n"
         return buf
 

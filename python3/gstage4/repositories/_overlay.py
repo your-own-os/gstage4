@@ -47,7 +47,7 @@ class RegisteredOverlay(EmergeSyncRepository):
 
     _localData = None
 
-    def __init__(self, overlay_name):
+    def __init__(self, overlay_name, rw=False):
         if self._localData is None:
             self._localData = OverlayDb()
 
@@ -57,6 +57,7 @@ class RegisteredOverlay(EmergeSyncRepository):
         self._name = overlay_name
         self._syncType = self._localData.get_overlay_vcs_type(overlay_name)
         self._syncUrl = self._localData.get_overlay_url(overlay_name)
+        self._syncDepth = 1 if not rw else None
 
     def get_name(self):
         return self._name
@@ -67,10 +68,13 @@ class RegisteredOverlay(EmergeSyncRepository):
     def get_repos_conf_file_content(self):
         buf = ""
         buf += "[%s]\n" % (self._name)
-        buf += "auto-sync = yes\n"
         buf += "location = %s\n" % (self.get_datadir_path())
         buf += "sync-type = %s\n" % (self._syncType)
         buf += "sync-uri = %s\n" % (self._syncUrl)
+        if self._syncDepth is not None:
+            buf += "sync-depth = %d\n" % (self._syncDepth)
+            buf += "clone-depth = %d\n" % (self._syncDepth)
+        buf += "auto-sync = yes\n"
         return buf
 
 
@@ -78,7 +82,8 @@ class UserDefinedOverlay(EmergeSyncRepository):
 
     """Unofficial overlay managed by individuals"""
 
-    def __init__(self, overlay_name, sync_type, sync_url):      # FIXME: should change to using kwargs for each sync_type
+    # FIXME: should change to using kwargs for each sync_type
+    def __init__(self, overlay_name, sync_type, sync_url, rw=False):
         validUrlSchemas = {
             "git": ["git", "http", "https"],
         }
@@ -88,6 +93,7 @@ class UserDefinedOverlay(EmergeSyncRepository):
         self._name = overlay_name
         self._syncType = sync_type
         self._syncUrl = sync_url
+        self._syncDepth = 1 if not rw else None
 
     def get_name(self):
         return self._name
@@ -98,8 +104,11 @@ class UserDefinedOverlay(EmergeSyncRepository):
     def get_repos_conf_file_content(self):
         buf = ""
         buf += "[%s]\n" % (self._name)
-        buf += "auto-sync = yes\n"
         buf += "location = %s\n" % (self.get_datadir_path())
         buf += "sync-type = %s\n" % (self._syncType)
         buf += "sync-uri = %s\n" % (self._syncUrl)
+        if self._syncDepth is not None:
+            buf += "sync-depth = %d\n" % (self._syncDepth)
+            buf += "clone-depth = %d\n" % (self._syncDepth)
+        buf += "auto-sync = yes\n"
         return buf
