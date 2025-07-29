@@ -69,12 +69,12 @@ class RegisteredOverlay(EmergeSyncRepository):
         buf = ""
         buf += "[%s]\n" % (self._name)
         buf += "location = %s\n" % (self.get_datadir_path())
+        buf += "auto-sync = yes\n"
         buf += "sync-type = %s\n" % (self._syncType)
         buf += "sync-uri = %s\n" % (self._syncUrl)
         if self._syncDepth is not None:
             buf += "sync-depth = %d\n" % (self._syncDepth)
             buf += "clone-depth = %d\n" % (self._syncDepth)
-        buf += "auto-sync = yes\n"
         return buf
 
 
@@ -105,10 +105,10 @@ class UserDefinedOverlay(EmergeSyncRepository):
         buf = ""
         buf += "[%s]\n" % (self._name)
         buf += "location = %s\n" % (self.get_datadir_path())
+        buf += "auto-sync = yes\n"
         buf += "sync-type = %s\n" % (self._syncType)
         buf += "sync-uri = %s\n" % (self._syncUrl)
         if self._syncDepth is not None:
             buf += "sync-depth = %d\n" % (self._syncDepth)
             buf += "clone-depth = %d\n" % (self._syncDepth)
-        buf += "auto-sync = yes\n"
         return buf

@@ -23,7 +23,6 @@
 
 import os
 import tarfile
-import urllib.parse
 from .._util import Util
 from .._util import SqfsExtractor
 from .._prototype import ManualSyncRepository
@@ -53,9 +52,9 @@ class CloudGentooRsync(EmergeSyncRepository):
         # buf += "\n"
         buf += "[gentoo]\n"
         buf += "location = %s\n" % (self.get_datadir_path())
+        buf += "auto-sync = yes\n"
         buf += "sync-type = rsync\n"
         buf += "sync-uri = %s\n" % (self._url)
-        buf += "auto-sync = yes\n"
         buf += "sync-rsync-verify-jobs = 1\n"
         buf += "sync-rsync-verify-metamanifest = yes\n"
         buf += "sync-rsync-verify-max-age = 24\n"
@@ -86,11 +85,11 @@ class CloudGentooGit(EmergeSyncRepository):
         buf = ""
         buf += "[gentoo]\n"
         buf += "location = %s\n" % (self.get_datadir_path())
-        buf += "sync-type = %s\n" % (urllib.parse.urlparse(self._url).scheme)
+        buf += "auto-sync = yes\n"
+        buf += "sync-type = git\n"
         buf += "sync-uri = %s\n" % (self._url)
         buf += "sync-depth = 1\n"
         buf += "clone-depth = 1\n"
-        buf += "auto-sync = yes\n"
         return buf
 
 

@@ -440,8 +440,8 @@ class _MyRepoUtil:
 
         buf = ""
         buf += "[%s]\n" % (repo.get_name())
-        buf += "auto-sync = no\n"
         buf += "location = %s\n" % (repo.get_datadir_path())
+        buf += "auto-sync = no\n"
 
         myRepo = _MyRepo(chrootDir, cls._getReposConfFilename(repo, repoOrOverlay))
         myRepo.write_repos_conf_file(buf)
