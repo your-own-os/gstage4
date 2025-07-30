@@ -847,6 +847,9 @@ class TailorPam:
                     "/etc/security/pam_env.conf",
                     "/etc/environment",
                 ],
+                "sys-apps/systemd": [
+                    "/usr/lib/environment.d/99-environment.conf",       # this symlink points to /etc/environment
+                ],
             })
             items.remove("pam_env_conf")
         # FIXME: modify pam files, add conffile=/dev/null, envfile=/dev/null
