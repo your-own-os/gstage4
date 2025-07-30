@@ -391,6 +391,14 @@ class TailorSystemd:
                 })
                 removeItems.remove("systemd-userdbd")
 
+            if "systemd-run-generator" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*systemd-run-generator*",
+                    ],
+                })
+                removeItems.remove("systemd-run-generator")
+
             if "systemd-efi-boot-generator" in removeItems:
                 _updateDict(td, {
                     "sys-apps/systemd": [
