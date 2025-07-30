@@ -731,8 +731,8 @@ class TailorPam:
                 "sys-libs/pam": [
                     "*limits*",             # including /etc/security/limits.conf
                 ],
-                "*/*": [
-                    "/etc/security/limits.d",
+                "media-video/pipewire": [
+                    "/etc/security",        # remove /etc/security/limits.d/*
                 ],
             })
             items.remove("pam_limits")
@@ -787,9 +787,6 @@ class TailorPam:
             })
             items.remove("pam_faillock_conf")
         # FIXME: modify pam files, add conf=/dev/null
-
-        # FIXME:
-        # passwdqc.conf
 
         # also remove the whole /etc/security directory if we can
         etcSecurityDirItem = [
