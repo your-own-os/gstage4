@@ -750,8 +750,8 @@ class TailorPam:
                 "sys-libs/pam": [
                     "*limits*",             # including /etc/security/limits.conf
                 ],
-                "*/*": [
-                    "/etc/security/limits.d",
+                "media-video/pipewire": [
+                    "/etc/security",        # remove /etc/security/limits.d/*
                 ],
             })
             items.remove("pam_limits")
@@ -793,10 +793,11 @@ class TailorPam:
             _updateDict(td, {
                 "sys-libs/pam": [
                     "/etc/security/pam_env.conf",
+                    "/etc/environment",
                 ],
             })
             items.remove("pam_env_conf")
-        # FIXME: modify pam files, add conffile=/dev/null
+        # FIXME: modify pam files, add conffile=/dev/null, envfile=/dev/null
 
         if "pam_faillock_conf" in items:
             _updateDict(td, {
@@ -806,9 +807,6 @@ class TailorPam:
             })
             items.remove("pam_faillock_conf")
         # FIXME: modify pam files, add conf=/dev/null
-
-        # FIXME:
-        # passwdqc.conf
 
         # also remove the whole /etc/security directory if we can
         etcSecurityDirItem = [

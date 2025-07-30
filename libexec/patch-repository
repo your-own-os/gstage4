@@ -107,5 +107,6 @@ if __name__ == "__main__":
                 print("Error: %s" % (x.msg), file=sys.stderr)
         if any([not x.warn_or_err for x in patcher.warn_or_err_list]):
             sys.exit(1)
-        patcher.generateManifest(targetDir, pendingDstDirList)
+        if len(pendingDstDirList) > 0:
+            patcher.generateManifest(targetDir, pendingDstDirList)
         print("Done.")

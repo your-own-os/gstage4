@@ -128,7 +128,7 @@ class Builder(ActionRunner):
             repo.sync(os.path.join(curPath, repo.get_datadir_path()[1:]))
         elif isinstance(repo, EmergeSyncRepository):
             myRepo = _MyRepoUtil.createFromEmergeSyncRepo(repo, True, curPath)
-            assert myRepo.get_sync_type() == "rsync"
+            assert myRepo.get_sync_type() in ['rsync', 'webrsync', 'zipfile']       # in this stage, we don't have program for other sync type: 'cvs', 'git', 'mercurial', 'svn'
             with _MyChrooter(self) as m:
                 m.script_exec("", ScriptSync(), quiet=self._getQuiet())
         else:
@@ -441,8 +441,8 @@ class _MyRepoUtil:
 
         buf = ""
         buf += "[%s]\n" % (repo.get_name())
-        buf += "auto-sync = no\n"
         buf += "location = %s\n" % (repo.get_datadir_path())
+        buf += "auto-sync = no\n"
 
         myRepo = _MyRepo(chrootDir, cls._getReposConfFilename(repo, repoOrOverlay))
         myRepo.write_repos_conf_file(buf)
