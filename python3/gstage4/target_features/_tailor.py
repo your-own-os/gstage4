@@ -415,6 +415,15 @@ class TailorSystemd:
                 })
                 removeItems.remove("systemd-gpt-auto-generator")
 
+            if "kernel-management" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*kernel-install*",
+                        "/usr/lib/kernel*",
+                    ],
+                })
+                removeItems.remove("kernel-management")
+
             if "fstab" in removeItems:
                 _updateDict(td, {
                     "sys-apps/systemd": [
