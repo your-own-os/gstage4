@@ -85,6 +85,7 @@ from ._tailor import TailorWget
 from ._tailor import TailorRsync
 from ._tailor import TailorLmSensors
 from ._tailor import TailorQemu
+from ._tailor import TailorWine
 
 from ._pam import PamSuWheelOk
 
@@ -174,6 +175,7 @@ __all__ = [
     "TailorRsync",
     "TailorLmSensors",
     "TailorQemu",
+    "TailorWine",
     "PamSuWheelOk",
     "UseGithubMirror",
     "UseGogMirror",
