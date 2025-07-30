@@ -184,7 +184,7 @@ class UseVT:
     pass
 
 
-class NotUseVT:
+class DontUseVT:
     # makes userspace be ready for CONFIG_VT=n, we don't manipulate kernel config file
 
     def update_target_settings(self, target_settings):
@@ -202,7 +202,7 @@ class NotUseVT:
         target_settings.repo_postsync_patch_directories.append("kill-config-vt")
 
 
-class NotUseDeprecatedPackagesAndFunctions:
+class DontUseDeprecatedPackagesAndFunctions:
 
     def update_target_settings(self, target_settings):
         assert "10-no-deprecated" not in target_settings.pkg_use_files
@@ -739,7 +739,7 @@ class DisableFstab:
         target_settings.repo_postsync_patch_directories.append("kill-fstab")
 
 
-class NotUsePypy:
+class DontUsePypy:
 
     def update_target_settings(self, target_settings):
         assert "10-no-pypy" not in target_settings.install_mask_files

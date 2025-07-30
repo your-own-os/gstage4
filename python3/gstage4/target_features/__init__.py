@@ -33,7 +33,7 @@ from ._common import UseOpenrc
 from ._common import UseSystemd
 
 from ._common import UseVT
-from ._common import NotUseVT
+from ._common import DontUseVT
 
 from ._common import UseGnomeKeyring
 from ._common import UseKeePassXc
@@ -42,7 +42,7 @@ from ._common import UseIbus
 from ._common import UseFcitx
 
 from ._common import AcceptAllLicenses
-from ._common import NotUseDeprecatedPackagesAndFunctions
+from ._common import DontUseDeprecatedPackagesAndFunctions
 from ._common import DesktopEnvironmentNeutral
 from ._common import UseCapability
 
@@ -59,7 +59,7 @@ from ._common import PreferPythonMagic
 
 from ._common import DisablePcSpeaker
 from ._common import DisableFstab
-from ._common import NotUsePypy
+from ._common import DontUsePypy
 from ._common import RemoveDoc
 
 from ._common import SupportAllVideoFormat
@@ -97,13 +97,13 @@ from ._mirror import UseHuggingFaceMirror
 
 from ._new_use import AddSystemServiceUseFlag
 
-from ._priviledge import NotUsePolicyKit
-from ._priviledge import NotUseSudo
+from ._priviledge import DontUsePolicyKit
+from ._priviledge import DontUseSudo
 from ._priviledge import UniversalWheelGroup
 
 from ._application import UseAllQemuTargets
 from ._application import UseAllLlvmTargets
-from ._application import NotUseLogrotate
+from ._application import DontUseLogrotate
 
 from ._application import MemTest
 from ._application import SshServer
@@ -112,13 +112,13 @@ from ._application import NetworkManager
 from ._application import Kmscon
 
 from ._application import UseZeroConf
-from ._application import NotUseZeroConf
+from ._application import DontUseZeroConf
 
 from ._application import UseBluetooth
-from ._application import NotUseBluetooth
+from ._application import DontUseBluetooth
 
 from ._application import UsePrinting
-from ._application import NotUsePrinting
+from ._application import DontUsePrinting
 
 
 __all__ = [
@@ -131,13 +131,13 @@ __all__ = [
     "UseOpenrc",
     "UseSystemd",
     "UseVT",
-    "NotUseVT",
+    "DontUseVT",
     "UseGnomeKeyring",
     "UseKeePassXc",
     "UseIbus",
     "UseFcitx",
     "AcceptAllLicenses",
-    "NotUseDeprecatedPackagesAndFunctions",
+    "DontUseDeprecatedPackagesAndFunctions",
     "DesktopEnvironmentNeutral",
     "UseCapability",
     "PreferGnuAndGpl",
@@ -152,7 +152,7 @@ __all__ = [
     "PreferPythonMagic",
     "DisablePcSpeaker",
     "DisableFstab",
-    "NotUsePypy",
+    "DontUsePypy",
     "RemoveDoc",
     "SupportAllVideoFormat",
     "SupportAllAudioFormat",
@@ -183,21 +183,21 @@ __all__ = [
     "UseItchMirror",
     "UseHuggingFaceMirror",
     "AddSystemServiceUseFlag",
-    "NotUsePolicyKit",
-    "NotUseSudo",
+    "DontUsePolicyKit",
+    "DontUseSudo",
     "UniversalWheelGroup",
     "UseAllQemuTargets",
     "UseAllLlvmTargets",
-    "NotUseLogrotate",
+    "DontUseLogrotate",
     "MemTest",
     "SshServer",
     "Chrony",
     "NetworkManager",
     "Kmscon",
     "UseZeroConf",
-    "NotUseZeroConf",
+    "DontUseZeroConf",
     "UseBluetooth",
-    "NotUseBluetooth",
+    "DontUseBluetooth",
     "UsePrinting",
-    "NotUsePrinting",
+    "DontUsePrinting",
 ]

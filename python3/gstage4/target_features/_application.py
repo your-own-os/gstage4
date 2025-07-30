@@ -169,7 +169,7 @@ media-video/pipewire    -zeroconf          # what zeroconf in pipewire is for?
 """
 
 
-class NotUseZeroConf:
+class DontUseZeroConf:
 
     def update_target_settings(self, target_settings):
         assert "10-no-zeroconf" not in target_settings.pkg_use_files
@@ -213,7 +213,7 @@ net-misc/networkmanager     -bluetooth          # what bluetooth in networkmanag
 """
 
 
-class NotUseBluetooth:
+class DontUseBluetooth:
 
     def update_target_settings(self, target_settings):
         assert "10-no-bluetooth" not in target_settings.pkg_use_files
@@ -259,7 +259,7 @@ class UsePrinting:
 """
 
 
-class NotUsePrinting:
+class DontUsePrinting:
 
     def update_target_settings(self, target_settings):
         assert "10-no-printing" not in target_settings.pkg_use_files
@@ -300,7 +300,7 @@ class UseAllLlvmTargets:
 """
 
 
-class NotUseLogrotate:
+class DontUseLogrotate:
 
     def update_target_settings(self, target_settings):
         assert "10-no-logrotate" not in target_settings.pkg_mask_files

@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 
-class NotUsePolicyKit:
+class DontUsePolicyKit:
 
     def update_target_settings(self, target_settings):
         assert "10-no-policykit" not in target_settings.pkg_use_files
@@ -47,7 +47,7 @@ sys-auth/polkit
 """
 
 
-class NotUseSudo:
+class DontUseSudo:
 
     def update_target_settings(self, target_settings):
         assert "10-no-sudo" not in target_settings.pkg_mask_files
