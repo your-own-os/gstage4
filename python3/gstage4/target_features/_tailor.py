@@ -24,6 +24,21 @@
 from .._util import Util
 
 
+class TailorWine:
+
+    def __init__(self, disable_items=[]):
+        self._disableItems = disable_items
+
+    def update_target_settings(self, target_settings):
+        disableItems = list(self._disableItems)
+
+        if "auto-adding-menu-entries" in disableItems:
+            target_settings.repo_postsync_patch_directories.append("wine-auto-adding-menu-entries")
+            disableItems.remove("wine-auto-adding-menu-entries")
+
+        assert len(disableItems) == 0
+
+
 class TailorSystemd:
 
     def __init__(self, disable_items=[], remove_items=[]):
@@ -35,384 +50,388 @@ class TailorSystemd:
         assert "10-tailor-systemd" not in target_settings.install_mask_files
 
         disableItems = list(self._disableItems)
+        if True:
+            if "systemd-udevd-socket-activation" in disableItems:
+                target_settings.repo_postsync_patch_directories.append("systemd-disable-systemd-udevd-socket-activation")
+                disableItems.remove("systemd-udevd-socket-activation")
 
-        if "systemd-udevd-socket-activation" in disableItems:
-            target_settings.repo_postsync_patch_directories.append("systemd-disable-systemd-udevd-socket-activation")
-            disableItems.remove("systemd-udevd-socket-activation")
+            if "kmod-static-nodes" in disableItems:
+                target_settings.repo_postsync_patch_directories.append("systemd-disable-kmod-static-nodes")
+                disableItems.remove("kmod-static-nodes")
 
-        if "kmod-static-nodes" in disableItems:
-            target_settings.repo_postsync_patch_directories.append("systemd-disable-kmod-static-nodes")
-            disableItems.remove("kmod-static-nodes")
+            assert len(disableItems) == 0
 
         removeItems = list(self._removeItems)
-        td = {}
-        tm = []
+        if True:
+            td = {}
+            tm = []
 
-        if "systemd-battery-check" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*battery-check*",
-                ],
-            })
-            removeItems.remove("systemd-battery-check")
+            if "systemd-battery-check" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*battery-check*",
+                    ],
+                })
+                removeItems.remove("systemd-battery-check")
 
-        if "systemd-backlight" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*backlight*",
-                ],
-            })
-            removeItems.remove("systemd-backlight")
+            if "systemd-backlight" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*backlight*",
+                    ],
+                })
+                removeItems.remove("systemd-backlight")
 
-        if "systemd-boot" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*bootctl*",
-                    "*/systemd-boot.7.bz2",
-                    "*systemd-boot-system-token*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*bootctl*",
-                    "*systemd-boot-system-token*",
-                ],
-            })
-            removeItems.remove("systemd-boot")
+            if "systemd-boot" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*bootctl*",
+                        "*/systemd-boot.7.bz2",
+                        "*systemd-boot-system-token*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*bootctl*",
+                        "*systemd-boot-system-token*",
+                    ],
+                })
+                removeItems.remove("systemd-boot")
 
-        if "systemd-coredump" in removeItems:
-            target_settings.repo_postsync_patch_directories.append("systemd-remove-coredump-user")
-            tm += [
-                "acct-user/systemd-coredump",
-                "acct-group/systemd-coredump",
-            ]
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*coredump*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*coredump*",
-                ],
-            })
-            removeItems.remove("systemd-coredump")
+            if "systemd-coredump" in removeItems:
+                target_settings.repo_postsync_patch_directories.append("systemd-remove-coredump-user")
+                tm += [
+                    "acct-user/systemd-coredump",
+                    "acct-group/systemd-coredump",
+                ]
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*coredump*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*coredump*",
+                    ],
+                })
+                removeItems.remove("systemd-coredump")
 
-        if "systemd-dissect" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*systemd-dissect*",
-                    "*mount.ddi*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*systemd-dissect*",
-                ],
-            })
-            removeItems.remove("systemd-dissect")
+            if "systemd-dissect" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*systemd-dissect*",
+                        "*mount.ddi*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*systemd-dissect*",
+                    ],
+                })
+                removeItems.remove("systemd-dissect")
 
-        if "systemd-firstboot" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*firstboot*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*systemd-firstboot*",
-                ],
-                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
-                    "*systemd-firstboot*",
-                ],
-            })
-            removeItems.remove("systemd-firstboot")
+            if "systemd-firstboot" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*firstboot*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*systemd-firstboot*",
+                    ],
+                    "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
+                        "*systemd-firstboot*",
+                    ],
+                })
+                removeItems.remove("systemd-firstboot")
 
-        if "systemd-hostnamed" in removeItems:
-            tm += [
-                "acct-group/systemd-hostname",
-            ]
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*hostname1*",
-                    "*hostnamed*",
-                    "*hostnamectl*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*hostnamed*",
-                    "*hostnamectl*",
-                ],
-                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
-                    "*hostnamed*",
-                    "*hostnamectl*",
-                ],
-            })
-            removeItems.remove("systemd-hostnamed")
+            if "systemd-hostnamed" in removeItems:
+                tm += [
+                    "acct-group/systemd-hostname",
+                ]
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*hostname1*",
+                        "*hostnamed*",
+                        "*hostnamectl*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*hostnamed*",
+                        "*hostnamectl*",
+                    ],
+                    "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
+                        "*hostnamed*",
+                        "*hostnamectl*",
+                    ],
+                })
+                removeItems.remove("systemd-hostnamed")
 
-        if "systemd-kexec" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*kexec*",
-                ],
-            })
-            removeItems.remove("systemd-kexec")
+            if "systemd-kexec" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*kexec*",
+                    ],
+                })
+                removeItems.remove("systemd-kexec")
 
-        if "systemd-localed" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*locale1*",
-                    "*localed*",
-                    "*localectl*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*localed*",
-                    "*localectl*",
-                ],
-            })
-            removeItems.remove("systemd-localed")
+            if "systemd-localed" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*locale1*",
+                        "*localed*",
+                        "*localectl*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*localed*",
+                        "*localectl*",
+                    ],
+                })
+                removeItems.remove("systemd-localed")
 
-        if "systemd-machined" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*machine*",
-                    "*nspawn*",
-                    "*vmspawn*",
-                    "*detect-virt*",
-                    "*exit.target",
-                    "*systemd-exit.service",
-                    "/usr/lib/systemd/system/machines.target.wants",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*machine*",                    # warn: may hide extra files
-                ],
-            })
-            removeItems.remove("systemd-machined")
+            if "systemd-machined" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*machine*",
+                        "*nspawn*",
+                        "*vmspawn*",
+                        "*detect-virt*",
+                        "*exit.target",
+                        "*systemd-exit.service",
+                        "/usr/lib/systemd/system/machines.target.wants",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*machine*",                    # warn: may hide extra files
+                    ],
+                })
+                removeItems.remove("systemd-machined")
 
-        if "systemd-networkd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append("systemd-remove-network-user")
-            tm += [
-                "acct-user/systemd-network",
-                "acct-group/systemd-network",
-            ]
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*network*",
-                    "/usr/lib/systemd/network*",
-                    "/etc/systemd/network",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*networkctl*",
-                    "*networkd*",
-                    "*systemd.network*",
-                    "*systemd-network*",
-                ],
-                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
-                    "*networkctl*",
-                    "*networkd*",
-                    "*systemd.network*",
-                    "*systemd-network*",
-                ],
-                "*/*": [
-                    "/usr/lib/systemd/network",
-                ],
-            })
-            removeItems.remove("systemd-networkd")
+            if "systemd-networkd" in removeItems:
+                target_settings.repo_postsync_patch_directories.append("systemd-remove-network-user")
+                tm += [
+                    "acct-user/systemd-network",
+                    "acct-group/systemd-network",
+                ]
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*network*",
+                        "/usr/lib/systemd/network*",
+                        "/etc/systemd/network",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*networkctl*",
+                        "*networkd*",
+                        "*systemd.network*",
+                        "*systemd-network*",
+                    ],
+                    "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
+                        "*networkctl*",
+                        "*networkd*",
+                        "*systemd.network*",
+                        "*systemd-network*",
+                    ],
+                    "*/*": [
+                        "/usr/lib/systemd/network",
+                    ],
+                })
+                removeItems.remove("systemd-networkd")
 
-        if "systemd-portabled" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*portable*",
-                    "/usr/lib/systemd/portable",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*portablectl*",
-                    "*systemd-portabled*",
-                ],
-            })
-            removeItems.remove("systemd-portabled")
+            if "systemd-portabled" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*portable*",
+                        "/usr/lib/systemd/portable",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*portablectl*",
+                        "*systemd-portabled*",
+                    ],
+                })
+                removeItems.remove("systemd-portabled")
 
-        if "systemd-oomd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append("systemd-remove-oom-user")
-            tm += [
-                "acct-user/systemd-oom",
-                "acct-group/systemd-oom",
-            ]
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*oom1*",
-                    "*oomd*",
-                    "*oomctl*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*oomctl*",
-                    "*oomd*",
-                ],
-            })
-            removeItems.remove("systemd-oomd")
+            if "systemd-oomd" in removeItems:
+                target_settings.repo_postsync_patch_directories.append("systemd-remove-oom-user")
+                tm += [
+                    "acct-user/systemd-oom",
+                    "acct-group/systemd-oom",
+                ]
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*oom1*",
+                        "*oomd*",
+                        "*oomctl*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*oomctl*",
+                        "*oomd*",
+                    ],
+                })
+                removeItems.remove("systemd-oomd")
 
-        if "systemd-pstore" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*pstore*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*pstore*",                     # warn: may hide extra files
-                ],
-            })
-            removeItems.remove("systemd-pstore")
+            if "systemd-pstore" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*pstore*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*pstore*",                     # warn: may hide extra files
+                    ],
+                })
+                removeItems.remove("systemd-pstore")
 
-        if "systemd-resolvd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append("systemd-remove-resolve-user")
-            tm += [
-                "acct-user/systemd-resolve",
-                "acct-group/systemd-resolve",
-            ]
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*resolv*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*resolvectl*",
-                    "*resolved*",
-                    "*nss-resolve*",
-                ],
-                "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
-                    "*resolvectl*",
-                    "*resolved*",
-                    "*nss-resolve*",
-                ],
-            })
-            removeItems.remove("systemd-resolvd")
+            if "systemd-resolvd" in removeItems:
+                target_settings.repo_postsync_patch_directories.append("systemd-remove-resolve-user")
+                tm += [
+                    "acct-user/systemd-resolve",
+                    "acct-group/systemd-resolve",
+                ]
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*resolv*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*resolvectl*",
+                        "*resolved*",
+                        "*nss-resolve*",
+                    ],
+                    "app-i18n/man-pages-zh_CN": [       # why i18n man pages not in the original package itself?
+                        "*resolvectl*",
+                        "*resolved*",
+                        "*nss-resolve*",
+                    ],
+                })
+                removeItems.remove("systemd-resolvd")
 
-        if "systemd-storagetm" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*storagetm*",
-                    "*storage-target-mode.target",
-                ],
-            })
-            removeItems.remove("systemd-storagetm")
+            if "systemd-storagetm" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*storagetm*",
+                        "*storage-target-mode.target",
+                    ],
+                })
+                removeItems.remove("systemd-storagetm")
 
-        if "systemd-sysext" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*sysext*",
-                    "*confext*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*systemd-sysext*",
-                ],
-            })
-            removeItems.remove("systemd-sysext")
+            if "systemd-sysext" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*sysext*",
+                        "*confext*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*systemd-sysext*",
+                    ],
+                })
+                removeItems.remove("systemd-sysext")
 
-        if "systemd-sysupdate" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*sysupdate*",
-                ],
-            })
-            removeItems.remove("systemd-sysupdate")
+            if "systemd-sysupdate" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*sysupdate*",
+                    ],
+                })
+                removeItems.remove("systemd-sysupdate")
 
-        if "systemd-sysusers" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*sysusers*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*sysusers*",                   # warn: may hide extra files
-                ],
-            })
-            removeItems.remove("systemd-sysusers")
+            if "systemd-sysusers" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*sysusers*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*sysusers*",                   # warn: may hide extra files
+                    ],
+                })
+                removeItems.remove("systemd-sysusers")
 
-        if "systemd-timedated" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*timedate*",
-                    "/usr/lib/systemd/ntp-units.d*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*timedatectl*",
-                    "*systemd-timedated*",
-                ],
-                "*/*": [
-                    "/usr/lib/systemd/ntp-units.d",
-                ],
-            })
-            removeItems.remove("systemd-timedated")
+            if "systemd-timedated" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*timedate*",
+                        "/usr/lib/systemd/ntp-units.d*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*timedatectl*",
+                        "*systemd-timedated*",
+                    ],
+                    "*/*": [
+                        "/usr/lib/systemd/ntp-units.d",
+                    ],
+                })
+                removeItems.remove("systemd-timedated")
 
-        if "systemd-timesyncd" in removeItems:
-            target_settings.repo_postsync_patch_directories.append("systemd-remove-timesync-user")
-            tm += [
-                "acct-user/systemd-timesync",
-                "acct-group/systemd-timesync",
-            ]
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*timesync*",
-                    "*ntp*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*timesyncd*",
-                ],
-            })
-            removeItems.remove("systemd-timesyncd")
+            if "systemd-timesyncd" in removeItems:
+                target_settings.repo_postsync_patch_directories.append("systemd-remove-timesync-user")
+                tm += [
+                    "acct-user/systemd-timesync",
+                    "acct-group/systemd-timesync",
+                ]
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*timesync*",
+                        "*ntp*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*timesyncd*",
+                    ],
+                })
+                removeItems.remove("systemd-timesyncd")
 
-        if "systemd-update" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*system-update*",
-                    "*systemd-update-helper*",
-                    "*update-done*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*systemd-system-update*",
-                ],
-            })
-            removeItems.remove("systemd-update")
+            if "systemd-update" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*system-update*",
+                        "*systemd-update-helper*",
+                        "*update-done*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*systemd-system-update*",
+                    ],
+                })
+                removeItems.remove("systemd-update")
 
-        if "systemd-userdbd" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*userdb*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*userdb*",
-                ],
-            })
-            removeItems.remove("systemd-userdbd")
+            if "systemd-userdbd" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*userdb*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*userdb*",
+                    ],
+                })
+                removeItems.remove("systemd-userdbd")
 
-        if "fstab" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*fstab*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*systemd-fstab*",
-                ],
-            })
-            removeItems.remove("fstab")
+            if "fstab" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*fstab*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*systemd-fstab*",
+                    ],
+                })
+                removeItems.remove("fstab")
 
-        if "fs-operations" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*repart*",
-                    "/usr/lib/systemd/repart",
-                    "*makefs*",
-                    "*growfs*",
-                    "*mkswap*",
-                ],
-                "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
-                    "*repart*",
-                    "*makefs*",
-                ],
-            })
-            removeItems.remove("fs-operations")
+            if "fs-operations" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*repart*",
+                        "/usr/lib/systemd/repart",
+                        "*makefs*",
+                        "*growfs*",
+                        "*mkswap*",
+                    ],
+                    "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
+                        "*repart*",
+                        "*makefs*",
+                    ],
+                })
+                removeItems.remove("fs-operations")
 
-        if "ldconfig.service" in removeItems:
-            _updateDict(td, {
-                "sys-apps/systemd": [
-                    "*ldconfig*",
-                ],
-            })
-            removeItems.remove("ldconfig.service")
+            if "ldconfig.service" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*ldconfig*",
+                    ],
+                })
+                removeItems.remove("ldconfig.service")
 
-        assert len(removeItems) == 0
-        if len(tm) > 0:
-            target_settings.pkg_mask_files["10-tailor-systemd"] = "\n".join(tm) + "\n"
-        if len(td) > 0:
-            target_settings.install_mask_files["10-tailor-systemd"] = td
+            if len(tm) > 0:
+                target_settings.pkg_mask_files["10-tailor-systemd"] = "\n".join(tm) + "\n"
+            if len(td) > 0:
+                target_settings.install_mask_files["10-tailor-systemd"] = td
+
+            assert len(removeItems) == 0
 
 
 class TailorBaselayout:
