@@ -774,10 +774,11 @@ class TailorPam:
             _updateDict(td, {
                 "sys-libs/pam": [
                     "/etc/security/pam_env.conf",
+                    "/etc/environment",
                 ],
             })
             items.remove("pam_env_conf")
-        # FIXME: modify pam files, add conffile=/dev/null
+        # FIXME: modify pam files, add conffile=/dev/null, envfile=/dev/null
 
         if "pam_faillock_conf" in items:
             _updateDict(td, {
