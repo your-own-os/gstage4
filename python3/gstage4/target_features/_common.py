@@ -35,11 +35,17 @@ class FixBugs:
 
         target_settings.pkg_use_files["10-bugfix"] = self._useFileContent.strip("\n") + "\n"
         target_settings.pkg_mask_files["10-bugfix"] = self._maskFileContent.strip("\n") + "\n"
+        target_settings.install_mask_files["10-bugfix"] = {}
 
-        # FIXME
-        # target_settings.install_mask_files["10-bugfix"] = {}
-
+        # packages should NOT install files into /var.
+        # Not only obvious runtime directory such as /var/tmp, /var/cache, but also /var/lib, /var/spool and some other directories.
+        # Package files should only reside in system directory, not data directory.
+        # /var should be removable if you can accept the total data loss (sometimes I do).
+        # Reference:
+        # [1] https://bugs.gentoo.org/520404
+        # [2] https://forums.gentoo.org/viewtopic-t-1154882-highlight-.html
         target_settings.repo_postsync_patch_directories.append("kill-var-files")
+
         target_settings.repo_postsync_patch_directories.append("bugfix")
 
     _useFileContent = """
