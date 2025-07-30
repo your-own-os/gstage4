@@ -391,6 +391,22 @@ class TailorSystemd:
                 })
                 removeItems.remove("systemd-userdbd")
 
+            if "systemd-efi-boot-generator" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*systemd-efi-boot-generator*",
+                    ],
+                })
+                removeItems.remove("systemd-efi-boot-generator")
+
+            if "systemd-gpt-auto-generator" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*systemd-gpt-auto-generator*",
+                    ],
+                })
+                removeItems.remove("systemd-gpt-auto-generator")
+
             if "fstab" in removeItems:
                 _updateDict(td, {
                     "sys-apps/systemd": [
