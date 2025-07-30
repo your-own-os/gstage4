@@ -459,6 +459,25 @@ class TailorSystemd:
                 })
                 removeItems.remove("ldconfig.service")
 
+            if "initrd-facility" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*initrd*",
+                        "*volatile-root*",
+                        "*hibernate-resume*",
+                    ],
+                })
+                removeItems.remove("initrd-facility")
+
+            if "debug-facility" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*systemd-debug-generator*",
+                        "*debug-shell*",
+                    ],
+                })
+                removeItems.remove("debug-facility")
+
             if len(tm) > 0:
                 target_settings.pkg_mask_files["10-tailor-systemd"] = "\n".join(tm) + "\n"
             if len(td) > 0:
