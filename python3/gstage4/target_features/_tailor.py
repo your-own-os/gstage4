@@ -34,7 +34,7 @@ class TailorWine:
 
         if "auto-adding-menu-entries" in disableItems:
             target_settings.repo_postsync_patch_directories.append("wine-auto-adding-menu-entries")
-            disableItems.remove("wine-auto-adding-menu-entries")
+            disableItems.remove("auto-adding-menu-entries")
 
         assert len(disableItems) == 0
 
