@@ -391,6 +391,17 @@ class TailorSystemd:
                 })
                 removeItems.remove("systemd-userdbd")
 
+            if "systemd-ssh-proxy" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*systemd-ssh-proxy*",
+                        "/etc/ssh",
+                        "/usr/lib/systemd/ssh_config.d",
+                        "/usr/lib/systemd/sshd_config.d",
+                    ],
+                })
+                removeItems.remove("systemd-ssh-proxy")
+
             if "systemd-run-generator" in removeItems:
                 _updateDict(td, {
                     "sys-apps/systemd": [
@@ -414,6 +425,14 @@ class TailorSystemd:
                     ],
                 })
                 removeItems.remove("systemd-gpt-auto-generator")
+
+            if "systemd-ssh-generator" in removeItems:
+                _updateDict(td, {
+                    "sys-apps/systemd": [
+                        "*systemd-ssh-generator*",
+                    ],
+                })
+                removeItems.remove("systemd-ssh-generator")
 
             if "kernel-management" in removeItems:
                 _updateDict(td, {
