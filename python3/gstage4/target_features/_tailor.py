@@ -33,7 +33,7 @@ class TailorWine:
         disableItems = list(self._disableItems)
 
         if "auto-adding-menu-entries" in disableItems:
-            target_settings.repo_postsync_patch_directories.append("wine-disable-auto-adding-menu-entries")
+                target_settings.repo_postsync_patch_directories.append("wine-disable-auto-adding-menu-entries")
             disableItems.remove("auto-adding-menu-entries")
 
         assert len(disableItems) == 0

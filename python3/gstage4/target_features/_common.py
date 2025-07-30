@@ -35,7 +35,7 @@ class FixBugs:
 
         target_settings.pkg_use_files["10-bugfix"] = self._useFileContent.strip("\n") + "\n"
         target_settings.pkg_mask_files["10-bugfix"] = self._maskFileContent.strip("\n") + "\n"
-        target_settings.install_mask_files["10-bugfix"] = {}
+        # target_settings.install_mask_files["10-bugfix"] = {}
 
         # packages should NOT install files into /var.
         # Not only obvious runtime directory such as /var/tmp, /var/cache, but also /var/lib, /var/spool and some other directories.
