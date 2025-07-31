@@ -48,12 +48,12 @@ class FixBugs:
             target_settings.install_mask_files["10-bugfix"] = {}
 
             # files in /var has already been created by /usr/lib/tmpfiles.d/*.conf in package
-            target_settings.install_mask_files["10-bugfix"].update({x: "/var" for x in [
+            target_settings.install_mask_files["10-bugfix"].update({x: ["/var"] for x in [
                 "sys-apps/systemd",
             ]})
 
             # files in /var can be created by package itself
-            target_settings.install_mask_files["10-bugfix"].update({x: "/var" for x in [
+            target_settings.install_mask_files["10-bugfix"].update({x: ["/var"] for x in [
             ]})
 
             # extra operation is needed when removing /var
