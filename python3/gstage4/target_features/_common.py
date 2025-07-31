@@ -45,10 +45,18 @@ class FixBugs:
         # [1] https://bugs.gentoo.org/520404
         # [2] https://forums.gentoo.org/viewtopic-t-1154882-highlight-.html
         if True:
-            maskPkgList = [
+            target_settings.install_mask_files["10-bugfix"] = {}
+
+            # files in /var has already been created by /usr/lib/tmpfiles.d/*.conf in package
+            target_settings.install_mask_files["10-bugfix"].update({x: "/var" for x in [
                 "sys-apps/systemd",
-            ]
-            target_settings.install_mask_files["10-bugfix"] = {x: "/var" for x in maskPkgList}
+            ]})
+
+            # files in /var can be created by package itself
+            target_settings.install_mask_files["10-bugfix"].update({x: "/var" for x in [
+            ]})
+
+            # extra operation is needed when removing /var
             target_settings.repo_postsync_patch_directories.append("kill-var-files")
 
         target_settings.repo_postsync_patch_directories.append("bugfix")
