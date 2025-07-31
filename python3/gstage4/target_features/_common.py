@@ -789,6 +789,7 @@ class PreferWayland:
         target_settings.install_mask_files["10-prefer-wayland"] = {
             "sys-apps/systemd": [
                 "/etc/X11",
+                "*/tmpfiles.d/x11.conf",
             ],
             "sys-apps/dbus": [
                 "/etc/X11",
