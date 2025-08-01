@@ -462,11 +462,11 @@ class TailorSystemd:
                         "*makefs*",
                         "*growfs*",
                         "*mkswap*",
-                        "*/tmpfiles.d/etc.conf",        # don't auto create baselayout files or directories
-                        "*/tmpfiles.d/home.conf",       # same as above
-                        "*/tmpfiles.d/legacy.conf",     # same as above
-                        "*/tmpfiles.d/tmp.conf",        # same as above
-                        "*/tmpfiles.d/var.conf",        # same as above
+                        "/usr/lib/tmpfiles.d/etc.conf",        # don't auto create baselayout files or directories
+                        "/usr/lib/tmpfiles.d/home.conf",       # same as above
+                        "/usr/lib/tmpfiles.d/legacy.conf",     # same as above
+                        "/usr/lib/tmpfiles.d/tmp.conf",        # same as above
+                        "/usr/lib/tmpfiles.d/var.conf",        # same as above
                     ],
                     "app-i18n/man-pages-l10n": [        # why i18n man pages not in the original package itself?
                         "*repart*",
