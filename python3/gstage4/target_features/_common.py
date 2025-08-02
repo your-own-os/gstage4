@@ -157,6 +157,7 @@ sys-auth/seatd                                                       systemd    
 # so that we can use systemd-udev
 virtual/libudev                                                      systemd
 virtual/udev                                                         systemd
+virtual/service-manager                                              systemd
 virtual/tmpfiles                                                     systemd
 
 # so that it does not depends on gui-libs/display-manager-init
