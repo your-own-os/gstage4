@@ -106,9 +106,11 @@ class CloudGentooStage3Archive(SeedStage):
         autoBuildsUrl = os.path.join(baseUrl, "releases", self._arch, "autobuilds")
 
         self._stage3FileUrl = None
-        for resp in Util.robustUrlOpen(os.path.join(autoBuildsUrl, indexFileName)):
-            m = re.search(r'^(\S+) [0-9]+', resp.read().decode("UTF-8"), re.M)
-            self._stage3FileUrl = os.path.join(autoBuildsUrl, m.group(1))
+        for attempt, getResp in Util.robustUrlOpen(os.path.join(autoBuildsUrl, indexFileName)):
+            with attempt:
+                with getResp() as resp:
+                    m = re.search(r'^(\S+) [0-9]+', resp.read().decode("UTF-8"), re.M)
+                    self._stage3FileUrl = os.path.join(autoBuildsUrl, m.group(1))
 
         self._stage3HashFileUrl = self._stage3FileUrl + ".DEGISTS"
 
@@ -116,13 +118,17 @@ class CloudGentooStage3Archive(SeedStage):
         return self._arch
 
     def get_digest(self):
-        for resp in Util.robustUrlOpen(self._stage3HashFileUrl):
-            return resp.read()
+        for attempt, getResp in Util.robustUrlOpen(self._stage3HashFileUrl):
+            with attempt:
+                with getResp() as resp:
+                    return resp.read()
 
     def unpack(self, target_dir):
-        for resp in Util.robustUrlOpen(self._stage3FileUrl):
-            tf = tarfile.open(fileobj=resp, mode="r:xz")
-            tf.extractall(target_dir)
+        for attempt, getResp in Util.robustUrlOpen(self._stage3FileUrl):
+            with attempt:
+                with getResp() as resp:
+                    tf = tarfile.open(fileobj=resp, mode="r:xz")
+                    tf.extractall(target_dir)
 
     def close(self):
         pass

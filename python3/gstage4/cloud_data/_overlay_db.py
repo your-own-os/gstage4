@@ -65,8 +65,10 @@ class OverlayDb:
         if self._lastModifiedTime is not None:
             return
 
-        for resp in Util.robustUrlOpen(urllib.request.Request(self.URL, method="HEAD")):
-            self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
+        for attempt, getResp in Util.robustUrlOpen(urllib.request.Request(self.URL, method="HEAD")):
+            with attempt:
+                with getResp() as resp:
+                    self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
 
     def _ensureData(self):
         if self._data is not None:
@@ -85,43 +87,45 @@ class OverlayDb:
             ("rsync", "rsync", None),
         ]
 
-        for resp in Util.robustUrlOpen(self.URL):
-            ret = dict()
+        for attempt, getResp in Util.robustUrlOpen(self.URL):
+            with attempt:
+                with getResp() as resp:
+                    ret = dict()
 
-            rootElem = lxml.etree.fromstring(resp.read())
-            for nameTag in rootElem.xpath(".//repo/name"):
-                overlayName = nameTag.text
-                if overlayName in ret:
-                    raise UpstreamError("duplicate overlay \"%s\"" % (overlayName))
+                    rootElem = lxml.etree.fromstring(resp.read())
+                    for nameTag in rootElem.xpath(".//repo/name"):
+                        overlayName = nameTag.text
+                        if overlayName in ret:
+                            raise UpstreamError("duplicate overlay \"%s\"" % (overlayName))
 
-                for vcsType, urlProto, urlDomain in cList:
-                    for sourceTag in nameTag.xpath("../source"):
-                        tVcsType = sourceTag.get("type")
-                        tUrl = sourceTag.text
+                        for vcsType, urlProto, urlDomain in cList:
+                            for sourceTag in nameTag.xpath("../source"):
+                                tVcsType = sourceTag.get("type")
+                                tUrl = sourceTag.text
 
-                        if tUrl.startswith("git+https://"):
-                            tUrl = tUrl.replace("git+https://", "https://")
-                        elif tUrl.startswith("git://github.com/"):
-                            if self._bStrict:
-                                raise UpstreamError("git://github.com in URL of overlay \"%s\" is not supported anymore" % (overlayName))
-                            else:
-                                tUrl = tUrl.replace("git://", "https://")
+                                if tUrl.startswith("git+https://"):
+                                    tUrl = tUrl.replace("git+https://", "https://")
+                                elif tUrl.startswith("git://github.com/"):
+                                    if self._bStrict:
+                                        raise UpstreamError("git://github.com in URL of overlay \"%s\" is not supported anymore" % (overlayName))
+                                    else:
+                                        tUrl = tUrl.replace("git://", "https://")
 
-                        if tVcsType == vcsType:
-                            if urlDomain is not None:
-                                if tUrl.startswith(urlProto + "://" + urlDomain + "/"):
-                                    ret[overlayName] = (tVcsType, tUrl)
-                                    break
-                            else:
-                                if tUrl.startswith(urlProto + "://"):
-                                    ret[overlayName] = (tVcsType, tUrl)
-                                    break
+                                if tVcsType == vcsType:
+                                    if urlDomain is not None:
+                                        if tUrl.startswith(urlProto + "://" + urlDomain + "/"):
+                                            ret[overlayName] = (tVcsType, tUrl)
+                                            break
+                                    else:
+                                        if tUrl.startswith(urlProto + "://"):
+                                            ret[overlayName] = (tVcsType, tUrl)
+                                            break
 
-                    if overlayName in ret:
-                        break
+                            if overlayName in ret:
+                                break
 
-                if overlayName not in ret:
-                    raise UpstreamError("no appropriate source for overlay \"%s\"" % (overlayName))
+                        if overlayName not in ret:
+                            raise UpstreamError("no appropriate source for overlay \"%s\"" % (overlayName))
 
             self._data = ret
             self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")

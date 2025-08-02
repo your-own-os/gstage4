@@ -70,11 +70,12 @@ class Util:
                                         stop=tenacity.stop_after_attempt(tryCount),
                                         retry=tenacity.retry_if_exception(_retryIfTrue),
                                         reraise=True)
+
+        def getResp():
+            return urllib.request.urlopen(*kargs, **kwargs, timeout=timeoutSeconds)
+
         for attempt in retryer:
-            with attempt:
-                with urllib.request.urlopen(*kargs, **kwargs, timeout=timeoutSeconds) as resp:
-                    yield resp
-                    break
+            yield attempt, getResp
 
     @functools.cache
     @staticmethod

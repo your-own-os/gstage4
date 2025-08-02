@@ -93,15 +93,17 @@ class GentooReleases:
             return
 
         self._archList = []
-        for resp in Util.robustUrlOpen(os.path.join(self._baseUrl, "releases")):
-            root = lxml.html.parse(resp)
-            for elem in root.xpath(".//a"):
-                if elem.text is None:
-                    continue
-                m = re.fullmatch("(\\S+)/", elem.text)
-                if m is None or m.group(1) in [".", ".."]:
-                    continue
-                self._archList.append(m.group(1))
+        for attempt, getResp in Util.robustUrlOpen(os.path.join(self._baseUrl, "releases")):
+            with attempt:
+                with getResp() as resp:
+                    root = lxml.html.parse(resp)
+                    for elem in root.xpath(".//a"):
+                        if elem.text is None:
+                            continue
+                        m = re.fullmatch("(\\S+)/", elem.text)
+                        if m is None or m.group(1) in [".", ".."]:
+                            continue
+                        self._archList.append(m.group(1))
 
     def _ensureVariantDictAndVersionDict(self, arch):
         if arch in self._variantDict and arch in self._versionDict:
@@ -109,15 +111,17 @@ class GentooReleases:
 
         variantList = []
         versionList = []
-        for resp in Util.robustUrlOpen(self.__getAutoBuildsUrl(self._baseUrl, arch)):
-            for elem in lxml.html.parse(resp).xpath(".//a"):
-                if elem.text is not None:
-                    m = re.fullmatch("current-(\\S+)/", elem.text)
-                    if m is not None:
-                        variantList.append(m.group(1))
-                    m = re.fullmatch("([0-9]+T[0-9]+Z)/", elem.text)
-                    if m is not None:
-                        versionList.append(m.group(1))
+        for attempt, getResp in Util.robustUrlOpen(self.__getAutoBuildsUrl(self._baseUrl, arch)):
+            with attempt:
+                with getResp() as resp:
+                    for elem in lxml.html.parse(resp).xpath(".//a"):
+                        if elem.text is not None:
+                            m = re.fullmatch("current-(\\S+)/", elem.text)
+                            if m is not None:
+                                variantList.append(m.group(1))
+                            m = re.fullmatch("([0-9]+T[0-9]+Z)/", elem.text)
+                            if m is not None:
+                                versionList.append(m.group(1))
 
         self._variantDict[arch] = variantList
         self._versionDict[arch] = versionList
@@ -159,9 +163,11 @@ class GentooSnapshots:
             return
 
         self._snapshotList = []
-        for resp in Util.robustUrlOpen(os.path.join(self._baseUrl, "snapshots", "squashfs")):
-            for elem in lxml.html.parse(resp).xpath(".//a"):
-                if elem.text is not None:
-                    m = re.fullmatch("gentoo-([0-9]+).xz.sqfs", elem.text)
-                    if m is not None:
-                        self._snapshotList.append(m.group(1))
+        for attempt, getResp in Util.robustUrlOpen(os.path.join(self._baseUrl, "snapshots", "squashfs")):
+            with attempt:
+                with getResp() as resp:
+                    for elem in lxml.html.parse(resp).xpath(".//a"):
+                        if elem.text is not None:
+                            m = re.fullmatch("gentoo-([0-9]+).xz.sqfs", elem.text)
+                            if m is not None:
+                                self._snapshotList.append(m.group(1))
