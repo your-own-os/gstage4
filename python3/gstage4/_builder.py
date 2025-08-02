@@ -178,48 +178,56 @@ class Builder(ActionRunner):
         assert len([x.get_name() for x in overlay_list]) == len(set([x.get_name() for x in overlay_list]))        # no duplication
 
         curPath = self._workDirObj.get_latest_action_dirpath()
-        overlayRecord = dict()
 
-        # create overlays
-        myRepoDict = dict()
-        pkgSet = set()
-        for overlay in overlay_list:
-            if isinstance(overlay, ManualSyncRepository):
-                myRepo = _MyRepoUtil.createFromManuSyncRepo(overlay, False, curPath)
-            elif isinstance(overlay, EmergeSyncRepository):
-                myRepo = _MyRepoUtil.createFromEmergeSyncRepo(overlay, False, curPath)
-                syncType = myRepo.get_sync_type()
-                if syncType == "rsync":
+        # install sync tools needed
+        if True:
+            pkgSet = set()
+            for overlay in overlay_list:
+                if isinstance(overlay, ManualSyncRepository):
                     pass
-                elif syncType == "git":
-                    pkgSet.add("dev-vcs/git")
+                elif isinstance(overlay, EmergeSyncRepository):
+                    m = re.search(r'sync-type = (\S+)', overlay.get_repos_conf_file_content(), re.M)
+                    if m.group(1) == "rsync":
+                        pass
+                    elif m.group(1) == "git":
+                        pkgSet.add("dev-vcs/git")
+                    else:
+                        assert False
                 else:
                     assert False
-                overlayRecord[overlay.get_name()] = syncType
+            installList = [x for x in pkgSet if not Util.portageIsPkgInstalled(curPath, x)]
+            if len(installList) > 0:
+                with _MyChrooter(self) as m:
+                    m.script_exec("", ScriptInstallPackages(installList, False, self._s.verbose_level), quiet=self._getQuiet())
+
+        # create overlays
+        myOverlayList = []
+        overlayRecord = dict()
+        for overlay in overlay_list:
+            myOverlay = _MyRepoUtil.createFromManuSyncRepo(overlay, False, curPath)
+            myOverlayList.append(myOverlay)
+            if isinstance(overlay, ManualSyncRepository):
+                pass
+            elif isinstance(overlay, EmergeSyncRepository):
+                overlayRecord[overlay.get_name()] = myOverlay.get_sync_type()
             else:
                 assert False
-            myRepoDict[overlay.get_name()] = myRepo
 
-        # install sync tools + sync some overlays
+        # sync some overlays
         if any([isinstance(overlay, EmergeSyncRepository) for overlay in overlay_list]):
             with _MyChrooter(self) as m:
-                installList = [x for x in pkgSet if not Util.portageIsPkgInstalled(curPath, x)]
-                m.script_exec("", ScriptInstallPackages(installList, False, self._s.verbose_level), quiet=self._getQuiet())
+                m.script_exec("", ScriptSync(), quiet=self._getQuiet())
 
-                if any([isinstance(overlay, EmergeSyncRepository) for overlay in overlay_list]):
-                    m.script_exec("", ScriptSync(), quiet=self._getQuiet())
-
-        # sync other overlays
+        # sync some other overlays
         for overlay in overlay_list:
             if isinstance(overlay, ManualSyncRepository):
                 overlay.sync(os.path.join(curPath, overlay.get_datadir_path()[1:]))
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            for overlay in overlay_list:
-                myRepo = myRepoDict[overlay.get_name()]
-                patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
-                self._patchRepo(myRepo, patchDirList)
+            patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
+            for overlay in myOverlayList:
+                self._patchRepo(overlay, patchDirList)
 
         self._actionStorage["overlays"] = overlayRecord
 
