@@ -204,11 +204,12 @@ class Builder(ActionRunner):
         myOverlayList = []
         overlayRecord = dict()
         for overlay in overlay_list:
-            myOverlay = _MyRepoUtil.createFromManuSyncRepo(overlay, False, curPath)
-            myOverlayList.append(myOverlay)
             if isinstance(overlay, ManualSyncRepository):
-                pass
+                myOverlay = _MyRepoUtil.createFromManuSyncRepo(overlay, False, curPath)
+                myOverlayList.append(myOverlay)
             elif isinstance(overlay, EmergeSyncRepository):
+                myOverlay = _MyRepoUtil.createFromEmergeSyncRepo(overlay, False, curPath)
+                myOverlayList.append(myOverlay)
                 overlayRecord[overlay.get_name()] = myOverlay.get_sync_type()
             else:
                 assert False
