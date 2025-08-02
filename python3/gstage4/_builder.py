@@ -136,7 +136,8 @@ class Builder(ActionRunner):
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            myRepo.patch_and_generate_manifest([os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories], self._s)
+            patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
+            self._patchRepo(myRepo, patchDirList)
 
         self._actionStorage["repo"] = repo
 
@@ -218,7 +219,7 @@ class Builder(ActionRunner):
             for overlay in overlay_list:
                 myRepo = myRepoDict[overlay.get_name()]
                 patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
-                myRepo.patch_and_generate_manifest(patchDirList, self._s)
+                self._patchRepo(myRepo, patchDirList)
 
         self._actionStorage["overlays"] = overlayRecord
 
@@ -400,6 +401,33 @@ class Builder(ActionRunner):
     def _getQuiet(self):
         return (self._s.verbose_level == 0)
 
+    def _patchRepo(self, repo, patchDirList):
+        patcher = RepoPatcher(settings=self._s)
+        patchDirList = patcher.filter_patch_dir_list(patchDirList, repo.get_repo_name())
+
+        # patching is not needed
+        if len(patchDirList) == 0:
+            return
+
+        pendingDstDirList = patcher.patch(repo.datadir_hostpath, patchDirList, repo.get_repo_name())
+        for x in patcher.warn_or_err_list:
+            if x.warn_or_err:
+                print("Warning: %s" % (x.msg))
+            else:
+                raise BuildError(x.msg)
+
+        # no need to generate manifest
+        if len(pendingDstDirList) == 0:
+            return
+
+        # FIXME: it a bit hard to parallelize the following code
+        with _MyChrooter(self) as m:
+            for dstDir in pendingDstDirList:
+                hostEbuildDir = os.path.join(repo.datadir_hostpath, dstDir)
+                fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
+                chrootEbuildDir = os.path.join(repo.datadir_path, dstDir)
+                m.shell_exec("", "ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)), quiet=True)
+
     def __enter__(self):
         return self
 
@@ -531,33 +559,6 @@ class _MyRepo:
         buf = pathlib.Path(self.repos_conf_file_hostpath).read_text()
         m = re.search(r'mount-params = "(.*)","(.*)"', buf, re.M)
         return (m.group(1), m.group(2)) if m is not None else None
-
-    def patch_and_generate_manifest(self, patchDirList, s):
-        patcher = RepoPatcher(settings=s)
-        patchDirList = patcher.filter_patch_dir_list(patchDirList, self.get_repo_name())
-
-        # patching is not needed
-        if len(patchDirList) == 0:
-            return
-
-        pendingDstDirList = patcher.patch(self.datadir_hostpath, patchDirList, self.get_repo_name())
-        for x in patcher.warn_or_err_list:
-            if x.warn_or_err:
-                print("Warning: %s" % (x.msg))
-            else:
-                raise BuildError(x.msg)
-
-        # no need to generate manifest
-        if len(pendingDstDirList) == 0:
-            return
-
-        # FIXME: it a bit hard to parallelize the following code
-        with _MyChrooter(self) as m:
-            for dstDir in pendingDstDirList:
-                hostEbuildDir = os.path.join(self.datadir_hostpath, dstDir)
-                fn = [x for x in os.listdir(hostEbuildDir) if x.endswith(".ebuild")][0]
-                chrootEbuildDir = os.path.join(self.datadir_path, dstDir)
-                m.shell_exec("", "ebuild %s manifest" % (os.path.join(chrootEbuildDir, fn)), quiet=True)
 
 
 class _MyChrooter(Runner):
