@@ -201,12 +201,12 @@ class Builder(ActionRunner):
             myRepoDict[overlay.get_name()] = myRepo
 
         # install sync tools + sync some overlays
-        if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
+        if any([isinstance(overlay, EmergeSyncRepository) for overlay in overlay_list]):
             with _MyChrooter(self) as m:
                 installList = [x for x in pkgSet if not Util.portageIsPkgInstalled(curPath, x)]
                 m.script_exec("", ScriptInstallPackages(installList, False, self._s.verbose_level), quiet=self._getQuiet())
 
-                if any([isinstance(repo, EmergeSyncRepository) for repo in overlay_list]):
+                if any([isinstance(overlay, EmergeSyncRepository) for overlay in overlay_list]):
                     m.script_exec("", ScriptSync(), quiet=self._getQuiet())
 
         # sync other overlays
