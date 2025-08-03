@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 
-import crypt
+import passlib.hosts
 from ..scripts import OneLinerScript
 from ..scripts import ScriptInstallPackages
 from .._builder import CustomAction
@@ -48,7 +48,7 @@ class SimpleCustomAction(CustomAction):                         # FIXME: should 
 class SetRootPassword(CustomAction):
 
     def __init__(self, password):
-        self._hash = crypt.crypt(password)
+        self._hash = passlib.hosts.linux_context.hash(password)
 
     @property
     def custom_scripts(self):
