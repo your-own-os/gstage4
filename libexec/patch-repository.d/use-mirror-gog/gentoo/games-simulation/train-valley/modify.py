@@ -13,7 +13,7 @@ try:
         buf = pathlib.Path(fn).read_text()
 
         buf = buf.replace(r'SRC_URI="', r'SRC_URI="mirror://gog/')
-        buf = re.sub(r'RESTRICT="(.*)fetch(.*)"', r'RESTRICT="\1\2"', buf, re.M)
+        buf = re.sub(r'RESTRICT="(.*)fetch(.*)"', r'RESTRICT="\1\2"', buf, flags=re.M)
 
         if refBuf is None:
             refBuf = buf

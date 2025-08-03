@@ -9,7 +9,7 @@ try:
     buf = pathlib.Path(fn).read_text()
 
     # remove keepdir
-    buf2 = re.sub('keepdir .*', 'true', buf, re.M)
+    buf2 = re.sub('keepdir .*', 'true', buf, flags=re.M)
     if buf2 == buf:
         raise ValueError()
     buf = buf2

@@ -9,7 +9,7 @@ try:
     for fn in glob.glob("*.ebuild"):
         buf = pathlib.Path(fn).read_text()
 
-        buf = re.sub(r">=dev-python/pyroute2-[0-9\.]+", "dev-python/pyroute2", buf, re.M)
+        buf = re.sub(r">=dev-python/pyroute2-[0-9\.]+", "dev-python/pyroute2", buf, flags=re.M)
 
         # save and generate manifest
         with open(fn, "w") as f:

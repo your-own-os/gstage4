@@ -17,7 +17,7 @@ try:
         buf = buf.replace("~dev-python/pyudev", ">=dev-python/pyudev")
         buf = buf.replace("~dev-python/regex", ">=dev-python/regex")
         buf = re.sub(r"~dev-python/grpcio-[0-9\.]+", "dev-python/grpcio", buf)
-        buf = re.sub(r"<dev-python/python-engineio-.*", "", buf, re.M)
+        buf = re.sub(r"<dev-python/python-engineio-.*", "", buf, flags=re.M)
 
         # save and generate manifest
         with open(fn, "w") as f:

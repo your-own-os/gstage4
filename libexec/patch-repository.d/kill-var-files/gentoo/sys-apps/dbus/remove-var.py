@@ -20,7 +20,7 @@ rm -rf ${D}/var
             raise ValueError()
 
         # step 1: remove /var/lib/dbus
-        buf = re.sub(".*/var/lib/dbus.*", "", buf, re.M)
+        buf = re.sub(".*/var/lib/dbus.*", "", buf, flags=re.M)
 
         # step 2: insert to the end of multilib_src_install_all()
         pos = buf.find("multilib_src_install_all() {")
