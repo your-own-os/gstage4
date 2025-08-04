@@ -183,8 +183,6 @@ net-wireless/bluez                                                   systemd
     _maskFileContent = """
 # don't use other init system
 sys-apps/sysvinit
-
-# don't use other init system
 sys-apps/openrc
 
 # don't use other init system
