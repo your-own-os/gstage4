@@ -175,8 +175,14 @@ net-wireless/bluez                                                   systemd
     _maskFileContent = """
 # don't use other init system
 sys-apps/sysvinit
-sys-apps/s6-linux-init
 sys-apps/openrc
+sys-apps/s6
+sys-apps/s6-rc
+sys-apps/s6-portable-utils
+sys-apps/s6-linux-init
+sys-apps/s6-linux-utils
+net-dns/s6-dns
+net-misc/s6-networking
 
 # mask all openrc thing
 sys-apps/systemd-utils
