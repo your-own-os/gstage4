@@ -462,6 +462,7 @@ class TailorSystemd:
                         "*makefs*",
                         "*growfs*",
                         "*mkswap*",
+                        "*tmp.mount*",
                         "/usr/lib/tmpfiles.d/etc.conf",        # don't auto create baselayout files or directories
                         "/usr/lib/tmpfiles.d/home.conf",       # same as above
                         "/usr/lib/tmpfiles.d/legacy.conf",     # same as above
