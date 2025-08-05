@@ -698,7 +698,10 @@ class SupportAllCompressFormat:
 
     _useFileContent = """
 # compress formats
-*/*                 7zip bzip2 gzip lz4 lzma lzo szip xz zstd
+*/*                                                             7zip bzip2 gzip lz4 lzma lzo szip xz zstd
+
+# lzo and lz4 is mutually exclusive for openvpn, prefer lzo
+net-vpn/openvpn                                                 -lz4
 """
 
 
