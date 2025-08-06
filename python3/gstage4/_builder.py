@@ -170,6 +170,7 @@ class Builder(ActionRunner):
         tw.write_package_env()
         # FIXME: should put files in patch-repository.d into config dir, so that target system can patch after every syncing
         #        but not all repositories and overlays use "emerge --sync"
+        tw.write_mirrors()
 
     @ActionRunner.Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
@@ -1083,6 +1084,18 @@ class TargetConfDirWriter:
 
         # FIXME
         assert False
+
+    def write_mirrors(self):
+        fpath = os.path.join(self._dir, "mirrors")
+
+        if len(self._ts.mirrors) == 0:
+            Util.forceDelete(fpath)
+            return
+
+        buf = ""
+        for name, mlist in self._ts.mirrors.items():
+            buf += name + "\t" + " ".join(mlist) + "\n"
+        pathlib.Path(fpath).write_text(buf)
 
 
 class TargetConfDirCleaner:

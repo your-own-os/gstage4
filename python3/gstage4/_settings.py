@@ -168,6 +168,7 @@ class TargetSettings:
 
         self.repo_postsync_patch_directories = []     # list<patch-directory>
 
+        self.mirrors = dict()                         # dict<mirror-name, mirror-site-list>
         self.fetch_command = None                     # tuple(fetch-command, resume-command)
         self.git_fetch_command = None                 # tuple(clone-command, pull-command)
 
@@ -247,9 +248,10 @@ class TargetSettings:
             if obj.repo_postsync_patch_directories is None or not isinstance(obj.repo_postsync_patch_directories, list):
                 raise SettingsError("invalid value for \"repo_postsync_patch_directories\"")
 
+            if not isinstance(obj.mirrors, dict):
+                raise SettingsError("invalid value for \"mirrors\"")
             if obj.fetch_command is not None and (not isinstance(obj.fetch_command, tuple) or len(obj.fetch_command) != 2):
                 raise SettingsError("invalid value for \"fetch_command\"")
-
             if obj.git_fetch_command is not None and (not isinstance(obj.git_fetch_command, tuple) or len(obj.git_fetch_command) != 2):
                 raise SettingsError("invalid value for \"git_fetch_command\"")
 
