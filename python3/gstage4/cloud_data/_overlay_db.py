@@ -127,5 +127,5 @@ class OverlayDb:
                         if overlayName not in ret:
                             raise UpstreamError("no appropriate source for overlay \"%s\"" % (overlayName))
 
-            self._data = ret
-            self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
+                    self._data = ret
+                    self._lastModifiedTime = datetime.strptime(resp.headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z")
