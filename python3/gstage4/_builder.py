@@ -255,8 +255,6 @@ class Builder(ActionRunner):
             elif self._ts.kernel_manager == "distkernel":
                 for pkg in TargetSettings._getPackagesForKernelManager("distkernel", dracutArgs=self._ts.kernel_manager_distkernel["dracut_args"]):
                     __worldNeeded(pkg)
-            elif self._ts.kernel_manager == "fake":
-                pass
             else:
                 assert False
         if True:
@@ -345,15 +343,6 @@ class Builder(ActionRunner):
                             m.shell_exec("", "mv /boot/%s-*.%s /boot/%s.%s" % (fn, ext, fn, ext))
                         else:
                             m.shell_exec("", "mv /boot/%s-* /boot/%s" % (fn, fn))
-            return
-
-        if self._ts.kernel_manager == "fake":
-            bootDir = os.path.join(self._workDirObj.get_latest_action_dirpath(), "boot")
-            os.makedirs(bootDir, exist_ok=True)
-            with open(os.path.join(bootDir, "vmlinuz"), "w") as f:
-                f.write("fake kernel")
-            with open(os.path.join(bootDir, "initramfs.img"), "w") as f:
-                f.write("fake initramfs")
             return
 
         assert False

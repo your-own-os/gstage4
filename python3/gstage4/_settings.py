@@ -148,7 +148,7 @@ class TargetSettings:
         self.profile = None
 
         self.package_manager = "portage"              # "portage"
-        self.kernel_manager = "none"                  # "none", "genkernel", "distkernel", "fake"
+        self.kernel_manager = "none"                  # "none", "genkernel", "distkernel"
         self.service_manager = "none"                 # "none", "openrc", "systemd"
 
         self.pkg_use = dict()                         # dict<package-wildcard, use-flag-list>
@@ -201,7 +201,7 @@ class TargetSettings:
             if obj.package_manager not in ["portage"]:
                 raise SettingsError("invalid value of \"package_manager\"")
 
-            if obj.kernel_manager not in ["none", "genkernel", "distkernel", "fake"]:
+            if obj.kernel_manager not in ["none", "genkernel", "distkernel"]:
                 raise SettingsError("invalid value of \"kernel_manager\"")
 
             if obj.service_manager not in ["none", "openrc", "systemd"]:

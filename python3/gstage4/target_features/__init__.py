@@ -27,7 +27,6 @@ from ._common import UsePortage
 from ._kernel import UseGenkernel
 from ._kernel import UseDistKernel
 from ._kernel import UseBbki
-from ._kernel import UseFakeKernel
 
 from ._common import UseOpenrc
 from ._common import UseSystemd
@@ -127,7 +126,6 @@ __all__ = [
     "UseGenkernel",
     "UseDistKernel",
     "UseBbki",
-    "UseFakeKernel",
     "UseOpenrc",
     "UseSystemd",
     "UseVT",

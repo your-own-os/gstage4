@@ -102,10 +102,3 @@ sys-kernel/*-firmware
 # we manage kernel ourself
 sys-kernel/installkernel-*
 """
-
-
-class UseFakeKernel:
-
-    def update_target_settings(self, target_settings):
-        target_settings.kernel_manager = "fake"
-        # FIXME: mask kernel related packages?
