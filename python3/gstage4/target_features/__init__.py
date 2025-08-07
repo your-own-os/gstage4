@@ -58,6 +58,8 @@ from ._common import PreferPythonMagic
 
 from ._common import DisablePcSpeaker
 from ._common import DisableFstab
+from ._common import DisableUtmp
+from ._common import DisableWtmpBtmpLastlog
 from ._common import DontUsePypy
 from ._common import RemoveDoc
 

@@ -768,6 +768,43 @@ class DisableFstab:
         target_settings.repo_postsync_patch_directories.append("kill-fstab")
 
 
+class DisableUtmp:
+
+    def update_target_settings(self, target_settings):
+        assert "10-no-utmp" not in target_settings.install_mask_files
+
+        target_settings.install_mask_files["10-no-utmp"] = {
+            "sys-apps/coreutils": [
+                "/usr/bin/who",
+                "*who.1*",
+                "/usr/sbin/users",
+                "*users.1*",
+            ],
+            "sys-process/procps": [
+                "/usr/bin/w",
+                "*w.1*",
+            ],
+        }
+
+
+class DisableWtmpBtmpLastlog:
+
+    def update_target_settings(self, target_settings):
+        assert "10-no-wtmp-btmp-lastlog" not in target_settings.install_mask_files
+
+        target_settings.install_mask_files["10-no-wtmp-btmp-lastlog"] = {
+            "sys-apps/util-linux": [
+                "*last*",               # remove last and lastb
+            ],
+            "sys-apps/shadow": [
+                "*lastlog*",
+            ],
+            "sys-libs/pam": [
+                "*pam_lastlog.so*",     # only remove so file, don't remove document files
+            ],
+        }
+
+
 class DontUsePypy:
 
     def update_target_settings(self, target_settings):
