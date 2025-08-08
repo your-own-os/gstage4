@@ -782,6 +782,7 @@ class DisableUtmpWtmpBtmpLastlog:
             fn = "10-no-utmp-wtmp-btmp-lastlog"
         else:
             fn = "10-no-wtmp-btmp-lastlog"
+
         assert fn not in target_settings.install_mask_files
 
         if self._utmp:
