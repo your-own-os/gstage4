@@ -41,9 +41,6 @@ class Settings:
         self.host_memory_size = None               # in byte
         self.host_cooling_level = None             # 1-10, less is weaker
 
-        # repo.postsync.d patch directory in host system
-        self.host_repo_postsync_patch_source_dir = None
-
         # distfiles directory in host system, will be bind mounted in target system
         self.host_distfiles_dir = None
 
@@ -111,12 +108,6 @@ class Settings:
         if not (1 <= obj.host_cooling_level <= 10):
             if raise_exception:
                 raise SettingsError("invalid value of \"host_cooling_level\"")
-            else:
-                return False
-
-        if obj.host_repo_postsync_patch_source_dir is not None and not os.path.isdir(obj.host_repo_postsync_patch_source_dir):
-            if raise_exception:
-                raise SettingsError("invalid value for key \"host_repo_postsync_patch_source_dir\"")
             else:
                 return False
 

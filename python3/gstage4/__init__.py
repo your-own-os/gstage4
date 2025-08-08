@@ -60,8 +60,8 @@ from ._errors import WorkDirError
 from ._errors import BuildError
 from ._errors import CustomActionError
 
-REPO_POSTSYNC_PATCH_SCRIPT = "/usr/libexec/gstage4/patch-repository"
-REPO_POSTSYNC_PATCH_SOURCE_DIR = "/usr/libexec/gstage4/patch-repository.d"
+REPO_POSTSYNC_PATCH_SCRIPT = Builder.REPO_POSTSYNC_PATCH_SCRIPT
+REPO_POSTSYNC_PATCH_SOURCE_DIR = Builder.REPO_POSTSYNC_PATCH_SOURCE_DIR
 
 
 __all__ = [

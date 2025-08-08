@@ -51,6 +51,9 @@ class Builder(ActionRunner):
     It is the driver class for pretty much everything that gstage4 does.
     """
 
+    REPO_POSTSYNC_PATCH_SCRIPT = "/usr/libexec/gstage4/patch-repository"
+    REPO_POSTSYNC_PATCH_SOURCE_DIR = "/usr/libexec/gstage4/patch-repository.d"
+
     def __init__(self, settings, target_settings, work_dir):
         assert Settings.check_object(settings, raise_exception=False)
         assert TargetSettings.check_object(target_settings, raise_exception=False)
@@ -62,8 +65,6 @@ class Builder(ActionRunner):
         self._ts = target_settings
         if self._ts.build_opts.ccache:
             assert self._s.host_ccache_dir is not None
-        if len(self._ts.repo_postsync_patch_directories) > 0:
-            assert self._s.host_repo_postsync_patch_source_dir is not None
 
         self._workDirObj = work_dir
 
@@ -136,7 +137,7 @@ class Builder(ActionRunner):
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
+            patchDirList = [os.path.join(self.REPO_POSTSYNC_PATCH_SOURCE_DIR, x) for x in self._ts.repo_postsync_patch_directories]
             self._patchRepo(myRepo, patchDirList)
 
         self._actionStorage["repo"] = repo
@@ -168,9 +169,8 @@ class Builder(ActionRunner):
         tw.write_package_accept_keywords()
         tw.write_package_license()
         tw.write_package_env()
-        # FIXME: should put files in patch-repository.d into config dir, so that target system can patch after every syncing
-        #        but not all repositories and overlays use "emerge --sync"
         tw.write_mirrors()
+        # don't create "/etc/portage/patch-repository.d", "patch-repository" script won't run because the target system doesn't have gstage4
 
     @ActionRunner.Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
@@ -227,7 +227,7 @@ class Builder(ActionRunner):
 
         # patch using host patch-repository.d
         if len(self._ts.repo_postsync_patch_directories) > 0:
-            patchDirList = [os.path.join(self._s.host_repo_postsync_patch_source_dir, x) for x in self._ts.repo_postsync_patch_directories]
+            patchDirList = [os.path.join(self.REPO_POSTSYNC_PATCH_SOURCE_DIR, x) for x in self._ts.repo_postsync_patch_directories]
             for overlay in myOverlayList:
                 self._patchRepo(overlay, patchDirList)
 
@@ -1077,15 +1077,9 @@ class TargetConfDirWriter:
                     for pkgWildcard in obj.keys():
                         f.write('%s %s\n' % (pkgWildcard, innerFnDict[pkgWildcard]))
 
-    def write_repo_postsync(self):
-        # modify and write out repo.postsync.d (in chroot)
-        fpath = os.path.join(self._dir, "repo.postsync.d")
-        Util.forceDelete(fpath)
-
-        # FIXME
-        assert False
-
     def write_mirrors(self):
+        # modify and write out /etc/portage/mirrors (in chroot)
+
         fpath = os.path.join(self._dir, "mirrors")
 
         if len(self._ts.mirrors) == 0:
