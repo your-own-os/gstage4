@@ -768,41 +768,48 @@ class DisableFstab:
         target_settings.repo_postsync_patch_directories.append("kill-fstab")
 
 
-class DisableUtmp:
+class DisableUtmpWtmpBtmpLastlog:
+
+    def __init__(self, utmp, wtmp, btmp, lastlog):
+        assert utmp
+        assert wtmp == btmp == lastlog
+
+        self._utmp = utmp
+        self._wtmp = wtmp
 
     def update_target_settings(self, target_settings):
-        assert "10-no-utmp" not in target_settings.install_mask_files
+        if self._utmp:
+            fn = "10-no-utmp-wtmp-btmp-lastlog"
+        else:
+            fn = "10-no-wtmp-btmp-lastlog"
+        assert fn not in target_settings.install_mask_files
 
-        target_settings.install_mask_files["10-no-utmp"] = {
-            "sys-apps/coreutils": [
-                "/usr/bin/who",
-                "*who.1*",
-                "/usr/sbin/users",
-                "*users.1*",
-            ],
-            "sys-process/procps": [
-                "/usr/bin/w",
-                "*w.1*",
-            ],
-        }
+        if self._utmp:
+            target_settings.install_mask_files[fn] = {
+                "sys-apps/coreutils": [
+                    "/usr/bin/who",
+                    "*who.1*",
+                    "/usr/sbin/users",
+                    "*users.1*",
+                ],
+                "sys-process/procps": [
+                    "/usr/bin/w",
+                    "*w.1*",
+                ],
+            }
 
-
-class DisableWtmpBtmpLastlog:
-
-    def update_target_settings(self, target_settings):
-        assert "10-no-wtmp-btmp-lastlog" not in target_settings.install_mask_files
-
-        target_settings.install_mask_files["10-no-wtmp-btmp-lastlog"] = {
-            "sys-apps/util-linux": [
-                "*last*",               # remove last and lastb
-            ],
-            "sys-apps/shadow": [
-                "*lastlog*",
-            ],
-            "sys-libs/pam": [
-                "*pam_lastlog.so*",     # only remove so file, don't remove document files
-            ],
-        }
+        if self._wtmp:
+            target_settings.install_mask_files[fn] = {
+                "sys-apps/util-linux": [
+                    "*last*",               # remove last and lastb
+                ],
+                "sys-apps/shadow": [
+                    "*lastlog*",
+                ],
+                "sys-libs/pam": [
+                    "*pam_lastlog.so*",     # only remove so file, don't remove document files
+                ],
+            }
 
 
 class DontUsePypy:
