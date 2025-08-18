@@ -52,6 +52,8 @@ class Util:
         def _retryIfTrue(e):
             if isinstance(e, http.client.RemoteDisconnected):
                 return True
+            if isinstance(e, http.client.IncompleteRead):
+                return True
             if isinstance(e, urllib.error.URLError):
                 if isinstance(e.reason, socket.gaierror):
                     return True
