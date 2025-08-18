@@ -59,6 +59,8 @@ class Util:
                     return True
             if isinstance(e, TimeoutError):
                 return True
+            if isinstance(e, ConnectionResetError):
+                return True
             return False
 
         if tryCount == 0:
