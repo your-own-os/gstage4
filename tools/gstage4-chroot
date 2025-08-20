@@ -36,9 +36,12 @@ if __name__ == '__main__':
         print('Error: Directory \"%s\" does not exist.')
         sys.exit(1)
 
+    ret = 0
     wdir = gstage4.WorkDir(sys.argv[1])
-    try:
-        with gstage4.Runner(wdir.get_arch(), wdir.get_latest_action_dirpath()) as c:
+    with gstage4.Runner(wdir.get_arch(), wdir.get_latest_action_dirpath()) as c:
+        try:
             c.shell("")
-    except subprocess.CalledProcessError as e:
-        sys.exit(e.returncode)
+        except subprocess.CalledProcessError as e:
+            ret = e.returncode
+
+    sys.exit(ret)
