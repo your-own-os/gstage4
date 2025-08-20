@@ -151,7 +151,7 @@ __all__ = [
     "PreferPythonMagic",
     "DisablePcSpeaker",
     "DisableFstab",
-    "DisableUtmpWtmpBtmpLastlog"
+    "DisableUtmpWtmpBtmpLastlog",
     "DontUsePypy",
     "RemoveDoc",
     "SupportAllVideoFormat",
