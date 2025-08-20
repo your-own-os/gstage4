@@ -24,6 +24,7 @@
 import os
 import sys
 import gstage4
+import subprocess
 
 
 if __name__ == '__main__':
@@ -36,5 +37,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     wdir = gstage4.WorkDir(sys.argv[1])
-    with gstage4.Runner(wdir.get_arch(), wdir.get_latest_action_dirpath()) as c:
-        c.shell("")
+    try:
+        with gstage4.Runner(wdir.get_arch(), wdir.get_latest_action_dirpath()) as c:
+            c.shell("")
+    except subprocess.CalledProcessError as e:
+        sys.exit(e.returncode)
