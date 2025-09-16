@@ -4,8 +4,8 @@ A python module for buildling stage4 of Gentoo Linux
 
 
 TODO:
-
 I was able to build libreoffice on gentoo without the X11 libs using --without-x and --disable-randr, however when running,  I get "no suitable windowing system found, exiting.
+https://bugs.documentfoundation.org/show_bug.cgi?id=167463
 
 
 以 shadow-utils 中的 login 为例（主流 Linux 发行版常用）
