@@ -891,6 +891,9 @@ app-emulation/wine-staging                    X
 # don't pull in X11
 media-libs/libv4l                             -qt6
 x11-libs/wxGTK                                -tiff -spell -keyring
+
+# pdfimport function uses xpdf which uses X11
+app-office/libreoffice                        -pdfimport
 """
 
     _maskFileContent = """

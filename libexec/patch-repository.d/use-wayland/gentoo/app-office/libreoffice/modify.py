@@ -6,9 +6,11 @@ import glob
 import shutil
 import pathlib
 
+# we have do this so that app-office/libreoffice won't depend on x11-libs/cairo[X] and gui-libs/gtk[X], which would pull in USE flag X for many packages
+
 # don't allow USE flag gtk3, only allow USE flag gtk4
 # don't allow USE flag pdfimport (it depends on xpdf so that depends on x11)
-# make macro USING_X11=1 (--with-x), macro GDK_WINDOWING_X11=0, marco GDK_WINDOWING_WAYLAND=1 (by USE flag of gui-libs/gtk)
+# make macro USING_X11=1 (still keep --with-x), macro GDK_WINDOWING_X11=0, marco GDK_WINDOWING_WAYLAND=1 (by USE flag of gui-libs/gtk)
 
 selfDir = os.path.dirname(os.path.realpath(__file__))
 os.makedirs("files", exist_ok=True)
