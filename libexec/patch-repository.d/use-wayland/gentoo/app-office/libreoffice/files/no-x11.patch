@@ -1,0 +1,105 @@
+diff --git a/vcl/Module_vcl.mk b/vcl/Module_vcl.mk
+index 91cf27c98267..b37c52617372 100644
+--- a/vcl/Module_vcl.mk
++++ b/vcl/Module_vcl.mk
+@@ -70,14 +70,6 @@ $(eval $(call gb_Module_add_l10n_targets,vcl,\
+     AllLangMoTarget_vcl \
+ ))
+ 
+-ifeq ($(USING_X11),TRUE)
+-$(eval $(call gb_Module_add_targets,vcl,\
+-    $(if $(ENABLE_GEN),Library_vclplug_gen) \
+-    Package_fontunxppds \
+-    Package_fontunxpsprint \
+-))
+-endif
+-
+ ifneq ($(ENABLE_GTK3),)
+ $(eval $(call gb_Module_add_targets,vcl,\
+     Library_vclplug_gtk3 \
+diff --git a/vcl/inc/unx/gtk/gtkdata.hxx b/vcl/inc/unx/gtk/gtkdata.hxx
+index 60b45bb14c56..9376bdb261fc 100644
+--- a/vcl/inc/unx/gtk/gtkdata.hxx
++++ b/vcl/inc/unx/gtk/gtkdata.hxx
+@@ -22,11 +22,13 @@
+ #define GLIB_DISABLE_DEPRECATION_WARNINGS
+ #include <gtk/gtk.h>
+ #include <gdk/gdk.h>
++#if defined(GDK_WINDOWING_X11)
+ #if GTK_CHECK_VERSION(4,0,0)
+ #include <gdk/x11/gdkx.h>
+ #else
+ #include <gdk/gdkx.h>
+ #endif
++#endif
+ 
+ #include <com/sun/star/accessibility/XAccessibleContext.hpp>
+ #include <com/sun/star/accessibility/XAccessibleEventListener.hpp>
+diff --git a/vcl/unx/gtk3/gtkframe.cxx b/vcl/unx/gtk3/gtkframe.cxx
+index 39d2dc352952..88b33140f190 100644
+--- a/vcl/unx/gtk3/gtkframe.cxx
++++ b/vcl/unx/gtk3/gtkframe.cxx
+@@ -1239,8 +1239,8 @@ void GtkSalFrame::InitCommon()
+     m_aSystemData.nScreen       = m_nXScreen.getXScreen();
+     m_aSystemData.toolkit       = SystemEnvData::Toolkit::Gtk;
+ 
+-#if defined(GDK_WINDOWING_X11)
+     GdkDisplay *pDisplay = getGdkDisplay();
++#if defined(GDK_WINDOWING_X11)
+     if (DLSYM_GDK_IS_X11_DISPLAY(pDisplay))
+     {
+         m_aSystemData.pDisplay = gdk_x11_display_get_xdisplay(pDisplay);
+@@ -2615,6 +2615,7 @@ void GtkSalFrame::SetScreenNumber( unsigned int nNewScreen )
+ 
+ void GtkSalFrame::updateWMClass()
+ {
++#if defined(GDK_WINDOWING_X11)
+     if (!DLSYM_GDK_IS_X11_DISPLAY(getGdkDisplay()))
+         return;
+ 
+@@ -2633,6 +2634,9 @@ void GtkSalFrame::updateWMClass()
+                    GtkSalFrame::GetNativeWindowHandle(m_pWindow),
+                    pClass );
+     XFree( pClass );
++#else
++    return;
++#endif
+ }
+ 
+ void GtkSalFrame::SetApplicationID( const OUString &rWMClass )
+@@ -2672,11 +2676,13 @@ void GtkSalFrame::SessionManagerInhibit(bool bStart, ApplicationInhibitFlags eTy
+     guint nWindow(0);
+     std::optional<Display*> aDisplay;
+ 
++#if defined(GDK_WINDOWING_X11)
+     if (DLSYM_GDK_IS_X11_DISPLAY(getGdkDisplay()))
+     {
+         nWindow = GtkSalFrame::GetNativeWindowHandle(m_pWindow);
+         aDisplay = gdk_x11_display_get_xdisplay(getGdkDisplay());
+     }
++#endif
+ 
+     m_SessionManagerInhibitor.inhibit(bStart, sReason, eType,
+                                       nWindow, aDisplay, application_id);
+diff --git a/vcl/unx/gtk3/gtksys.cxx b/vcl/unx/gtk3/gtksys.cxx
+index 4dc191bd67d2..fee1c31c967b 100644
+--- a/vcl/unx/gtk3/gtksys.cxx
++++ b/vcl/unx/gtk3/gtksys.cxx
+@@ -121,6 +121,7 @@ GtkSalSystem::countScreenMonitors()
+ SalX11Screen
+ GtkSalSystem::getXScreenFromDisplayScreen(unsigned int nScreen)
+ {
++#if defined(GDK_WINDOWING_X11)
+     if (!DLSYM_GDK_IS_X11_DISPLAY(mpDisplay))
+         return SalX11Screen (0);
+ 
+@@ -134,6 +135,9 @@ GtkSalSystem::getXScreenFromDisplayScreen(unsigned int nScreen)
+         return SalX11Screen (0);
+ #endif
+     return SalX11Screen(gdk_x11_screen_get_screen_number(pScreen));
++#else
++    return SalX11Screen (0);
++#endif
+ }
+ 
+ #if !GTK_CHECK_VERSION(4, 0, 0)
