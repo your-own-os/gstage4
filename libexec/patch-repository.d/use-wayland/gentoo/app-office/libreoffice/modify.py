@@ -8,6 +8,7 @@ import pathlib
 
 # don't allow USE flag gtk3, only allow USE flag gtk4
 # don't allow USE flag pdfimport (it depends on xpdf so that depends on x11)
+# make macro USING_X11=1 (--with-x), macro GDK_WINDOWING_X11=0, marco GDK_WINDOWING_WAYLAND=1 (by USE flag of gui-libs/gtk)
 
 selfDir = os.path.dirname(os.path.realpath(__file__))
 os.makedirs("files", exist_ok=True)
