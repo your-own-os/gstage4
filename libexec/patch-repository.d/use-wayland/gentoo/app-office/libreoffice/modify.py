@@ -25,7 +25,8 @@ try:
         buf = buf.replace("[wayland,X]", "[wayland]")
 
         # disable skia since it doesn't have wayland backend, only have x11 backend
-        buf = buf.replace("--with-x", "--with-x --disable-skia")
+        # disable fallback vcl plugin "gen" since it uses X11
+        buf = buf.replace("--with-x", "--with-x --disable-skia --disable-gen")
 
         # add our patch
         buf = buf.replace("PATCHES=(", 'PATCHES=( "${FILESDIR}/no-x11.patch"')

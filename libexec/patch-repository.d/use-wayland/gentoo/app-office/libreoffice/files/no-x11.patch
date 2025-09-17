@@ -1,22 +1,3 @@
-diff --git a/vcl/Module_vcl.mk b/vcl/Module_vcl.mk
-index 91cf27c98267..b37c52617372 100644
---- a/vcl/Module_vcl.mk
-+++ b/vcl/Module_vcl.mk
-@@ -70,14 +70,6 @@ $(eval $(call gb_Module_add_l10n_targets,vcl,\
-     AllLangMoTarget_vcl \
- ))
- 
--ifeq ($(USING_X11),TRUE)
--$(eval $(call gb_Module_add_targets,vcl,\
--    $(if $(ENABLE_GEN),Library_vclplug_gen) \
--    Package_fontunxppds \
--    Package_fontunxpsprint \
--))
--endif
--
- ifneq ($(ENABLE_GTK3),)
- $(eval $(call gb_Module_add_targets,vcl,\
-     Library_vclplug_gtk3 \
 diff --git a/vcl/inc/unx/gtk/gtkdata.hxx b/vcl/inc/unx/gtk/gtkdata.hxx
 index 60b45bb14c56..9376bdb261fc 100644
 --- a/vcl/inc/unx/gtk/gtkdata.hxx
