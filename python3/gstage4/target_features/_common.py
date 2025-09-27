@@ -65,6 +65,9 @@ class FixBugs:
 # https://bugs.gentoo.org/782685:
 # Clover (the OpenCL runtime in Mesa) supports only a small set of some rather old Radeons, it still tries to attach itself to newer AMD GPUs - and fails, causing segfaults.
 media-libs/mesa         -opencl
+
+# ntfs3g won't mount without "suid" USE flag, but FUSE shouldn't need it
+sys-fs/ntfs3g           suid
 """
 
     _maskFileContent = """
