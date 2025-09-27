@@ -68,6 +68,9 @@ media-libs/mesa         -opencl
 
 # ntfs3g won't mount without "suid" USE flag, but FUSE should be able to work for non-root
 sys-fs/ntfs3g           suid
+
+# NTFS3 module has been already in kernel, FUSE should not occupy the standard filesystem name anymore
+sys-fs/ntfs3g           -mount-ntfs
 """
 
     _maskFileContent = """
