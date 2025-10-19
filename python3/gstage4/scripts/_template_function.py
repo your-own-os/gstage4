@@ -23,6 +23,7 @@
 
 import os
 import shutil
+import pathlib
 from .._prototype import FunctionInChroot
 
 
@@ -44,11 +45,9 @@ class CreateFileFunction(FunctionInChroot):
         fullfn = os.path.join(chroot_dir_hostpath, target_filepath[1:])
 
         if isinstance(buf, str):
-            with open(fullfn, "w") as f:
-                f.write(buf)
+            pathlib.Path(fullfn).write_test(buf)
         elif isinstance(buf, bytes):
-            with open(fullfn, "wb") as f:
-                f.write(buf)
+            pathlib.Path(fullfn).write_bytes(buf)
         else:
             assert False
         os.chown(fullfn, owner, group)
