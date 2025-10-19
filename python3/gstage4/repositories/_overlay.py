@@ -88,7 +88,7 @@ class UserDefinedOverlay(EmergeSyncRepository):
             "git": ["git", "http", "https"],
         }
         assert sync_type in validUrlSchemas
-        assert any([sync_url.startswith(x + "://") for x in validUrlSchemas[sync_type]])
+        assert any(sync_url.startswith(x + "://") for x in validUrlSchemas[sync_type])
 
         self._name = overlay_name
         self._syncType = sync_type

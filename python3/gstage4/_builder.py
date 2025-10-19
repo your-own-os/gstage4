@@ -185,7 +185,7 @@ class Builder(ActionRunner):
     @ActionRunner.Action(after=["init_confdir"])
     def action_create_overlays(self, overlay_list):
         assert all([Util.isInstanceList(x, ManualSyncRepository, EmergeSyncRepository) for x in overlay_list])
-        assert not any([x.get_name() == "gentoo" for x in overlay_list])
+        assert not any(x.get_name() == "gentoo" for x in overlay_list)
         assert len([x.get_name() for x in overlay_list]) == len(set([x.get_name() for x in overlay_list]))        # no duplication
 
         curPath = self._workDirObj.get_latest_action_dirpath()
@@ -226,7 +226,7 @@ class Builder(ActionRunner):
                 assert False
 
         # sync some overlays
-        if any([isinstance(overlay, EmergeSyncRepository) for overlay in overlay_list]):
+        if any(isinstance(overlay, EmergeSyncRepository) for overlay in overlay_list):
             with _MyChrooter(self) as m:
                 m.script_exec("", ScriptSync(), quiet=self._getQuiet())
 
