@@ -51,7 +51,6 @@ try:
         if pos == -1:
             raise ValueError()
         pos += 1
-
         # do insert
         buf = buf[:pos] + strReplaceGithub.replace("    ", "\t") + buf[pos:]
 
