@@ -54,12 +54,14 @@ class CreateFileFunction(FunctionInChroot):
 
 
 class CopyHostFileFunction(FunctionInChroot):
-    def __init__(self, target_filepath, hostpath, owner=0, group=0, mode=0o644):
+    def __init__(self, target_filepath, hostpath=None, owner=0, group=0, mode=0o644):
         assert target_filepath.startswith("/")
-        assert hostpath.startswith("/")
         assert isinstance(owner, int)
         assert isinstance(group, int)
         assert 0o000 <= mode <= 0o777
+
+        if hostpath is None:
+            hostpath = target_filepath
 
         self._info = (target_filepath, owner, group, mode, hostpath)
 
@@ -93,13 +95,15 @@ class CreateDirFunction(FunctionInChroot):
 
 class CopyHostDirFunction(FunctionInChroot):
 
-    def __init__(self, target_dirpath, hostpath, owner=0, group=0, dmode=0o755, fmode=0o644):
+    def __init__(self, target_dirpath, hostpath=None, owner=0, group=0, dmode=0o755, fmode=0o644):
         assert target_dirpath.startswith("/")
-        assert hostpath.startswith("/")
         assert isinstance(owner, int)
         assert isinstance(group, int)
         assert 0o000 <= dmode <= 0o777
         assert 0o000 <= fmode <= 0o777
+
+        if hostpath is None:
+            hostpath = target_dirpath
 
         self._info = (target_dirpath, owner, group, dmode, fmode, hostpath)
 
@@ -143,11 +147,13 @@ class CreateSymlinkFunction(FunctionInChroot):
 
 
 class CopyHostSymlinkFunction(FunctionInChroot):
-    def __init__(self, target_linkpath, hostpath, owner=0, group=0):
+    def __init__(self, target_linkpath, hostpath=None, owner=0, group=0):
         assert target_linkpath.startswith("/")
-        assert hostpath.startswith("/")
         assert isinstance(owner, int)
         assert isinstance(group, int)
+
+        if hostpath is None:
+            hostpath = target_linkpath
 
         self._info = (target_linkpath, hostpath, owner, group)
 
