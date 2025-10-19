@@ -4,6 +4,17 @@
 import pathlib
 
 fn = "git-r3.eclass"
+
+s2 = '''
+        local index=0
+        for repo in "${subrepos[@]}"; do
+                if [[ ${repo} == https://github.com/* ]]; then
+                        subrepos[$index]="mirror://github/${repo#https://github.com/}"
+                fi
+                ((index++))
+        done
+'''
+
 try:
     buf = pathlib.Path(fn).read_text()
 
@@ -29,6 +40,21 @@ try:
     buf = buf[:idx] + \
         '\n\tindex=0' + \
         buf[idx:]
+
+    # transform https://github.com to mirror://github for all subrepos elements
+    if True:
+        # insert to the end of _git-r3_set_subrepos()
+        pos = buf.find("_git-r3_set_subrepos() {")
+        if pos == -1:
+            raise ValueError()
+        pos = buf.find("\n}\n", pos)
+        if pos == -1:
+            raise ValueError()
+        pos += 1
+
+        # do insert
+        buf = buf[:pos] + s2 + buf[pos:]
+
     pathlib.Path(fn).write_text(buf)
 except (FileNotFoundError, ValueError):
     print("outdated")
