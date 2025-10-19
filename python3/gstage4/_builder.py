@@ -33,6 +33,7 @@ from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
 from ._prototype import EmergeSyncRepository
 from ._prototype import ScriptInChroot
+from ._prototype import FunctionInChroot
 from ._errors import SettingsError
 from ._errors import BuildError
 from ._errors import CustomActionError
@@ -86,9 +87,18 @@ class Builder(ActionRunner):
         ]
 
         def x(self, action_name, action):
-            with _MyChrooter(self) as m:
-                for s in action.custom_scripts_and_functions:
-                    m.script_exec("", s, quiet=self._getQuiet())
+            i = 0
+            while i < len(action.custom_scripts_and_functions):
+                if isinstance(action.custom_scripts_and_functions[i], ScriptInChroot):
+                    with _MyChrooter(self) as m:
+                        while i < len(action.custom_scripts_and_functions) and isinstance(action.custom_scripts_and_functions[i], ScriptInChroot):
+                            m.script_exec("", action.custom_scripts_and_functions[i], quiet=self._getQuiet())
+                            i += 1
+                elif isinstance(action.custom_scripts_and_functions[i], FunctionInChroot):
+                    action.custom_scripts_and_functions[i].execute(self._workDirObj.get_latest_action_dirpath())
+                    i += 1
+                else:
+                    assert False
 
         super().__init__(self._workDirObj._persistentStorage, actionList, x, BuildError)
 
@@ -451,7 +461,7 @@ class CustomAction(ActionRunner.CustomAction):
             else:
                 return False
 
-        if len(obj.custom_scripts_and_functions) == 0 or any([not isinstance(s, ScriptInChroot) for s in obj.custom_scripts_and_functions]):
+        if len(obj.custom_scripts_and_functions) == 0 or any(not Util.isInstanceList(s, ScriptInChroot, FunctionInChroot) for s in obj.custom_scripts_and_functions):
             if raise_exception:
                 raise CustomActionError("invalid value for key \"custom_scripts_and_functions\"")
             else:
