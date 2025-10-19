@@ -38,7 +38,7 @@ class ScriptFromHostFile(ScriptInChroot):
         os.copy(self._filepath, script_dir_hostpath)
         os.chmod(os.path.join(script_dir_hostpath, os.path.basename(self._filepath)), 0o0755)
 
-    def get_script(self):
+    def get_script_filename(self):
         return os.path.basename(self._filepath)
 
 
@@ -56,7 +56,7 @@ class ScriptFromHostDir(ScriptInChroot):
         Util.shellCall("find \"%s\" -type f | xargs chmod 644" % (script_dir_hostpath))
         Util.shellCall("find \"%s\" -type d | xargs chmod 755" % (script_dir_hostpath))
 
-    def get_script(self):
+    def get_script_filename(self):
         return self._filename
 
 
@@ -73,7 +73,7 @@ class ScriptFromBuffer(ScriptInChroot):
             f.write(self._buf)
         os.chmod(fullfn, 0o0755)
 
-    def get_script(self):
+    def get_script_filename(self):
         return _SCRIPT_FILE_NAME
 
 
@@ -92,7 +92,7 @@ class OneLinerScript(ScriptInChroot):
             f.write("%s\n" % (self._cmd))
         os.chmod(fullfn, 0o0755)
 
-    def get_script(self):
+    def get_script_filename(self):
         return _SCRIPT_FILE_NAME
 
 
@@ -210,7 +210,7 @@ class PlacingFilesScript(ScriptInChroot):
             f.write(sbuf)
         os.chmod(fullfn, 0o0755)
 
-    def get_script(self):
+    def get_script_filename(self):
         return _SCRIPT_FILE_NAME
 
     def _fn(self, dataDir, itemId):

@@ -81,5 +81,12 @@ class ScriptInChroot(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_script(self):
+    def get_script_filename(self):
+        pass
+
+
+class FuncInChroot(abc.ABC):
+
+    @abc.abstractmethod
+    def run(self):
         pass

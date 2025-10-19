@@ -152,7 +152,7 @@ class Runner:
         os.makedirs(hostPath, mode=0o755)
         scriptObj.fill_script_dir(hostPath)
 
-        return (hostPath, scriptDir, scriptObj.get_script())
+        return (hostPath, scriptDir, scriptObj.get_script_filename())
 
     def _shellExec(self, env, cmd, bQuiet, bNeedOutput):
         scriptObj = ScriptChrootInit(Util.getTermType(), Util.getLangEncoding(), cmd)
