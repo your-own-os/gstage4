@@ -71,6 +71,10 @@ sys-fs/ntfs3g           suid
 
 # NTFS3 module has been already in kernel, FUSE should not occupy the standard filesystem name anymore
 sys-fs/ntfs3g           -mount-ntfs
+
+# "adns" is not compatible with "nss-mdns + TYPE_CNAME"
+*/*                     -adns
+net-misc/curl           -httpsrr -http3 -quic -curl_quic_openssl      # these depend on "adns"
 """
 
     _maskFileContent = """
