@@ -21,11 +21,18 @@
 # THE SOFTWARE.
 
 
-from ._template import ScriptFromHostFile
-from ._template import ScriptFromHostDir
-from ._template import ScriptFromBuffer
-from ._template import OneLinerScript
-from ._template import PlacingFilesScript
+from ._template_script import ScriptFromHostFile
+from ._template_script import ScriptFromHostDir
+from ._template_script import ScriptFromBuffer
+from ._template_script import OneLinerScript
+from ._template_script import PlacingFilesScript            # deprecated
+
+from ._template_function import CreateFileFunction
+from ._template_function import CopyHostFileFunction
+from ._template_function import CreateDirFunction
+from ._template_function import CopyHostDirFunction
+from ._template_function import CreateSymlinkFunction
+from ._template_function import CopyHostSymlinkFunction
 
 from ._common import ScriptInstallPackages
 from ._common import ScriptUpdateWorld
@@ -36,6 +43,12 @@ __all__ = [
     "ScriptFromBuffer",
     "OneLinerScript",
     "PlacingFilesScript",
+    "CreateFileFunction",
+    "CopyHostFileFunction",
+    "CreateDirFunction",
+    "CopyHostDirFunction",
+    "CreateSymlinkFunction",
+    "CopyHostSymlinkFunction",
     "ScriptInstallPackages",
     "ScriptUpdateWorld",
 ]
