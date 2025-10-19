@@ -5,7 +5,7 @@ import pathlib
 
 fn = "git-r3.eclass"
 
-s2 = '''
+strReplaceGithub = '''
     local index=0
     for repo in "${subrepos[@]}"; do
         if [[ ${repo} == https://github.com/* ]]; then
@@ -53,7 +53,7 @@ try:
         pos += 1
 
         # do insert
-        buf = buf[:pos] + s2.replace("    ", "\t") + buf[pos:]
+        buf = buf[:pos] + strReplaceGithub.replace("    ", "\t") + buf[pos:]
 
     pathlib.Path(fn).write_text(buf)
 except (FileNotFoundError, ValueError):
