@@ -35,6 +35,8 @@ class CreateFileFunction(FunctionInChroot):
         assert 0o000 <= mode <= 0o777
         assert isinstance(buf, str) or isinstance(buf, bytes)
 
+        target_filepath = os.path.normpath(target_filepath)
+
         self._info = (target_filepath, owner, group, mode, buf)
 
     def execute(self, chroot_dir_hostpath):
@@ -60,6 +62,7 @@ class CopyHostFileFunction(FunctionInChroot):
         assert isinstance(group, int)
         assert 0o000 <= mode <= 0o777
 
+        target_filepath = os.path.normpath(target_filepath)
         if hostpath is None:
             hostpath = target_filepath
 
@@ -82,6 +85,8 @@ class CreateDirFunction(FunctionInChroot):
         assert isinstance(group, int)
         assert 0o000 <= mode <= 0o777
 
+        target_dirpath = os.path.normpath(target_dirpath)
+
         self._info = (target_dirpath, owner, group, mode)
 
     def execute(self, chroot_dir_hostpath):
@@ -102,6 +107,7 @@ class CopyHostDirFunction(FunctionInChroot):
         assert 0o000 <= dmode <= 0o777
         assert 0o000 <= fmode <= 0o777
 
+        target_dirpath = os.path.normpath(target_dirpath)
         if hostpath is None:
             hostpath = target_dirpath
 
@@ -136,6 +142,8 @@ class CreateSymlinkFunction(FunctionInChroot):
         assert isinstance(owner, int)
         assert isinstance(group, int)
 
+        target_linkpath = os.path.normpath(target_linkpath)
+
         self._info = (target_linkpath, target, owner, group)
 
     def execute(self, chroot_dir_hostpath):
@@ -152,6 +160,7 @@ class CopyHostSymlinkFunction(FunctionInChroot):
         assert isinstance(owner, int)
         assert isinstance(group, int)
 
+        target_linkpath = os.path.normpath(target_linkpath)
         if hostpath is None:
             hostpath = target_linkpath
 
