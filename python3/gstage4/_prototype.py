@@ -85,8 +85,8 @@ class ScriptInChroot(abc.ABC):
         pass
 
 
-class FuncInChroot(abc.ABC):
+class FunctionInChroot(abc.ABC):
 
     @abc.abstractmethod
-    def run(self):
+    def execute(self, chroot_dir_hostpath):
         pass

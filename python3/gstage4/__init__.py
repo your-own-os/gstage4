@@ -44,6 +44,7 @@ from ._prototype import SeedStage
 from ._prototype import ManualSyncRepository
 from ._prototype import EmergeSyncRepository
 from ._prototype import ScriptInChroot
+from ._prototype import FunctionInChroot
 
 from ._workdir import WorkDir
 
@@ -77,6 +78,7 @@ __all__ = [
     "ManualSyncRepository",
     "EmergeSyncRepository",
     "ScriptInChroot",
+    "FunctionInChroot",
     "WorkDir",
     "Runner",
     "Builder",

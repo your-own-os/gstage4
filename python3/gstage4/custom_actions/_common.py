@@ -29,14 +29,14 @@ from .._builder import CustomAction
 
 class SimpleCustomAction(CustomAction):                         # FIXME: should be renamed to UserDefinedAction
 
-    def __init__(self, *custom_scripts, after=[], before=[]):
-        self._custom_scripts = custom_scripts
+    def __init__(self, *custom_scripts_and_functions, after=[], before=[]):
+        self._custom_scripts_and_functions = custom_scripts_and_functions
         self._after = after
         self._before = before
 
     @property
-    def custom_scripts(self):
-        return self._custom_scripts
+    def custom_scripts_and_functions(self):
+        return self._custom_scripts_and_functions
 
     def get_after(self):
         return self._after
@@ -51,7 +51,7 @@ class SetRootPassword(CustomAction):
         self._hash = passlib.hosts.linux_context.hash(password)
 
     @property
-    def custom_scripts(self):
+    def custom_scripts_and_functions(self):
         return [OneLinerScript("sed -i 's#^root:[^:]*:#root:%s:#' /etc/shadow" % (self._hash))]
 
     def get_after(self):
@@ -69,7 +69,7 @@ class AddUser(CustomAction):
         self._comment = comment
 
     @property
-    def custom_scripts(self):
+    def custom_scripts_and_functions(self):
         return []
 
     def get_after(self):
@@ -85,7 +85,7 @@ class InstallPackages(CustomAction):
         self._script = ScriptInstallPackages(packages, record_to_world, 0)
 
     @property
-    def custom_scripts(self):
+    def custom_scripts_and_functions(self):
         return [self._script]
 
     def get_after(self):
@@ -101,7 +101,7 @@ class RemovePackagesFromWorld(CustomAction):
         self._pkgList = packages
 
     @property
-    def custom_scripts(self):
+    def custom_scripts_and_functions(self):
         return []
 
     def get_after(self):
@@ -114,7 +114,7 @@ class RemovePackagesFromWorld(CustomAction):
 class RemoveUsrSrcDirectoryContent(CustomAction):
 
     @property
-    def custom_scripts(self):
+    def custom_scripts_and_functions(self):
         return [OneLinerScript("rm -rf /usr/src/*")]
 
     def get_after(self):

@@ -87,7 +87,7 @@ class Builder(ActionRunner):
 
         def x(self, action_name, action):
             with _MyChrooter(self) as m:
-                for s in action.custom_scripts:
+                for s in action.custom_scripts_and_functions:
                     m.script_exec("", s, quiet=self._getQuiet())
 
         super().__init__(self._workDirObj._persistentStorage, actionList, x, BuildError)
@@ -438,7 +438,7 @@ class CustomAction(ActionRunner.CustomAction):
 
     @property
     @abc.abstractmethod
-    def custom_scripts(self):
+    def custom_scripts_and_functions(self):
         pass
 
     @classmethod
@@ -451,9 +451,9 @@ class CustomAction(ActionRunner.CustomAction):
             else:
                 return False
 
-        if len(obj.custom_scripts) == 0 or any([not isinstance(s, ScriptInChroot) for s in obj.custom_scripts]):
+        if len(obj.custom_scripts_and_functions) == 0 or any([not isinstance(s, ScriptInChroot) for s in obj.custom_scripts_and_functions]):
             if raise_exception:
-                raise CustomActionError("invalid value for key \"custom_scripts\"")
+                raise CustomActionError("invalid value for key \"custom_scripts_and_functions\"")
             else:
                 return False
 
