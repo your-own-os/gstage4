@@ -106,7 +106,7 @@ class Util:
     def getLangEncoding():
         ret = None
 
-        # extract encoding part from LANG、LC_* environment variables
+        # extract encoding part from "LANG", "LC_*" environment variables
         # 1. ensures that encoding part exists
         # 2. ensures that encoding parts are same
         for k, v in os.environ.items():

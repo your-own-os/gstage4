@@ -258,7 +258,7 @@ for var in LANG $(env | grep -oP '^LC_\w+'); do
         enc=$(get_encoding $value)
         shopt -s nocasematch
         if [[ "$enc" != "@@languageEncoding@@" ]]; then
-            die "stage4 uses another language encoding ($var=$value)"
+            die "stage4 language encoding differs from current: ($var=$value vs @@languageEncoding@@)"
         fi
         shopt -u nocasematch
     fi
