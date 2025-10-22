@@ -252,15 +252,20 @@ get_encoding() {
         echo "${BASH_REMATCH[1]}"
     fi
 }
+normalize_encoding() {
+    # UTF-8 => utf8, UTF8 => utf8, ISO-8859-15 => iso885915
+    # The standard form is "UTF-8", Gentoo uses "utf8" by default, but can also use "UTF-8", "UTF8", Gentoo sucks
+    echo "$1" | tr '[:upper:]' '[:lower:]' | tr -d '-'
+}
 for var in LANG $(env | grep -oP '^LC_\w+'); do
-    value=$(printenv $var)
+    value=$(printenv "$var")
     if [ -n "$value" ] ; then
-        enc=$(get_encoding $value)
-        shopt -s nocasematch
-        if [[ "$enc" != "@@languageEncoding@@" ]]; then
+        enc1=$(get_encoding "$value")
+        enc1=$(normalize_encoding "$enc1")
+        enc2=$(normalize_encoding "@@languageEncoding@@")
+        if [[ "$enc1" != "$enc2" ]]; then
             die "stage4 language encoding differs from current: ($var=$value vs @@languageEncoding@@)"
         fi
-        shopt -u nocasematch
     fi
 done
 """
