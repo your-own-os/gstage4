@@ -39,6 +39,32 @@ class TailorWine:
         assert len(disableItems) == 0
 
 
+class TailorGlibc:
+
+    def __init__(self, remove_items=[]):
+        self._removeItems = remove_items
+
+    def update_target_settings(self, target_settings):
+        assert "10-tailor-glibc" not in target_settings.pkg_mask_files
+
+        removeItems = list(self._removeItems)
+        if True:
+            tm = []
+
+            if "locale-gen" in removeItems:
+                # this will also make the system use the common "C.UTF-8" instead of "C.utf8", gentoo sucks
+                target_settings.repo_postsync_patch_directories.append("glibc-remove-locale-gen")
+                tm += [
+                    "sys-apps/locale-gen",
+                ]
+                removeItems.remove("locale-gen")
+
+            if len(tm) > 0:
+                target_settings.pkg_mask_files["10-tailor-glibc"] = "\n".join(tm) + "\n"
+
+            assert len(removeItems) == 0
+
+
 class TailorSystemd:
 
     def __init__(self, disable_items=[], remove_items=[]):

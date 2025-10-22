@@ -74,6 +74,7 @@ from ._common import SupportAllTermType
 from ._common import GettyAutoLogin
 
 from ._tailor import TailorBaselayout
+from ._tailor import TailorGlibc
 from ._tailor import TailorUtilLinux
 from ._tailor import TailorSystemd
 from ._tailor import TailorShadow
@@ -164,6 +165,7 @@ __all__ = [
     "SupportAllTermType",
     "GettyAutoLogin",
     "TailorBaselayout",
+    "TailorGlibc",
     "TailorUtilLinux",
     "TailorSystemd",
     "TailorShadow",
