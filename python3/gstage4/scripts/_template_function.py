@@ -45,7 +45,7 @@ class CreateFileFunction(FunctionInChroot):
         fullfn = os.path.join(chroot_dir_hostpath, target_filepath[1:])
 
         if isinstance(buf, str):
-            pathlib.Path(fullfn).write_test(buf)
+            pathlib.Path(fullfn).write_text(buf)
         elif isinstance(buf, bytes):
             pathlib.Path(fullfn).write_bytes(buf)
         else:
