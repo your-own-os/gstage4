@@ -977,6 +977,7 @@ media-libs/libsdl                                               -alsa           
 media-libs/libsdl2                                              -alsa pipewire                # sound route 1
 media-libs/openal                                               -alsa pipewire                # sound route 1
 media-libs/mediastreamer2                                       -alsa pulseaudio              # sound route 6 (bad)
+media-plugins/audacious-plugins                                 -alsa pipewire                # sound route 1
 media-sound/fluidsynth                                          -alsa pipewire                # sound route 1
 media-sound/lmms                                                -alsa pulseaudio              # sound route 6 (bad)
 media-sound/mpg123                                              -alsa pulseaudio              # sound route 6 (bad)
