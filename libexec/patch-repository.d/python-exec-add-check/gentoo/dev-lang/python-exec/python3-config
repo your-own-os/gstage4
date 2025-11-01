@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 
+import re
+import sys
 import subprocess
 
 
 if __name__ == '__main__':
-    subprocess.run(["python-exec2c", "python3-config"])
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--check":
+            pass
+        else:
+            ret = subprocess.run(["python-exec2c", "python3-config"] + sys.argv[1:])
+            sys.exit(ret.returncode)
+    else:
+        ret = subprocess.run(["python-exec2c", "python3-config"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        assert ret.returncode == 1
+        assert ret.stdout == ""
+        assert ret.stderr.startswith("Usage:")
+        sys.stderr.write(re.sub(r"|.*", r"\1|--check", flags=re.M))
+        sys.exit(ret.returncode)
