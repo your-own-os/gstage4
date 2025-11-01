@@ -65,6 +65,21 @@ class TailorGlibc:
             assert len(removeItems) == 0
 
 
+class TailorPythonExec:
+
+    def __init__(self, add_items=[]):
+        self._addItems = add_items
+
+    def update_target_settings(self, target_settings):
+        addItems = list(self._addItems)
+        if True:
+            if "check" in addItems:
+                target_settings.repo_postsync_patch_directories.append("python-exec-add-check")
+                addItems.remove("check")
+
+            assert len(addItems) == 0
+
+
 class TailorSystemd:
 
     def __init__(self, disable_items=[], remove_items=[]):
