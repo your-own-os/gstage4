@@ -17,5 +17,5 @@ if __name__ == '__main__':
         assert ret.returncode == 1
         assert ret.stdout == ""
         assert ret.stderr.startswith("Usage:")
-        sys.stderr.write(re.sub(r"|.*", r"\1|--check", ret.stderr, flags=re.M))
+        sys.stderr.write(re.sub(r"(\|.*)$", r"\1|--check", ret.stderr, flags=re.M))
         sys.exit(ret.returncode)
