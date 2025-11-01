@@ -10,7 +10,7 @@ import pathlib
 try:
     selfDir = os.path.dirname(os.path.realpath(__file__))
     os.makedirs("files", exist_ok=True)
-    shutil.copyfile(os.path.join(selfDir, "python-config"), os.path.join("files", "python-config"))
+    shutil.copyfile(os.path.join(selfDir, "python3-config"), os.path.join("files", "python3-config"))
 
     buf2 = """
 dobin ${FILESDIR}/python3-config
@@ -41,9 +41,6 @@ dosym python3-config /usr/bin/python-config
 
         # do insert
         buf = buf[:pos] + buf2 + buf[pos:]
-
-        # insert new use flag
-        buf += '\nIUSE="${IUSE} +system-service"\n'
 
         with open(fn, "w") as f:
             f.write(buf)
