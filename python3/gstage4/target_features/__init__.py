@@ -79,12 +79,13 @@ from ._tailor import TailorUtilLinux
 from ._tailor import TailorSystemd
 from ._tailor import TailorShadow
 from ._tailor import TailorPam
-from ._tailor import TailorAvahi
+from ._tailor import TailorPythonExec
 from ._tailor import TailorEselect
 from ._tailor import TailorGit
 from ._tailor import TailorWget
 from ._tailor import TailorRsync
 from ._tailor import TailorLmSensors
+from ._tailor import TailorAvahi
 from ._tailor import TailorQemu
 from ._tailor import TailorWine
 
