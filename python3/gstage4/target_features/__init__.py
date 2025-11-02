@@ -79,7 +79,6 @@ from ._tailor import TailorUtilLinux
 from ._tailor import TailorSystemd
 from ._tailor import TailorShadow
 from ._tailor import TailorPam
-from ._tailor import TailorPythonExec
 from ._tailor import TailorEselect
 from ._tailor import TailorGit
 from ._tailor import TailorWget
@@ -171,7 +170,6 @@ __all__ = [
     "TailorSystemd",
     "TailorShadow",
     "TailorPam",
-    "TailorPythonExec",
     "TailorEselect",
     "TailorGit",
     "TailorWget",
