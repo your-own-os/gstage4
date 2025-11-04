@@ -26,17 +26,59 @@ from .._util import Util
 
 class TailorWine:
 
-    def __init__(self, disable_items=[]):
+    def __init__(self, disable_items=[], patches=[]):
         self._disableItems = disable_items
+        self._patches = patches
 
     def update_target_settings(self, target_settings):
         disableItems = list(self._disableItems)
+        patches = list(self._patches)
 
         if "auto-adding-menu-entries" in disableItems:
             target_settings.repo_postsync_patch_directories.append("wine-disable-auto-adding-menu-entries")
             disableItems.remove("auto-adding-menu-entries")
 
+        if "register-mime" in disableItem:
+            # Disable mime-types registering
+            # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
+            assert False
+
+        if "register-foa" in disableItem:
+            # Disable file-open-associations registering
+            # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
+            assert False
+
         assert len(disableItems) == 0
+
+        if "mwo-fix" in patches:
+            # Mechwarrior Online fix - https://mwomercs.com/forums/topic/268847-running-the-game-on-ubuntu-steam-play/page__st__20__p__6195387#entry6195387
+            # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
+            assert False
+
+        if "re4-fix" in patches:
+            # Resident Evil 4 hack - https://bugs.winehq.org/show_bug.cgi?id=46336
+            # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
+            assert False
+
+        if "assettocorsa-hudperf-fix" in patches:
+            # Fix for Assetto Corsa performance drop when HUD elements are displayed - https://bugs.winehq.org/show_bug.cgi?id=46955
+            # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
+            assert False
+
+        if "ffxivlauncher-fix" in patches:
+            # Workaround for Final Fantasy XIV Launcher 404 error - Thanks @varris1 ! - Fixed by d535df42f665a097ec721b10fb49d7b18f899be9 (4.10)
+            # Found to also enable the new launcher (that came with the 5.1 update) to work *with issues*
+            # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
+            assert False
+
+        if "kof-bgm-fix" in patches:
+            # Background music on King of Fighters 98 and 2002 is silent on Wine-staging and the `xactengine-initial` patchset was found to introduce the issue. Set to "true" to disable it as a workaround.
+            # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
+            assert False
+
+        assert len(patches) == 0
+
+        # https://github.com/Frogging-Family/community-patches/tree/master/wine-tkg-git
 
 
 class TailorGlibc:
