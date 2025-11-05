@@ -38,12 +38,12 @@ class TailorWine:
             target_settings.repo_postsync_patch_directories.append("wine-disable-auto-adding-menu-entries")
             disableItems.remove("auto-adding-menu-entries")
 
-        if "register-mime" in disableItem:
+        if "register-mime" in disableItems:
             # Disable mime-types registering
             # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
             assert False
 
-        if "register-foa" in disableItem:
+        if "register-foa" in disableItems:
             # Disable file-open-associations registering
             # from https://github.com/Frogging-Family/wine-tkg-git/blob/master/wine-tkg-git/wine-tkg-profiles/sample-external-config.cfg
             assert False
