@@ -188,6 +188,9 @@ media-video/pipewire                                                 systemd
 media-video/wireplumber                                              systemd
 net-print/cups                                                       systemd
 net-wireless/bluez                                                   systemd
+
+# don't use systemd alternatives
+*/*                                                                  -elogind
 """
 
     _maskFileContent = """
@@ -204,7 +207,7 @@ sys-apps/s6-linux-utils
 net-dns/s6-dns
 net-misc/s6-networking
 
-# mask all systemd alternatives
+# don't use systemd alternatives
 sys-apps/systemd-utils
 sys-fs/udev-init-scripts
 
@@ -908,8 +911,8 @@ app-office/libreoffice                        -pdfimport
 
     _maskFileContent = """
 # we use wayland
-x11-apps/xinit
-x11-base/xorg-server
+#x11-apps/xinit                             # media-gfx/blender-bin still depends on it, media-gfx/blender is unusable (https://bugs.gentoo.org/965288)
+#x11-base/xorg-server                       # media-gfx/blender-bin still depends on it, media-gfx/blender is unusable (https://bugs.gentoo.org/965288)
 #x11-base/xwayland
 
 # vdpau is from NVIDIA (it does not support pure wayland yet), use vaapi is enough
