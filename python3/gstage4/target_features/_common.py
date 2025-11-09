@@ -911,8 +911,8 @@ app-office/libreoffice                        -pdfimport
 
     _maskFileContent = """
 # we use wayland
-#x11-apps/xinit                             # media-gfx/blender-bin still depends on it, media-gfx/blender is unusable (https://bugs.gentoo.org/965288)
-#x11-base/xorg-server                       # media-gfx/blender-bin still depends on it, media-gfx/blender is unusable (https://bugs.gentoo.org/965288)
+x11-apps/xinit
+x11-base/xorg-server
 #x11-base/xwayland
 
 # vdpau is from NVIDIA (it does not support pure wayland yet), use vaapi is enough
