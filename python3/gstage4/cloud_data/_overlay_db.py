@@ -85,6 +85,7 @@ class OverlayDb:
             ("mercurial", "https", None),
             ("mercurial", "http", None),
             ("rsync", "rsync", None),
+            ("cvs", None, None),
         ]
 
         for attempt, getResp in Util.robustUrlOpen(self.URL):
@@ -112,14 +113,19 @@ class OverlayDb:
                                         tUrl = tUrl.replace("git://", "https://")
 
                                 if tVcsType == vcsType:
-                                    if urlDomain is not None:
-                                        if tUrl.startswith(urlProto + "://" + urlDomain + "/"):
-                                            ret[overlayName] = (tVcsType, tUrl)
-                                            break
+                                    if urlProto is not None:
+                                        if urlDomain is not None:
+                                            if tUrl.startswith(urlProto + "://" + urlDomain + "/"):
+                                                ret[overlayName] = (tVcsType, tUrl)
+                                                break
+                                        else:
+                                            if tUrl.startswith(urlProto + "://"):
+                                                ret[overlayName] = (tVcsType, tUrl)
+                                                break
                                     else:
-                                        if tUrl.startswith(urlProto + "://"):
-                                            ret[overlayName] = (tVcsType, tUrl)
-                                            break
+                                        assert urlDomain is None
+                                        ret[overlayName] = (tVcsType, tUrl)
+                                        break
 
                             if overlayName in ret:
                                 break
