@@ -288,6 +288,7 @@ class DontUseDeprecatedPackagesAndFunctions:
 # select between gtk2, gtk3 and gtk4
 */*                                                                                                                         -gtk2 -gtk3
 app-office/libreoffice                                                                                                      gtk3 -gtk4      # gtk4 is experimental
+www-client/chromium                                                                                                         gtk4
 
 # select between qt4, qt5 and qt6
 */*                                                                                                                         -qt4 -qt5
