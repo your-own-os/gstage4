@@ -364,6 +364,9 @@ net-vpn/i2p
 
 # why use the old version openssl?
 <dev-libs/openssl-3.0.0
+
+# this is obsolete
+net-wireless/wireless-tools
 """
 
 
