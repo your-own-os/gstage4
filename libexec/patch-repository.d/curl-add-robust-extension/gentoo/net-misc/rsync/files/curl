@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# curl has no option to retry forever, sucks
+curl-reference $@ --retry=9223372036854775807 --retry-connrefused --retry-delay 10
