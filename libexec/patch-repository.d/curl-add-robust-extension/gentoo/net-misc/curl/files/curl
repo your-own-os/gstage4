@@ -1,4 +1,5 @@
 #!/bin/sh
 
 # curl has no option to retry forever, sucks
+# use explicit retry delay so that we don't do exponent backoff
 curl-reference $@ --retry=9223372036854775807 --retry-connrefused --retry-delay 10
