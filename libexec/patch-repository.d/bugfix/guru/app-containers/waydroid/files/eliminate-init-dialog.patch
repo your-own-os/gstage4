@@ -1,0 +1,21 @@
+diff --git a/tools/actions/initializer.py b/tools/actions/initializer.py
+index c2dcccd..5700524 100644
+--- a/tools/actions/initializer.py
++++ b/tools/actions/initializer.py
+@@ -452,8 +452,11 @@ def remote_init_client(args):
+     GLib.set_prgname("Waydroid")
+     win = WaydroidInitWindow()
+ 
+-    win.show_all()
+-    win.outTextView.hide()
+-    win.doneBtn.hide()
+-
+-    Gtk.main()
++    if (os.path.exists("/usr/share/waydroid-extra/images/system.img") and os.path.exists("/usr/share/waydroid-extra/images/vendor.img")) or (os.path.exists("/etc/waydroid-extra/images/system.img") and os.path.exists("/etc/waydroid-extra/images/vendor.img")):
++        sysType = win.sysType.get_model()[win.sysType.get_active_iter()][0]
++        win.run_init(win.sysOta.get_text(), win.vndOta.get_text(), sysType)
++    else:
++        win.show_all()
++        win.outTextView.hide()
++        win.doneBtn.hide()
++        Gtk.main()
