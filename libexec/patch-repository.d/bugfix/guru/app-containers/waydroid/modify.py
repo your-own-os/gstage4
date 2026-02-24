@@ -13,7 +13,7 @@ shutil.copyfile(os.path.join(selfDir, "files", "eliminate-init-dialog.patch"), o
 try:
     # what to insert (with blank line in the beginning and the end)
     buf2 = r"""
-patch -p0 -i ${FILESDIR}/eliminate-init-dialog.patch
+patch -p1 -i ${FILESDIR}/eliminate-init-dialog.patch
 """
     buf2 = buf2.replace("\n", "\n\t")
     buf2 += "\n"
