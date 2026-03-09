@@ -241,6 +241,12 @@ class DontUseVT:
         target_settings.repo_postsync_patch_directories.append("kill-config-vt")
 
 
+class UseBnetd:
+
+    def update_target_settings(self, target_settings):
+        target_settings.repo_postsync_patch_directories.append("use-bnetd")
+
+
 class DontUseDeprecatedPackagesAndFunctions:
 
     def update_target_settings(self, target_settings):

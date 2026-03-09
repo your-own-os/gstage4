@@ -34,6 +34,8 @@ from ._common import UseSystemd
 from ._common import UseVT
 from ._common import DontUseVT
 
+from ._common import UseBnetd
+
 from ._common import UseGnomeKeyring
 from ._common import UseKeePassXc
 
@@ -132,6 +134,7 @@ __all__ = [
     "UseSystemd",
     "UseVT",
     "DontUseVT",
+    "UseBnetd",
     "UseGnomeKeyring",
     "UseKeePassXc",
     "UseIbus",
