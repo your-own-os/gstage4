@@ -1,0 +1,14 @@
+diff --git a/src/backend/plugins/config-sysconfig/config-sysconfig.c b/src/backend/plugins/config-sysconfig/config-sysconfig.c
+index 42aa901..dd50a57 100644
+--- a/src/backend/plugins/config-sysconfig/config-sysconfig.c
++++ b/src/backend/plugins/config-sysconfig/config-sysconfig.c
+@@ -226,6 +226,9 @@ px_config_sysconfig_get_config (PxConfig     *config,
+ 
+   if (proxy)
+     px_strv_builder_add_proxy (builder, proxy);
++
++  if (g_file_test("/run/bnetd/wpad.dat", G_FILE_TEST_EXISTS))
++    px_strv_builder_add_proxy (builder, "pac+file:///run/bnetd/wpad.dat");
+ }
+ 
+ static void
