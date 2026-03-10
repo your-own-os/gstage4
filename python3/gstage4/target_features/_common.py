@@ -244,7 +244,16 @@ class DontUseVT:
 class UseBnetd:
 
     def update_target_settings(self, target_settings):
+        assert "10-use-bnetd" not in target_settings.pkg_use_files
+
+        target_settings.pkg_use_files["10-use-bnetd"] = self._useFileContent.strip("\n") + "\n"
+
         target_settings.repo_postsync_patch_directories.append("use-bnetd")
+
+    _useFileContent = """
+# duktape USE flag is not for selecting a parser, it controls whether PAC file support is enabled
+net-libs/libproxy                                                                                   duktape
+"""
 
 
 class DontUseDeprecatedPackagesAndFunctions:
