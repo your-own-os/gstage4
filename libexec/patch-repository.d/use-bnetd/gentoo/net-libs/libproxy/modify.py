@@ -4,11 +4,35 @@
 import os
 import glob
 import shutil
+import pathlib
 
 selfDir = os.path.dirname(os.path.realpath(__file__))
-
 os.makedirs("files", exist_ok=True)
 shutil.copyfile(os.path.join(selfDir, "files", "bnetd-wpad.patch"), os.path.join("files", "bnetd-wpad.patch"))
-for fn in glob.glob("*.ebuild"):
-    with open(fn, "a") as f:
-        f.write('\nPATCHES=( ${PATCHES[@]} "${FILESDIR}"/bnetd-wpad.patch )\n')
+
+try:
+    # what to insert (with blank line in the beginning and the end)
+    buf2 = r"""
+patch -p1 -i ${FILESDIR}/bnetd-wpad.patch
+"""
+    buf2 = buf2.replace("\n", "\n\t")
+    buf2 += "\n"
+
+    for fn in glob.glob("*.ebuild"):
+        buf = pathlib.Path(fn).read_text()
+
+        # insert to the end of src_install()
+        pos = buf.find("src_prepare() {")
+        if pos == -1:
+            raise ValueError()
+        pos = buf.find("\n}\n", pos)
+        if pos == -1:
+            raise ValueError()
+        pos += 1
+
+        # do insert
+        buf = buf[:pos] + buf2 + buf[pos:]
+        with open(fn, "w") as f:
+            f.write(buf)
+except ValueError:
+    print("outdated")
