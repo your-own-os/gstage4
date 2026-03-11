@@ -1,0 +1,25 @@
+--- a/net/proxy_resolution/proxy_config_service_linux.cc	2026-03-03 07:00:09.000000000 +0800
++++ b/net/proxy_resolution/proxy_config_service_linux.cc	2026-03-11 22:49:24.070525847 +0800
+@@ -1373,11 +1373,18 @@
+ ProxyConfigServiceLinux::Delegate::GetLatestProxyConfig(
+     ProxyConfigWithAnnotation* config) {
+   // This is called from the main TaskRunner.
+-  DCHECK(!main_task_runner_.get() ||
+-         main_task_runner_->RunsTasksInCurrentSequence());
++  // Check for custom WPAD file on every request (like libproxy)
++  base::FilePath wpad_path("/run/bnetd/wpad.dat");
++  if (base::PathExists(wpad_path)) {
++    ProxyConfig wpad_config;
++    wpad_config.set_pac_url(GURL("file:///run/bnetd/wpad.dat"));
++    *config = ProxyConfigWithAnnotation(
++        wpad_config, NetworkTrafficAnnotationTag(traffic_annotation_));
++    VLOG(1) << "Using proxy settings from /run/bnetd/wpad.dat";
++    return CONFIG_VALID;
++  }
+ 
+-  // Simply return the last proxy configuration that glib_default_loop
+-  // notified us of.
++  // Fall back to cached config (gsettings/env vars)
+   *config = GetConfigOrDirect(cached_config_);
+ 
+   // We return CONFIG_VALID to indicate that *config was filled in. It is always
