@@ -1,3 +1,33 @@
+--- a/net/proxy_resolution/pac_file_fetcher_impl.cc	2026-03-03 07:00:09.000000000 +0800
++++ b/net/proxy_resolution/pac_file_fetcher_impl.cc	2026-03-12 00:29:51.736108120 +0800
+@@ -234,11 +234,12 @@
+                                             bool* defer_redirect) {
+   int error = OK;
+ 
+-  // Redirection to file:// is never OK. Ordinarily this is handled lower in the
+-  // stack (|FileProtocolHandler::IsSafeRedirectTarget|), but this is reachable
+-  // when built without file:// suppport. Return the same error for consistency.
++  // Allow redirects to our specific local PAC file: file:///run/bnetd/wpad.dat
++  // Otherwise, redirection to file:// is never OK.
+   if (redirect_info.new_url.SchemeIsFile()) {
+-    error = ERR_UNSAFE_REDIRECT;
++    if (redirect_info.new_url.path() != "/run/bnetd/wpad.dat") {
++      error = ERR_UNSAFE_REDIRECT;
++    }
+   } else if (!IsUrlSchemeAllowed(redirect_info.new_url)) {
+     error = ERR_DISALLOWED_URL_SCHEME;
+   }
+@@ -328,6 +329,10 @@
+   if (url.SchemeIsHTTPOrHTTPS() || url.SchemeIs("data"))
+     return true;
+ 
++  // Allow specific local PAC file: file:///run/bnetd/wpad.dat
++  if (url.SchemeIsFile() && url.path() == "/run/bnetd/wpad.dat")
++    return true;
++
+   // Disallow any other URL scheme.
+   return false;
+ }
 --- a/net/proxy_resolution/proxy_config_service_linux.cc	2026-03-03 07:00:09.000000000 +0800
 +++ b/net/proxy_resolution/proxy_config_service_linux.cc	2026-03-11 22:49:24.070525847 +0800
 @@ -1373,11 +1373,18 @@
