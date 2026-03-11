@@ -22,7 +22,7 @@ try:
         pos += 1
 
         # do insert
-        buf = buf[:pos] + '\tPATCHES+=( "${FILESDIR}"/bnet-wpad.patch )\n' + buf[pos:]
+        buf = buf[:pos] + '\tPATCHES+=( "${FILESDIR}"/bnetd-wpad.patch )\n' + buf[pos:]
         with open(fn, "w") as f:
             f.write(buf)
 except ValueError:
