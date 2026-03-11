@@ -250,6 +250,13 @@ class UseBnetd:
 
         target_settings.repo_postsync_patch_directories.append("use-bnetd")
 
+    def update_world_set(self, world_set):
+        world_set.add("net-misc/bnetd")
+
+    def update_service_list(self, service_list):
+        if "bnetd" not in service_list:
+            service_list.append("bnetd")
+
     _useFileContent = """
 # duktape USE flag is not for selecting a parser, it controls whether PAC file support is enabled
 net-libs/libproxy                                                                                   duktape
