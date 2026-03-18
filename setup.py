@@ -26,7 +26,7 @@ if not platform.startswith('linux'):
 setup(
     name=__package__,
     version=__version__,
-    description="A python module for buildling stage4 of Gentoo Linux",
+    description="A python module for building stage4 of Gentoo Linux",
     author=email.utils.parseaddr(__author__)[0],
     author_email=email.utils.parseaddr(__author__)[1],
     url='https://gitee.com/your-own-os/gstage4',

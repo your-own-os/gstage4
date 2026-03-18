@@ -1,6 +1,6 @@
 # gstage4
 
-A python module for buildling stage4 of Gentoo Linux
+A python module for building stage4 of Gentoo Linux
 
 
 
