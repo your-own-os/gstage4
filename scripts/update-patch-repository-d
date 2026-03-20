@@ -49,13 +49,12 @@ You are helping maintain {patchRepoDir} in this project.
 Project Directory: {projectFullDir}
 
 Actions:
-- Comply to AGENTS.md in the project.
-- Check every directory and file in patch-repository.d to identify outdated content.
+- Read and comply with AGENTS.md in the project.
+- Review all files and directories in patch-repository.d to identify outdated content.
 - Don't run any thing, just read, anaylse, edit file
 - Fix any outdated content you find.
-- If a file or directory is no longer needed (e.g., the bug was fixed upstream), remove it.
-- Don't commit, I'll check the result.
-- Report what was fixed and what files remain outdated in the end.
+- Remove files or directories that are no longer needed (e.g., upstream bug fixes).
+- Do NOT commit changes. Report what was fixed and what files remain outdated.
 
 You should download / update the related gentoo repository / overlay into cahe directory and analyse them with project coden together.
 Cache directory may already contains data from last run.
