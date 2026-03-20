@@ -41,6 +41,7 @@ if __name__ == "__main__":
     patchRepoFullDir = os.path.join(projectFullDir, patchRepoDir)
 
     cacheFullDir = os.path.join(selfDir, "cache")
+    os.makedirs(cacheFullDir, exist_ok=True)
 
     prompt = f"""
 You are helping maintain {patchRepoDir} in this project.
@@ -62,6 +63,6 @@ Cache directory may already contains data from last run.
 Cache Directory: {cacheFullDir}
 """
 
-    ret = openCodeCall(projectFullDir, prompt)
+    ret = openCodeCall(projectFullDir, prompt, logfile=os.path.ojin(cacheFullDir, "opencode.log"))
     print(ret)
  
