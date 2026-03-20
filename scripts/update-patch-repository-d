@@ -62,6 +62,6 @@ Cache directory may already contains data from last run.
 Cache Directory: {cacheFullDir}
 """
 
-    ret = openCodeCall(projectFullDir, prompt, logfile=os.path.ojin(cacheFullDir, "opencode.log"))
+    ret = openCodeCall(projectFullDir, prompt, logfile=os.path.join(cacheFullDir, "opencode.log"))
     print(ret)
  
