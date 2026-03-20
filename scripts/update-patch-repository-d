@@ -45,27 +45,23 @@ if __name__ == "__main__":
     prompt = f"""
 You are helping maintain {patchRepoDir} in this project.
 
+Project Directory: {projectFullDir}
+
+Actions:
+- Comply to AGENTS.md in the project.
+- Check every directory and file in patch-repository.d to identify outdated content.
+- Don't run any thing, just read, anaylse, edit file
+- Fix any outdated content you find.
+- If a file or directory is no longer needed (e.g., the bug was fixed upstream), remove it.
+- Don't commit, I'll check the result.
+- Report what was fixed and what files remain outdated in the end.
+
 You should download / update the related gentoo repository / overlay into cahe directory and analyse them with project coden together.
 Cache directory may already contains data from last run.
 
-Project Directory: {projectFullDir}
 Cache Directory: {cacheFullDir}
-
-Tasks:
-- Check every directory and file in patch-repository.d to identify outdated content.
-- Don't run any thing, just read, anaylse, edit file
-- For shell scripts (*.sh), examine them to check if their patterns are still valid.
-- For patch files, check if they still apply cleanly.
-- For any other files, check if they reference correct package names/versions/paths.
-- Fix any outdated content you find.
-- Report what was fixed and what files remain outdated.
-
-Important:
-- Comply to the project AGENTS.md
-- When fixing, preserve the existing code style and conventions.
-- If a file is no longer needed (e.g., the bug was fixed upstream), remove it.
-- If a file is completely broken and you cannot fix it, report it.
 """
 
     ret = openCodeCall(projectFullDir, prompt)
     print(ret)
+ 
