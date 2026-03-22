@@ -46,19 +46,16 @@ if __name__ == "__main__":
     prompt = f"""
 You are helping maintain {patchRepoDir} in this project.
 
-Project Directory: {projectFullDir}
-
 Actions:
 - Read and comply with AGENTS.md in the project.
-- Review all files and directories in patch-repository.d to identify outdated content.
-- Don't run any thing, just read, anaylse, edit file
-- Fix any outdated content you find.
+- Get to know all files and directories in patch-repository.d directory.
+- Download / update the related gentoo repository / overlay from Internet into the cache directory so that you can analyse project code with them together. Don't put any local data into the cache directory, local data may be modified. Cache directory may already contains data from the last run.
+- Review all files and directories in patch-repository.d to identify outdated content. Fix any outdated content you find.
+- Do NOT run any thing, just read, anaylse, edit file
 - Remove files or directories that are no longer needed (e.g., upstream bug fixes).
 - Do NOT commit changes. Report what was fixed and what files remain outdated.
 
-You should download / update the related gentoo repository / overlay into cahe directory and analyse them with project coden together.
-Cache directory may already contains data from last run.
-
+Project Directory: {projectFullDir}
 Cache Directory: {cacheFullDir}
 """
 
