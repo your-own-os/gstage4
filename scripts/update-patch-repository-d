@@ -59,7 +59,7 @@ You are helping maintain {patchRepoDir} in this project.
 Actions:
 - Read and comply with AGENTS.md in the project.
 - Get to know all files and directories in patch-repository.d directory.
-- Download / update the related gentoo repository / overlay from Internet into the cache directory so that you can analyse project code with them together. Don't put any local data into the cache directory, local data may be modified. Cache directory may already contains data from the last run.
+- Download / update the related gentoo repository / overlay from Internet into the cache directory so that you can analyse project code with them together. Don't put any local data into the cache directory. Cache directory may already contain data from the last run, re-using and supplementing.
 - Review all files and directories in patch-repository.d to identify outdated content. Fix any outdated content you find.
 - Do NOT run any thing, just read, anaylse, edit file
 - Remove files or directories that are no longer needed (e.g., upstream bug fixes).
