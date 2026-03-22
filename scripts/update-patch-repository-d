@@ -8,24 +8,34 @@ import pathlib
 import subprocess
 
 
-def openCodeCall(workDir, prompt, logfile=None):
-    env = os.environ.copy()
-    env["OPENCODE_PERMISSION"] = '{"*": "allow"}'
+class Util:
 
-    prompt = "You take the most appropriate action and output the result, there's no chance to interact with the user.\n\n" + prompt
+    @staticmethod
+    def openCodeCall(workDir, prompt, logfile=None):
+        newEnv, promptPrefix = Util._openCodeEnvAndPrompt()
+        ret = subprocess.check_output(["opencode", "run", "--model", "opencode/big-pickle", "--dir", workDir, "--format", "json", promptPrefix + prompt], env=dict(os.environ, **newEnv))
 
-    ret = subprocess.check_output(["opencode", "run", "--model", "opencode/big-pickle", "--dir", workDir, prompt],
-                                    stderr=subprocess.STDOUT, text=True, env=env)
+        if logfile is not None:
+            pathlib.Path(logfile).write_text(ret)
 
-    if logfile is not None:
-        pathlib.Path(logfile).write_text(ret)
+        ret = ret.rstrip("\n").split("\n")[-2]      # the last output is "step_finish", the second to last output is the result
+        ret = json.loads(ret)
+        ret = ret["part"]["text"]
+        ret = json.loads(ret)
 
-    ret = ret.rstrip("\n").split("\n")[-2]      # the last output is "step_finish", the second to last output is the result
-    ret = json.loads(ret)
-    ret = ret["part"]["text"]
-    ret = json.loads(ret)
+        return ret
 
-    return ret
+    @staticmethod
+    def openCodeExec(workDir, prompt):
+        newEnv, promptPrefix = Util._openCodeEnvAndPrompt()
+        subprocess.check_call(["opencode", "run", "--model", "opencode/big-pickle", "--dir", workDir, promptPrefix + prompt], env=dict(os.environ, **newEnv))
+
+    @staticmethod
+    def _openCodeEnvAndPrompt():
+        return (
+            {"OPENCODE_PERMISSION": '{"*": "allow"}'},
+            "You take the most appropriate action and output the result, there's no chance to interact with the user.\n\n",
+        )
 
 
 if __name__ == "__main__":
@@ -59,6 +69,4 @@ Project Directory: {projectFullDir}
 Cache Directory: {cacheFullDir}
 """
 
-    ret = openCodeCall(projectFullDir, prompt, logfile=os.path.join(cacheFullDir, "opencode.log"))
-    print(ret)
- 
+    Util.openCodeExec(projectFullDir, prompt)
