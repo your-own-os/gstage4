@@ -3,27 +3,10 @@
 
 import os
 import sys
-import json
-import pathlib
 import subprocess
 
 
 class Util:
-
-    @staticmethod
-    def openCodeCall(workDir, prompt, logfile=None):
-        newEnv, promptPrefix = Util._openCodeEnvAndPrompt()
-        ret = subprocess.check_output(["opencode", "run", "--model", "opencode/big-pickle", "--dir", workDir, "--format", "json", promptPrefix + prompt], env=dict(os.environ, **newEnv))
-
-        if logfile is not None:
-            pathlib.Path(logfile).write_text(ret)
-
-        ret = ret.rstrip("\n").split("\n")[-2]      # the last output is "step_finish", the second to last output is the result
-        ret = json.loads(ret)
-        ret = ret["part"]["text"]
-        ret = json.loads(ret)
-
-        return ret
 
     @staticmethod
     def openCodeExec(workDir, prompt):
