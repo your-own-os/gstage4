@@ -22,8 +22,8 @@ dobin "${FILESDIR}/curl"
     for fn in glob.glob("*.ebuild"):
         buf = pathlib.Path(fn).read_text()
 
-        # insert to the end of src_install()
-        pos = buf.find("src_install() {")               # FIXME: should modify multilib_src_install()?
+        # insert to the end of multilib_src_install()
+        pos = buf.find("multilib_src_install() {")
         if pos == -1:
             raise ValueError()
         pos = buf.find("\n}\n", pos)
