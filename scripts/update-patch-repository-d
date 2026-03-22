@@ -14,7 +14,7 @@ def openCodeCall(workDir, prompt, logfile=None):
 
     prompt = "You take the most appropriate action and output the result, there's no chance to interact with the user.\n\n" + prompt
 
-    ret = subprocess.check_output(["opencode", "run", "--model", "opencode/big-pickle", "--dir", workDir, "--format", "json", prompt],
+    ret = subprocess.check_output(["opencode", "run", "--model", "opencode/big-pickle", "--dir", workDir, prompt],
                                     stderr=subprocess.STDOUT, text=True, env=env)
 
     if logfile is not None:
